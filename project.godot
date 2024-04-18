@@ -11,7 +11,13 @@ config_version=4
 [application]
 
 config/name="Snake 42"
+run/main_scene="res://Szenen/Test.tscn"
 config/icon="res://Assets/icon.png"
+
+[gdnative]
+
+singletons=[ "res://webrtc/webrtc.tres" ]
+singletons_disabled=[  ]
 
 [gui]
 
