@@ -4,8 +4,18 @@
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Button" type="Button" parent="."]
+[node name="Verbindung" type="Button" parent="."]
 anchor_right = 0.227
 anchor_bottom = 0.153
-margin_right = -0.448013
-margin_bottom = 0.199989
+margin_left = 405.0
+margin_top = 505.0
+margin_right = 339.552
+margin_bottom = 474.2
+text = "Verbindung starten"
+
+[node name="Label" type="Label" parent="."]
+margin_left = 105.0
+margin_top = 92.0
+margin_right = 260.0
+margin_bottom = 123.0
+text = "Mit Spieler verbinden"

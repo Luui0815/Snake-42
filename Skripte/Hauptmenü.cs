@@ -8,10 +8,10 @@ public class Hauptmenü : Control
 
 	}
 
-    public override void _Process(float delta)
-    {
-      
-    }
+	public override void _Process(float delta)
+	{
+	  
+	}
 
 	public void _on_VerbindungAufbauen_pressed()
 	{
