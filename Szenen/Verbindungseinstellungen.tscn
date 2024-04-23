@@ -3,6 +3,7 @@
 [node name="Verbindungseinstellungen" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 537, 155 )
 
 [node name="Verbindung" type="Button" parent="."]
 anchor_right = 0.227
@@ -13,7 +14,7 @@ margin_right = 339.552
 margin_bottom = 474.2
 text = "Verbindung starten"
 
-[node name="Label" type="Label" parent="."]
+[node name="Mit Spieler verbinden" type="Label" parent="."]
 margin_left = 105.0
 margin_top = 92.0
 margin_right = 260.0
