@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="Snake 42"
-run/main_scene="res://Szenen/Hauptmenü.tscn"
+run/main_scene="res://Szenen/Client.tscn"
 config/icon="res://Assets/icon.png"
 
 [gdnative]
@@ -22,6 +22,10 @@ singletons_disabled=[  ]
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
+
+[locale]
+
+translations=PoolStringArray(  )
 
 [mono]
 
