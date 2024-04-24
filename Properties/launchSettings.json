@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Snake 42": {
+      "commandName": "Project",
+      "commandLineArgs": "-e--path scons C:\\Users\\lukas\\OneDrive\\Dokumente\\Godot Spiele\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64"
+    },
+    "Profil \"1\"": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\lukas\\OneDrive\\Dokumente\\Godot Spiele\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64.exe",
+      "commandLineArgs": "-d",
+      "workingDirectory": ".",
+      "remoteDebugEnabled": true
+    }
+  }
+}
