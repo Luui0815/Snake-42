@@ -3,14 +3,16 @@
     "tasks": [
         {
             "label": "build",
-            "group": "build",
-            "type": "shell",
-            "command": "scons",
+            "command": "C:/Users/lukas/OneDrive/Dokumente/Godot Spiele/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64.exe\r",
+            "type": "process",
             "args": [
-              // enable for debugging with breakpoints
-              "dev_build=yes",
+                "--build-solutions",
+                "--path",
+                "${workspaceRoot}",
+                "--no-window",
+                "-q"
             ],
             "problemMatcher": "$msCompile"
-          }
+        }
     ]
 }

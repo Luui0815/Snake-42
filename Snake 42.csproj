@@ -3,14 +3,4 @@
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>Snake42</RootNamespace>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>True</Optimize>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ExportDebug|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ExportRelease|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
 </Project>

@@ -1,23 +1,47 @@
 {
-    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
-    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
-    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
+    "version": "2.0.0",
     "configurations": [
         {
-            "name": "Launch Project",
-            "type": "cppvsdbg",
+            "name": "Play in Editor",
+            "type": "godot-mono",
+            "mode": "playInEditor",
+            "request": "launch"
+        },
+        {
+            "name": "Launch",
+            "type": "godot-mono",
             "request": "launch",
-            "program": "C:/Users/LUG/Documents/Godot_v3.5.3",
-            // Change the arguments below for the project you want to test with.
-            // To run the project instead of editing it, remove the "--editor" argument.
-            "args": [ "--editor", "--path", "C:/Users/LUG/Documents/GitHub/Snake-42" ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "internalConsole",
-            "visualizerFile": "${workspaceFolder}/platform/windows/godot.natvis",
-            "preLaunchTask": "build"
-          }
+            "mode": "executable",
+            "preLaunchTask": "build",
+            "executable": "C:/Users/lukas/OneDrive/Dokumente/Godot Spiele/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64.exe\r",
+            // See which arguments are available here:
+            // https://docs.godotengine.org/en/stable/getting_started/editor/command_line_tutorial.html
+            "executableArguments": [
+                "--path",
+                "${workspaceRoot}"
+            ]
+        },
+        {
+            "name": "Launch (Select Scene)",
+            "type": "godot-mono",
+            "request": "launch",
+            "mode": "executable",
+            "preLaunchTask": "build",
+            "executable": "C:/Users/lukas/OneDrive/Dokumente/Godot Spiele/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64/Godot_v3.5.3-stable_mono_win64.exe\r",
+            // See which arguments are available here:
+            // https://docs.godotengine.org/en/stable/getting_started/editor/command_line_tutorial.html
+            "executableArguments": [
+                "--path",
+                "${workspaceRoot}",
+                "${command:SelectLaunchScene}"
+            ]
+        },
+        {
+            "name": "Attach",
+            "type": "godot-mono",
+            "request": "attach",
+            "address": "localhost",
+            "port": 23685
+        }
     ]
 }
