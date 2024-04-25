@@ -1,5 +1,43 @@
-[gd_scene format=2]
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Skripte/Server.cs" type="Script" id=1]
+[ext_resource path="res://Skripte/Client.cs" type="Script" id=2]
 
 [node name="Verbindungseinstellungen" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+
+[node name="Server" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 1 )
+
+[node name="Client" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 2 )
+
+[node name="Server starten" type="Button" parent="."]
+margin_left = 38.0
+margin_top = 83.0
+margin_right = 190.0
+margin_bottom = 134.0
+text = "Server starten"
+
+[node name="Client starten" type="Button" parent="."]
+margin_left = 221.0
+margin_top = 85.0
+margin_right = 363.0
+margin_bottom = 135.0
+text = "Client starten"
+
+[node name="Testdaten senden" type="Button" parent="."]
+margin_left = 222.0
+margin_top = 145.0
+margin_right = 378.0
+margin_bottom = 201.0
+text = "Sende Hallo Welt zum Server"
+
+[connection signal="pressed" from="Server starten" to="Server" method="_on_Server_starten_pressed"]
+[connection signal="pressed" from="Client starten" to="Client" method="_on_Client_starten_pressed"]
+[connection signal="pressed" from="Testdaten senden" to="Client" method="_on_Testdaten_senden_pressed"]
