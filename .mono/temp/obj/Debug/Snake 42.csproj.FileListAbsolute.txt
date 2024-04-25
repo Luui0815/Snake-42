@@ -8,3 +8,13 @@ C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\obj\Debug\Sna
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\obj\Debug\Snake 42.dll
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\obj\Debug\Snake 42.pdb
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\obj\Debug\Snake 42.sourcelink.json
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Snake 42.dll
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Snake 42.pdb
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.AssemblyReference.cache
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.AssemblyInfoInputs.cache
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.AssemblyInfo.cs
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.CoreCompileInputs.cache
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.sourcelink.json
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.dll
+C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.pdb
