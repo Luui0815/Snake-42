@@ -52,7 +52,7 @@ public class ClientFormPopup : Popup
             return true;
         }
         GD.Print("IP ist ungueltig");
-        portInput.Text = "IP ist ungueltig!";
+        ipInput.Text = "IP ist ungueltig!";
         return false;
     }
 

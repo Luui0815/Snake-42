@@ -22,15 +22,16 @@ namespace Snake42
 public class Client : Control
 {
     private WebSocketClient _WSPeer = new WebSocketClient();
+    private PackedScene _clientFormPopup;
     public override void _Ready()
     {
         //Signale mit Methoden verknüpfen
         _WSPeer.Connect("connection_closed",this,"ConnectionClosed");
         _WSPeer.Connect("connection_error", this, "ConnectionClosed");
-
         _WSPeer.Connect("connection_established", this, "ConnectionOpened");
-
         _WSPeer.Connect("data_received", this, "ReceiveData");
+
+        _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
     }
 
     public void ConnectionClosed(bool was_clean=false)
@@ -48,6 +49,32 @@ public class Client : Control
         GD.Print("Client: Daten vom Server sind angekommen: " + _WSPeer.GetPeer(1).GetPacket().GetStringFromUTF8());
     }
 
+    public void _on_Client_starten_pressed()
+    {
+        ShowClientPopup();
+    }
+
+    private void ShowClientPopup()
+    {
+        Popup popupInstance = (Popup)_clientFormPopup.Instance();
+        GetTree().Root.AddChild(popupInstance);
+        popupInstance.PopupCentered();
+
+        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
+        LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
+        portInput.Text = "";
+        ipInput.Text = "";
+
+        popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
+    }
+
+    private void OnPopupConfirmed(string ip, int port)
+    {
+        GD.Print("Portnummer: " + port);
+        GD.Print("IP-Adresse: " + ip);
+        ConnectToServer("ws://" + ip + ":" + port.ToString());
+    }
+
     public void ConnectToServer(String ip)
     {
         Error error = _WSPeer.ConnectToUrl(ip);
@@ -57,10 +84,7 @@ public class Client : Control
             GD.Print("Client: Fehler beim verbinden: " + error.ToString());
     }
 
-    public void _on_Client_starten_pressed()
-    {
-        ConnectToServer("ws://127.0.0.1:8915");
-    }
+    
 
     private void SendData(string Data)
     {

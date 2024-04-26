@@ -3,7 +3,6 @@
 [ext_resource path="res://Skripte/ServerFormPopup.cs" type="Script" id=1]
 
 [node name="ServerFormPopup" type="Popup"]
-visible = true
 anchor_right = 0.537
 anchor_bottom = 0.5
 margin_right = 0.112

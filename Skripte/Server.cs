@@ -45,10 +45,10 @@ public class Server : Control
 
     public void _on_Server_starten_pressed()
     {
-        ShowPopup();
+        ShowServerFormPopup();
     }
 
-    private void ShowPopup()
+    private void ShowServerFormPopup()
     {
         Popup popupInstance = (Popup)_serverFormPopup.Instance();
         GetTree().Root.AddChild(popupInstance);
@@ -62,7 +62,7 @@ public class Server : Control
 
     private void OnPopupConfirmed(int port)
     {
-        GD.Print("Portnummer:" + port);
+        GD.Print("Portnummer: " + port);
         StartServer(port);
     }
 
