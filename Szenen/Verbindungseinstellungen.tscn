@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Skripte/Server.cs" type="Script" id=1]
 [ext_resource path="res://Skripte/Client.cs" type="Script" id=2]
+
+[sub_resource type="Theme" id=1]
 
 [node name="Verbindungseinstellungen" type="Control"]
 anchor_right = 1.0
@@ -37,6 +39,42 @@ margin_top = 418.0
 margin_right = 892.0
 margin_bottom = 474.0
 text = "Sende Hallo Welt zum Server"
+
+[node name="ChatBox" type="VBoxContainer" parent="."]
+margin_left = 15.0
+margin_top = 388.0
+margin_right = 415.0
+margin_bottom = 585.0
+theme = SubResource( 1 )
+
+[node name="ColorRect" type="ColorRect" parent="ChatBox"]
+margin_right = 400.0
+margin_bottom = 197.0
+color = Color( 0.529412, 0.6, 0.6, 1 )
+
+[node name="ChatLog" type="RichTextLabel" parent="ChatBox"]
+margin_top = 4.0
+margin_right = 400.0
+margin_bottom = 169.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ChatBox"]
+margin_top = 173.0
+margin_right = 400.0
+margin_bottom = 197.0
+
+[node name="InputLabel" type="Label" parent="ChatBox/HBoxContainer"]
+margin_top = 5.0
+margin_right = 52.0
+margin_bottom = 19.0
+text = "[Spieler]"
+
+[node name="MessageInput" type="LineEdit" parent="ChatBox/HBoxContainer"]
+margin_left = 56.0
+margin_right = 400.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
 
 [connection signal="pressed" from="Server starten" to="Server" method="_on_Server_starten_pressed"]
 [connection signal="pressed" from="Client starten" to="Client" method="_on_Client_starten_pressed"]

@@ -8,6 +8,8 @@ public class Server : Control
 {
     private WebSocketServer _WSPeer = new WebSocketServer();
     private PackedScene _serverFormPopup;
+    private RichTextLabel _chatLog;
+    private LineEdit _messageInput;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -19,6 +21,8 @@ public class Server : Control
         _WSPeer.Connect("data_received",this,"ReceiveData");
 
         _serverFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ServerFormPopup.tscn");
+        _chatLog = GetParent().GetNode<RichTextLabel>("ChatBox/ChatLog");
+        _messageInput = GetParent().GetNode<LineEdit>("ChatBox/HBoxContainer/MessageInput");
     }
 
     public void ClientConnected(int id, string proto)
@@ -38,9 +42,12 @@ public class Server : Control
 
     public void ReceiveData(int id)
     {
+        string recievedMessage = ConvertDataToString(_WSPeer.GetPeer(id).GetPacket());        
+        string chatMessage = $"[Client] {id}: " + recievedMessage +"\n";
         GD.Print("Server: Nachricht erhalten:");
-        GD.Print(ConvertDataToString(_WSPeer.GetPeer(id).GetPacket()));
+        GD.Print(recievedMessage);
 
+        _chatLog.Text += chatMessage;
     }
 
     public void _on_Server_starten_pressed()
@@ -74,8 +81,6 @@ public class Server : Control
         else
             GD.Print("Server: Server konnte nicht gestartet werden");
     }
-
-   
 
     private String ConvertDataToString(byte[] packet)
     {
