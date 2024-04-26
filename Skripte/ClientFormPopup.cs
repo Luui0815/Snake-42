@@ -33,11 +33,11 @@ public class ClientFormPopup : Popup
         {
             if (port >= 1 && port <= 65535)
             {
-                GD.Print("Port ist gueltig");
+                GD.Print("Vom Client eingegebener Port ist gueltig");
                 return true;
             }
         }
-        GD.Print("Port ist ungueltig");
+        GD.Print("Vom Client eingegebener Port ist ungueltig");
         portInput.Text = "Port ist ungueltig!";
         return false;
     }
@@ -49,9 +49,10 @@ public class ClientFormPopup : Popup
 
         if (regexIPv4.IsMatch(ip) || regexIPv6.IsMatch(ip))
         {
+            GD.Print("Vom Client eingegebene IP ist gueltig");
             return true;
         }
-        GD.Print("IP ist ungueltig");
+        GD.Print("Vom Client eingegebene IP ist ungueltig");
         ipInput.Text = "IP ist ungueltig!";
         return false;
     }

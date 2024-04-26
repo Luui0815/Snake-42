@@ -30,11 +30,11 @@ public class ServerFormPopup : Popup
         {
             if (port >= 1 && port <= 65535)
             {
-                GD.Print("Port ist gueltig");
+                GD.Print("Vom Server eingegebener Port ist gueltig");
                 return true;
             }
         }
-        GD.Print("Port ist ungueltig");
+        GD.Print("Vom Server eingegebener Port ist ungueltig");
         portInput.Text = "Port ist ungueltig!";
         return false;
     }
