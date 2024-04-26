@@ -7,6 +7,7 @@ using System.Text;
 public class Server : Control
 {
     private WebSocketServer _WSPeer = new WebSocketServer();
+    private PackedScene _serverFormPopup;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -16,6 +17,8 @@ public class Server : Control
         _WSPeer.Connect("client_disconnected", this, "ClientDisconnected");
         _WSPeer.Connect("client_close_request", this, "ConnectionCloseRequest");
         _WSPeer.Connect("data_received",this,"ReceiveData");
+
+        _serverFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ServerFormPopup.tscn");
     }
 
     public void ClientConnected(int id, string proto)
@@ -40,19 +43,39 @@ public class Server : Control
 
     }
 
-    public void StartServer()
+    public void _on_Server_starten_pressed()
     {
-        Error error=_WSPeer.Listen(8915);
+        ShowPopup();
+    }
+
+    private void ShowPopup()
+    {
+        Popup popupInstance = (Popup)_serverFormPopup.Instance();
+        GetTree().Root.AddChild(popupInstance);
+        popupInstance.PopupCentered();
+
+        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
+        portInput.Text = ""; 
+
+        popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
+    }
+
+    private void OnPopupConfirmed(int port)
+    {
+        GD.Print("Portnummer:" + port);
+        StartServer(port);
+    }
+
+    public void StartServer(int port)
+    {
+        Error error=_WSPeer.Listen(port);
         if(error==Error.Ok)
             GD.Print("Server: Server lauscht");
         else
             GD.Print("Server: Server konnte nicht gestartet werden");
     }
 
-    public void _on_Server_starten_pressed()
-    {
-        StartServer();
-    }
+   
 
     private String ConvertDataToString(byte[] packet)
     {

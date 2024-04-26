@@ -18,24 +18,24 @@ margin_bottom = 40.0
 script = ExtResource( 2 )
 
 [node name="Server starten" type="Button" parent="."]
-margin_left = 38.0
-margin_top = 83.0
-margin_right = 190.0
-margin_bottom = 134.0
+margin_left = 233.0
+margin_top = 217.0
+margin_right = 385.0
+margin_bottom = 268.0
 text = "Server starten"
 
 [node name="Client starten" type="Button" parent="."]
-margin_left = 221.0
-margin_top = 85.0
-margin_right = 363.0
-margin_bottom = 135.0
+margin_left = 551.0
+margin_top = 216.0
+margin_right = 693.0
+margin_bottom = 266.0
 text = "Client starten"
 
 [node name="Testdaten senden" type="Button" parent="."]
-margin_left = 222.0
-margin_top = 145.0
-margin_right = 378.0
-margin_bottom = 201.0
+margin_left = 694.0
+margin_top = 418.0
+margin_right = 892.0
+margin_bottom = 474.0
 text = "Sende Hallo Welt zum Server"
 
 [connection signal="pressed" from="Server starten" to="Server" method="_on_Server_starten_pressed"]
