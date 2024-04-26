@@ -41,7 +41,7 @@ public class Client : Control
 
     public void ConnectionOpened(string proto)
     {
-        GD.Print("Client: Verbunden durch Protokoll: " + proto);
+        GD.Print("Client: Verbunden durch Protokoll: " + proto + "\n--------------------------------------------------");
     }
 
     public void ReceiveData()
@@ -79,7 +79,7 @@ public class Client : Control
     {
         Error error = _WSPeer.ConnectToUrl(ip);
         if(error == Error.Ok)
-            GD.Print("Client: Client gestartet");
+            GD.Print("Client: Client gestartet \n--------------------------------------------------");
         else
             GD.Print("Client: Fehler beim verbinden: " + error.ToString());
     }

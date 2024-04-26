@@ -70,7 +70,7 @@ public class Server : Control
     {
         Error error=_WSPeer.Listen(port);
         if(error==Error.Ok)
-            GD.Print("Server: Server lauscht");
+            GD.Print("Server: Server lauscht \n--------------------------------------------------");
         else
             GD.Print("Server: Server konnte nicht gestartet werden");
     }
