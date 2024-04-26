@@ -55,7 +55,7 @@ public class Server : Control
         popupInstance.PopupCentered();
 
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
-        portInput.Text = ""; 
+        portInput.Text = "8915"; 
 
         popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
     }

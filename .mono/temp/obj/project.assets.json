@@ -8,25 +8,28 @@
     ".NETFramework,Version=v4.7.2": []
   },
   "packageFolders": {
-    "C:\\Users\\mar\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\LUG\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
+    "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mar\\Documents\\Godot\\Snake-42\\Snake 42.csproj",
+      "projectUniqueName": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
       "projectName": "Snake 42",
-      "projectPath": "C:\\Users\\mar\\Documents\\Godot\\Snake-42\\Snake 42.csproj",
-      "packagesPath": "C:\\Users\\mar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mar\\Documents\\Godot\\Snake-42\\.mono\\temp\\obj\\",
+      "projectPath": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
+      "packagesPath": "C:\\Users\\LUG\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\.mono\\temp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+        "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
       ],
       "configFilePaths": [
-        "C:\\Users\\mar\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\LUG\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net472"
@@ -45,17 +48,12 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
       "net472": {
         "targetAlias": "net472",
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }

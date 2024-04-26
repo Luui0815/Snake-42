@@ -62,8 +62,8 @@ public class Client : Control
 
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
         LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
-        portInput.Text = "";
-        ipInput.Text = "";
+        portInput.Text = "8915";
+        ipInput.Text = "127.0.0.1";
 
         popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
     }

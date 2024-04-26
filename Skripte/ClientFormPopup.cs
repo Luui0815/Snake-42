@@ -13,6 +13,7 @@ public class ClientFormPopup : Popup
     {
         ipInput = GetNode<LineEdit>("IpInput");
         portInput = GetNode<LineEdit>("PortInput");
+        
     }
 
     private void _on_ConfirmButton_pressed()
