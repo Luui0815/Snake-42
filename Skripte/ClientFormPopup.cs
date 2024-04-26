@@ -29,8 +29,7 @@ public class ClientFormPopup : Popup
 
     private bool ValidatePort(string portStr)
     {
-        int port;
-        if (int.TryParse(portStr, out port))
+        if (int.TryParse(portStr, out int port))
         {
             if (port >= 1 && port <= 65535)
             {
