@@ -82,6 +82,12 @@ public class Client : Control
         ShowClientPopup();
     }
 
+    public string playerName
+    {
+        get{ return _playerName; }
+        set{_playerName=value;}
+    }
+
     private void ShowClientPopup()
     {
         Popup popupInstance = (Popup)_clientFormPopup.Instance();
@@ -90,8 +96,11 @@ public class Client : Control
 
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
         LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
+        LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
         portInput.Text = "8915";
         ipInput.Text = "127.0.0.1";
+        playername.Text = "Test1";
+
 
         popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );
 
@@ -102,6 +111,7 @@ public class Client : Control
         GD.Print("Portnummer: " + port);
         GD.Print("IP-Adresse: " + ip);
         ConnectToServer("ws://" + ip + ":" + port.ToString());
+        _playerName=playerName;
     }
 
     public void ConnectToServer(String ip)

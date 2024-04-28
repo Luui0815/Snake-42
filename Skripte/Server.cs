@@ -148,17 +148,12 @@ public class Server : Control
             GD.Print("Server: Nachricht ist kein Json Dokument");
     }
 
-    public void SendDataToAll(string Data, int id)
+    public void SendDataToAll(string Data)
     {
-        // Prüfen ob die Nachricht gültiges Json Format hat
-        JSONParseResult JsonParseFehler = JSON.Parse(Data);
-        if(JsonParseFehler.ErrorString=="")
+        foreach(ConnectedClients cc in _ConnectedClients)
         {
-            _WSPeer.GetPeer(id).PutPacket(Data.ToString().ToUTF8());
-            GD.Print("Server: Nachricht gesendet: " + Data);
+            _WSPeer.GetPeer(cc.GetId).PutPacket(Data.ToString().ToUTF8());
         }
-        else
-            GD.Print("Server: Nachricht ist kein Json Dokument");
     }
 
     public void _on_Sende_Hallo_zu_Clients_pressed()

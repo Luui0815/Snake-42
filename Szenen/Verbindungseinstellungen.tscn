@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Skripte/Server.cs" type="Script" id=1]
 [ext_resource path="res://Skripte/Client.cs" type="Script" id=2]
+[ext_resource path="res://Skripte/Verbindungseinstellungen.cs" type="Script" id=3]
 
 [sub_resource type="Theme" id=1]
 
@@ -9,6 +10,7 @@
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_pivot_offset = Vector2( 233, 335 )
+script = ExtResource( 3 )
 
 [node name="Server" type="Control" parent="."]
 margin_right = 40.0
@@ -21,10 +23,10 @@ margin_bottom = 40.0
 script = ExtResource( 2 )
 
 [node name="Server starten" type="Button" parent="."]
-margin_left = 60.0
-margin_top = 221.0
-margin_right = 212.0
-margin_bottom = 272.0
+margin_left = 76.0
+margin_top = 218.0
+margin_right = 228.0
+margin_bottom = 269.0
 text = "Nur Server starten"
 
 [node name="Client starten" type="Button" parent="."]
@@ -35,10 +37,10 @@ margin_bottom = 271.0
 text = "Client starten"
 
 [node name="Testdaten senden" type="Button" parent="."]
-margin_left = 486.0
-margin_top = 434.0
-margin_right = 921.0
-margin_bottom = 479.0
+margin_left = 493.0
+margin_top = 309.0
+margin_right = 928.0
+margin_bottom = 354.0
 text = "Sende Hallo Welt zum Server"
 
 [node name="ErrorMSGBox" type="VBoxContainer" parent="."]
@@ -78,13 +80,13 @@ margin_bottom = 24.0
 size_flags_horizontal = 3
 
 [node name="Sende Hallo zu Clients" type="Button" parent="."]
-margin_left = 75.0
-margin_top = 438.0
-margin_right = 467.0
-margin_bottom = 480.0
+margin_left = 80.0
+margin_top = 309.0
+margin_right = 472.0
+margin_bottom = 351.0
 text = "Sende Hallo zu Clients"
 
-[node name="Button" type="Button" parent="."]
+[node name="ServerundClient" type="Button" parent="."]
 margin_left = 348.0
 margin_top = 220.0
 margin_right = 589.0
@@ -95,3 +97,4 @@ text = "Server und Client starten"
 [connection signal="pressed" from="Client starten" to="Client" method="_on_Client_starten_pressed"]
 [connection signal="pressed" from="Testdaten senden" to="Client" method="_on_Testdaten_senden_pressed"]
 [connection signal="pressed" from="Sende Hallo zu Clients" to="Server" method="_on_Sende_Hallo_zu_Clients_pressed"]
+[connection signal="pressed" from="ServerundClient" to="." method="_on_ServerundClient_pressed"]
