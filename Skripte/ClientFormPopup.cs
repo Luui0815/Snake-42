@@ -4,25 +4,28 @@ using System;
 public class ClientFormPopup : Popup
 {
     [Signal]
-    public delegate void Confirmed(string ip, int port);
+    public delegate void Confirmed(string ip, int port, string Spielername);
 
     private LineEdit ipInput;
     private LineEdit portInput;
+    private LineEdit playerNameInput;
 
     public override void _Ready()
     {
         ipInput = GetNode<LineEdit>("IpInput");
         portInput = GetNode<LineEdit>("PortInput");
-        
+        playerNameInput = GetNode<LineEdit>("PlayerNameInput");
     }
 
     private void _on_ConfirmButton_pressed()
     {
         string ip = ipInput.Text;
         string port = portInput.Text;
+        string playerName = playerNameInput.Text;  
         if (ValidatePort(port) && ValidateIp(ip))
         {
-            EmitSignal(nameof(Confirmed), ip, int.Parse(port));
+            //EmitSignal(nameof(Confirmed), ip, int.Parse(port));
+            EmitSignal("Confirmed", ip, port, playerName);
             Hide();
         }
     }

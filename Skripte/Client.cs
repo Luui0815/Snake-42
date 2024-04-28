@@ -3,12 +3,15 @@ using System;
 using Snake42;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Newtonsoft.Json;
+using System.Data.Common;
 
 namespace Snake42
 {
     enum Nachricht
     {
         id,
+        name,
         join,
         userConnected,
         userDisconnected,
@@ -23,6 +26,9 @@ public class Client : Control
 {
     private WebSocketClient _WSPeer = new WebSocketClient();
     private PackedScene _clientFormPopup;
+    private RichTextLabel _chatLog;
+    private string _playerName;
+    private int _clientId;
     public override void _Ready()
     {
         //Signale mit Methoden verknüpfen
@@ -32,21 +38,43 @@ public class Client : Control
         _WSPeer.Connect("data_received", this, "ReceiveData");
 
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
+        _chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
     }
 
     public void ConnectionClosed(bool was_clean=false)
     {
         GD.Print("Client: Verbindung geschlossen. Geplant: " + was_clean);
+        _chatLog.Text += "Client: Verbindung geschlossen. Geplant: " + was_clean + "\n";
     }
 
     public void ConnectionOpened(string proto)
     {
         GD.Print("Client: Verbunden durch Protokoll: " + proto + "\n--------------------------------------------------");
+        _chatLog.Text += "Client: Verbunden durch Protokoll: " + proto + "\n";
     }
 
     public void ReceiveData()
     {
-        GD.Print("Client: Daten vom Server sind angekommen: " + _WSPeer.GetPeer(1).GetPacket().GetStringFromUTF8());
+        string recievedMessage = ConvertDataToString(_WSPeer.GetPeer(1).GetPacket());        
+        string chatMessage = "Client: " + recievedMessage +"\n";
+        GD.Print("Client: Nachricht erhalten:");
+        GD.Print(recievedMessage);
+
+        _chatLog.Text += chatMessage + "\n";
+
+        msg Message=JsonConvert.DeserializeObject<msg>(recievedMessage);
+        if(Message.state== Nachricht.checkIn)
+        {
+            _clientId=Message.target;
+            //Name senden
+            msg msg2 = new msg(Nachricht.name,_clientId,0,_playerName);
+            SendData(JsonConvert.SerializeObject(msg2));
+        }
+    }
+
+    private String ConvertDataToString(byte[] packet)
+    {
+        return Encoding.UTF8.GetString(packet);
     }
 
     public void _on_Client_starten_pressed()
@@ -65,10 +93,11 @@ public class Client : Control
         portInput.Text = "8915";
         ipInput.Text = "127.0.0.1";
 
-        popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
+        popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );
+
     }
 
-    private void OnPopupConfirmed(string ip, int port)
+    public void OnPopupConfirmed(string ip, int port, string playerName)
     {
         GD.Print("Portnummer: " + port);
         GD.Print("IP-Adresse: " + ip);
@@ -79,9 +108,15 @@ public class Client : Control
     {
         Error error = _WSPeer.ConnectToUrl(ip);
         if(error == Error.Ok)
+        {
             GD.Print("Client: Client gestartet \n--------------------------------------------------");
+            _chatLog.Text += "Client: Client gestartet \n";
+        }
         else
+        {
             GD.Print("Client: Fehler beim verbinden: " + error.ToString());
+            _chatLog.Text += "Client: Fehler beim verbinden: " + error.ToString() + "\n";
+        }
     }
 
     
@@ -100,10 +135,16 @@ public class Client : Control
 
     }
 
+    private void SendJoinData()
+    {
+        // alle die sich verbinden wollen haben erstmal die id 0, später wird es dann vom Server korrigiert
+        msg msg= new msg(Nachricht.join,_clientId,0,"");
+        SendData(JsonConvert.SerializeObject(msg));
+    }
+
     public void _on_Testdaten_senden_pressed()
     {
-        SendData("{\"Nachricht\": \"" + Nachricht.join + "\", \"data\": \"Hallo Welt\"}");
-
+        SendData("{\"Nachricht\": \"" + "Test" + "\", \"data\": \"Hallo Welt\"}");
     }
 
     public override void _Process(float delta)

@@ -3,16 +3,21 @@
 [ext_resource path="res://Skripte/ClientFormPopup.cs" type="Script" id=1]
 
 [node name="ClientFormPopup" type="Popup"]
+visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -474.0
 margin_bottom = -300.0
 rect_pivot_offset = Vector2( 122, 87 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 90.0 ]
+}
 
 [node name="ColorRect" type="ColorRect" parent="."]
 margin_right = 550.0
 margin_bottom = 300.0
+rect_pivot_offset = Vector2( 135, 83 )
 color = Color( 0.192157, 0.298039, 0.439216, 1 )
 
 [node name="Headline" type="Label" parent="."]
@@ -22,6 +27,13 @@ margin_right = 547.0
 margin_bottom = 52.0
 text = "Gib die Portnummer und die IP-Adresse des Hosts an!"
 align = 1
+
+[node name="Spielername" type="Label" parent="."]
+margin_left = 89.0
+margin_top = 71.0
+margin_right = 174.0
+margin_bottom = 85.0
+text = "Spielername:"
 
 [node name="PortLabel" type="Label" parent="."]
 margin_left = 90.0
@@ -68,6 +80,15 @@ margin_top = 231.0
 margin_right = 435.0
 margin_bottom = 270.0
 text = "Abbrechen"
+
+[node name="PlayerNameInput" type="LineEdit" parent="."]
+margin_left = 205.0
+margin_top = 61.0
+margin_right = 368.0
+margin_bottom = 99.0
+text = "8915"
+caret_blink = true
+caret_blink_speed = 0.5
 
 [connection signal="pressed" from="ConfirmButton" to="." method="_on_ConfirmButton_pressed"]
 [connection signal="pressed" from="CancelButton" to="." method="_on_CancelButton_pressed"]
