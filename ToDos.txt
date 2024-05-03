@@ -1,0 +1,6 @@
+https://docs.godotengine.org/de/4.x/tutorials/networking/websocket.html
+
+Raum erstellen
+HTML Export
+Testen der Räume
+Client Sercer und Verbindungseinstellungen irgendwie zentrieren, auf eine Node packen, da vieles doppelt

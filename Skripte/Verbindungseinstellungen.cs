@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class Verbindungseinstellungen : Control
 {
@@ -40,7 +41,16 @@ public class Verbindungseinstellungen : Control
     private void OnPopupConfirmed(string ip, int port, string playerName)
     {
         _server.StartServer(port);
-        _client.ConnectToServer("ws://" + ip + ":" + port.ToString());
+        _client.ConnectToServer("ws://" + ip + ":" + port);
         _client.playerName  = playerName;
+
+        // ToDo: vereinfachen, kommt bei Client nochmal 
+        PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
+        Lobby lobbyInstance = (Lobby)lobby.Instance();
+        lobbyInstance.Init(_client);
+        GetTree().Root.AddChild(lobbyInstance);
+        
+        Hide();
+        Free();
     }
 }

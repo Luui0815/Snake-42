@@ -8,22 +8,18 @@ using System.Data.Common;
 
 namespace Snake42
 {
-    enum Nachricht
+    public enum Nachricht
     {
-        id,
-        name,
-        join,
-        userConnected,
-        userDisconnected,
-        lobby,
-        candidate,
-        offer,
-        answer,
-        checkIn
+        name,// sendet Name des Clients an den Server
+        checkIn, //Server sendet Client seine id zurück
+        chatMSG // User Nachrichten werden ausgetauscht
     }
 }
 public class Client : Control
 {
+    [Signal]
+    public delegate void MSGReceived(Nachricht state,string msg);
+
     private WebSocketClient _WSPeer = new WebSocketClient();
     private PackedScene _clientFormPopup;
     private RichTextLabel _chatLog;
@@ -70,6 +66,11 @@ public class Client : Control
             msg msg2 = new msg(Nachricht.name,_clientId,0,_playerName);
             SendData(JsonConvert.SerializeObject(msg2));
         }
+
+        if(Message.state== Nachricht.chatMSG)// hier weitere Bedingungen hinzufügen
+        {
+            EmitSignal(nameof(MSGReceived), Message.state,Message.data);
+        }
     }
 
     private String ConvertDataToString(byte[] packet)
@@ -86,6 +87,11 @@ public class Client : Control
     {
         get{ return _playerName; }
         set{_playerName=value;}
+    }
+
+    public int id
+    {
+        get{ return _clientId; }
     }
 
     private void ShowClientPopup()
@@ -112,6 +118,15 @@ public class Client : Control
         GD.Print("IP-Adresse: " + ip);
         ConnectToServer("ws://" + ip + ":" + port.ToString());
         _playerName=playerName;
+
+        // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
+        PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
+        Lobby lobbyInstance = (Lobby)lobby.Instance();
+        lobbyInstance.Init(this);
+        GetParent().GetTree().Root.AddChild(lobbyInstance);
+        Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
+        vb.Hide();
+        //Free hier nicht, ka. warum hier nicht geht und bei Verbindungseinstellung es geht
     }
 
     public void ConnectToServer(String ip)
@@ -129,9 +144,8 @@ public class Client : Control
         }
     }
 
-    
 
-    private void SendData(string Data)
+    public void SendData(string Data)
     {
         // Prüfen ob die Nachricht gültiges Json Format hat
         JSONParseResult JsonParseFehler = JSON.Parse(Data);
@@ -145,16 +159,17 @@ public class Client : Control
 
     }
 
-    private void SendJoinData()
-    {
-        // alle die sich verbinden wollen haben erstmal die id 0, später wird es dann vom Server korrigiert
-        msg msg= new msg(Nachricht.join,_clientId,0,"");
-        SendData(JsonConvert.SerializeObject(msg));
-    }
-
     public void _on_Testdaten_senden_pressed()
     {
         SendData("{\"Nachricht\": \"" + "Test" + "\", \"data\": \"Hallo Welt\"}");
+    }
+
+    public string PlayerName
+    {
+        get
+        {
+            return _playerName;
+        }
     }
 
     public override void _Process(float delta)

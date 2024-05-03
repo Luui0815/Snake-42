@@ -110,6 +110,13 @@ public class Server : Control
         {
             _ConnectedClients.Find(x => x.GetId==id).Name = Message.data;
         }
+        else if (Message.state==Nachricht.chatMSG)
+        {
+            // Nachricht an alle anderen Clients senden
+            Message = new msg(Nachricht.chatMSG,0,999,Message.data);
+            // 999 -> alle Clients sind das Ziel
+            SendDataToAll(JsonConvert.SerializeObject(Message));
+        }
     }
 
     public void _on_Server_starten_pressed()
