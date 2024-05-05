@@ -45,4 +45,58 @@ margin_right = 400.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
+[node name="RaumListe" type="ItemList" parent="."]
+margin_left = 554.0
+margin_top = 90.0
+margin_right = 963.0
+margin_bottom = 436.0
+max_text_lines = 10
+auto_height = true
+icon_mode = 0
+
+[node name="Raum" type="Button" parent="RaumListe"]
+visible = false
+margin_left = 19.0
+margin_top = 20.0
+margin_right = 392.0
+margin_bottom = 50.0
+toggle_mode = true
+button_mask = 3
+
+[node name="Raumbeschreibung" type="Label" parent="RaumListe/Raum"]
+margin_left = 7.0
+margin_top = 6.0
+margin_right = 170.0
+margin_bottom = 30.0
+text = "Raum von XXX"
+
+[node name="Spieleranzahl" type="Label" parent="RaumListe/Raum"]
+margin_left = 132.0
+margin_top = 5.0
+margin_right = 283.0
+margin_bottom = 26.0
+text = "Spieler 1/2"
+
+[node name="RaumErstellen" type="Button" parent="."]
+margin_left = 560.0
+margin_top = 469.0
+margin_right = 730.0
+margin_bottom = 519.0
+text = "Raum erstellen"
+
+[node name="RaumVerlassen" type="Button" parent="."]
+margin_left = 805.0
+margin_top = 470.0
+margin_right = 960.0
+margin_bottom = 517.0
+text = "Raum verlassen"
+
+[node name="SpielStartenBereit" type="Button" parent="."]
+margin_left = 564.0
+margin_top = 535.0
+margin_right = 961.0
+margin_bottom = 582.0
+text = "Spiel starten/ Bereit!"
+
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
+[connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]

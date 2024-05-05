@@ -2,18 +2,42 @@ using Godot;
 using Newtonsoft.Json;
 using Snake42;
 using System;
+using System.Collections.Generic;
 
 public class Lobby : Control
 {
+    private class Raum
+    {
+        public int PlayerOneId;
+        public bool ReadyPlayerOne;
+        public int PlayerTwoId;
+        public bool ReadyPlayerTwo;
+        public string Raumname;
+
+        public Raum(int PlayerOneId)
+        {
+            this.PlayerOneId=PlayerOneId;
+        }
+    }
+
     private RichTextLabel _ChatLog;
     private Label _PlayerNameLabel;
     private LineEdit _MSGInput;
     private Client _client;
+    private List<Raum> _RaumList=new List<Raum>();
+    private Button _Raum;
+    private Label _Raumbeschreibung;
+    private Label _SpielerAnzahl;
+    private MultiplayerAPI multiplayer;
     public override void _Ready()
     {
         _ChatLog= GetNode<RichTextLabel>("ChatMSGBox/ChatLog");
         _PlayerNameLabel= GetNode<Label>("ChatMSGBox/HBoxContainer/PlayerNameLabel");
         _MSGInput = GetNode<LineEdit>("ChatMSGBox/HBoxContainer/MessageInput");
+        _Raum = GetNode<Button>("RaumListe/Raum");
+        _Raumbeschreibung = GetNode<Label>("RaumListe/Raum/Raumbeschreibung");
+        _SpielerAnzahl = GetNode<Label>("RaumListe/Raum/Spieleranzahl");
+
         // alle Knoten werden nicht gefunden
         _PlayerNameLabel.Text = _client.PlayerName;
     }
@@ -22,7 +46,6 @@ public class Lobby : Control
     {
         _client = c;
         _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
-        c._Process(1);
     }
 
 
@@ -53,5 +76,39 @@ public class Lobby : Control
     private void updateChatLog(string txt)
     {
         _ChatLog.Text+= txt + "\n";
+    }
+
+    private void _on_RaumErstellen_pressed()
+    {
+        Rpc("CreateNewRoom");
+    }
+
+    [Remote]
+    private void CreateNewRoom()
+    {
+        _RaumList.Add(new Raum(_client.id));
+        if(_RaumList.Count==1)
+        {
+            _Raumbeschreibung.Text = "Raum von: " + _client.PlayerName;
+            _SpielerAnzahl.Text = "Spieler 1/2";
+            _Raum.Visible = true;
+            _Raum.Connect("pressed", this, "JoinRoom");
+        }
+        else 
+        {
+            Button btn = new Button();
+            btn = _Raum; // neuer Speicherplatz für neuen Raum, keine Zeiger werden weitergegeben
+            btn.GetNode<Label>("RaumListe/Raum/Raumbeschreibung").Text = "Raum von: " + _client.PlayerName;
+            btn.GetNode<Label>("RaumListe/Raum/Spieleranzahl").Text = "Spieler 1/2";
+            Vector2 position = new Vector2(_Raum.RectSize.x * _RaumList.Count,(_Raum.RectSize.y + 10) * _RaumList.Count);
+            btn.SetPosition(position);
+            _Raum.Connect("pressed", this, "JoinRoom");
+        }
+
+    }
+
+    private void JoinRoom()
+    {
+
     }
 }
