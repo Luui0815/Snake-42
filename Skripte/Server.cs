@@ -117,6 +117,11 @@ public class Server : Control
             // 999 -> alle Clients sind das Ziel
             SendDataToAll(JsonConvert.SerializeObject(Message));
         }
+        else if (Message.state == Nachricht.RoomCreate)
+        {
+            Message.publisher = 0;//wird ja jetzt vom Server an alle gesendet
+            SendDataToAll(JsonConvert.SerializeObject(Message));
+        }
     }
 
     public void _on_Server_starten_pressed()

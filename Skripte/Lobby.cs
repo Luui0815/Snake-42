@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Snake42;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Lobby : Control
 {
@@ -60,6 +61,10 @@ public class Lobby : Control
         {
             updateChatLog(msg);
         }
+        else if(state == Nachricht.RoomCreate)
+        {
+            CreateNewRoom(msg.Split("|"));
+        }
     }
 
     public void _on_MessageInput_text_entered(string new_text)
@@ -80,17 +85,26 @@ public class Lobby : Control
 
     private void _on_RaumErstellen_pressed()
     {
-        Rpc("CreateNewRoom");
+        string[] text = new string[3];
+        text[0] = Convert.ToString(_client.id);
+        text[1] = "Raum von: " + _client.PlayerName;
+        text[2] = "Spieler 1/2";
+        msg message = new msg(Nachricht.RoomCreate,_client.id,999,string.Join("|", text));
+        _client.SendData(JsonConvert.SerializeObject(message));
     }
 
-    [Remote]
-    private void CreateNewRoom()
+    private void CreateNewRoom(string[] text)
     {
-        _RaumList.Add(new Raum(_client.id));
+        //text[0] -> Raumersteller Id
+        //text[1] -> Raum von XXX
+        //text[2] -> Spieler 1/2
+        _RaumList.Add(new Raum(Convert.ToInt32(text[0])));
+        
+
         if(_RaumList.Count==1)
         {
-            _Raumbeschreibung.Text = "Raum von: " + _client.PlayerName;
-            _SpielerAnzahl.Text = "Spieler 1/2";
+            _Raumbeschreibung.Text = text[1];
+            _SpielerAnzahl.Text = text[2];
             _Raum.Visible = true;
             _Raum.Connect("pressed", this, "JoinRoom");
         }

@@ -12,7 +12,10 @@ namespace Snake42
     {
         name,// sendet Name des Clients an den Server
         checkIn, //Server sendet Client seine id zurück
-        chatMSG // User Nachrichten werden ausgetauscht
+        chatMSG, // User Nachrichten werden ausgetauscht
+        RoomCreate, // Wenn neuer Raum Erstellt wird
+        RoomJoin, // Wenn jemand anderes einem Raum beitritt
+        RoomDelete // entweder wurde das Spiel gestartet oder der Raum geschlossen
     }
 }
 public class Client : Control
@@ -67,7 +70,7 @@ public class Client : Control
             SendData(JsonConvert.SerializeObject(msg2));
         }
 
-        if(Message.state== Nachricht.chatMSG)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }
@@ -157,11 +160,6 @@ public class Client : Control
         else
             GD.Print("Client: Nachricht ist kein Json Dokument");
 
-    }
-
-    public void _on_Testdaten_senden_pressed()
-    {
-        SendData("{\"Nachricht\": \"" + "Test" + "\", \"data\": \"Hallo Welt\"}");
     }
 
     public string PlayerName
