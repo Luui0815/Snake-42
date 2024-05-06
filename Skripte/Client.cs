@@ -5,6 +5,8 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using Newtonsoft.Json;
 using System.Data.Common;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace Snake42
 {
@@ -13,9 +15,12 @@ namespace Snake42
         name,// sendet Name des Clients an den Server
         checkIn, //Server sendet Client seine id zurück
         chatMSG, // User Nachrichten werden ausgetauscht
-        RoomCreate, // Wenn neuer Raum Erstellt wird
+        RoomCreate, // Wenn neuer Raum Erstellt wird, geht nur an Serer um seine Raumlisteaktuell zu halten
         RoomJoin, // Wenn jemand anderes einem Raum beitritt
-        RoomDelete // entweder wurde das Spiel gestartet oder der Raum geschlossen
+        RoomDelete, // entweder wurde das Spiel gestartet oder der Raum geschlossen
+        OfferRoomData, // Clients fordern Liste aller Räume vom Server an
+        AnswerRoomData, //nur der Client welcher die Raumliste angefordert hat bekommt sie vom Server geschickt
+
     }
 }
 public class Client : Control
@@ -28,6 +33,8 @@ public class Client : Control
     private RichTextLabel _chatLog;
     private string _playerName;
     private int _clientId;
+    private Godot.Timer _sendTimer = new Godot.Timer();
+    private List<string> _DataSendBuffer = new List<string>(); // Wenn zu viel nachrichten gleichzeitig gesendet werden wollen, wird es hier zwischengespeichert
     public override void _Ready()
     {
         //Signale mit Methoden verknüpfen
@@ -38,6 +45,12 @@ public class Client : Control
 
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
         _chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
+
+        // Timer stellen, da Nachrichten zu schnell gesendet werden können
+        _sendTimer.WaitTime = 1;
+        _sendTimer.OneShot=true;
+        _sendTimer.Connect("timeout",this,"SendDataFromBuffer");
+        AddChild(_sendTimer);
     }
 
     public void ConnectionClosed(bool was_clean=false)
@@ -70,7 +83,7 @@ public class Client : Control
             SendData(JsonConvert.SerializeObject(msg2));
         }
 
-        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }
@@ -152,14 +165,37 @@ public class Client : Control
     {
         // Prüfen ob die Nachricht gültiges Json Format hat
         JSONParseResult JsonParseFehler = JSON.Parse(Data);
-        if(JsonParseFehler.ErrorString=="")
+
+        if(_sendTimer.TimeLeft==0)
         {
-            _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
-            GD.Print("Client: Nachricht gesendet: " + Data);
+            if(JsonParseFehler.ErrorString=="")
+            {
+                _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
+                GD.Print("Client: Nachricht gesendet: " + Data);
+                _sendTimer.Start();
+
+            }
+            else
+                GD.Print("Client: Nachricht ist kein Json Dokument");
         }
         else
-            GD.Print("Client: Nachricht ist kein Json Dokument");
+        {
+            // Zu viele daten auf einmal, in Wartebuffer schreiben
+            _DataSendBuffer.Add(Data);
+            //Geht nicht, Client wartet bis der Timer 0 ist, Server kommt solang nicht zum Zug
+            // bessert sich wenn man alles in ein Skript packt denk ich
+        }
+    }
 
+    private void SendDataFromBuffer()
+    {
+        // wird aufgerufen wenn SendTimer 0 ist
+        if(_DataSendBuffer.Count !=0 )
+        {
+            //Daten nachträglich senden
+            SendData(_DataSendBuffer[0]);
+            _DataSendBuffer.RemoveAt(0);
+        }
     }
 
     public string PlayerName

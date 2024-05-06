@@ -18,6 +18,10 @@ config/icon="res://icon.png"
 
 singletons=[ "res://webrtc/webrtc.tres" ]
 
+[global]
+
+UDP=false
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true

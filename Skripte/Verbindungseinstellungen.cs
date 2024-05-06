@@ -51,6 +51,6 @@ public class Verbindungseinstellungen : Control
         GetTree().Root.AddChild(lobbyInstance);
         
         Hide();
-        Free();
+        //Free();
     }
 }

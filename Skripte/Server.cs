@@ -56,6 +56,7 @@ public class Server : Control
     private RichTextLabel _chatLog;
     private LineEdit _messageInput;
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
+    private List<Raum> _RaumList=new List<Raum>();
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -117,10 +118,20 @@ public class Server : Control
             // 999 -> alle Clients sind das Ziel
             SendDataToAll(JsonConvert.SerializeObject(Message));
         }
-        else if (Message.state == Nachricht.RoomCreate)
+        else if (Message.state == Nachricht.RoomCreate || Message.state == Nachricht.OfferRoomData)
         {
-            Message.publisher = 0;//wird ja jetzt vom Server an alle gesendet
-            SendDataToAll(JsonConvert.SerializeObject(Message));
+            if(Message.state==Nachricht.RoomCreate)
+            {
+                //zur RoomList hinzufügen
+                Raum room = new Raum(Message.publisher);
+                string[] arguments = Message.data.Split("|");
+                room.Raumname = arguments[1];
+                _RaumList.Add(room);
+            }
+
+
+            msg MSG = new msg(Nachricht.AnswerRoomData,0,Message.publisher,JsonConvert.SerializeObject(_RaumList));
+            SendDataToOne(JsonConvert.SerializeObject(MSG),Message.publisher);
         }
     }
 

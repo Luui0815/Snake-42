@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Lobby : Control
+namespace Snake42
 {
-    private class Raum
+    public class Raum
     {
         public int PlayerOneId;
         public bool ReadyPlayerOne;
@@ -20,16 +20,21 @@ public class Lobby : Control
             this.PlayerOneId=PlayerOneId;
         }
     }
+}
 
+public class Lobby : Control
+{
     private RichTextLabel _ChatLog;
     private Label _PlayerNameLabel;
     private LineEdit _MSGInput;
     private Client _client;
-    private List<Raum> _RaumList=new List<Raum>();
     private Button _Raum;
+    private List<Raum> _RaumList; // Liste der Räume welcher der Client hat
     private Label _Raumbeschreibung;
     private Label _SpielerAnzahl;
-    private MultiplayerAPI multiplayer;
+    private PackedScene _RaumButton;
+
+
     public override void _Ready()
     {
         _ChatLog= GetNode<RichTextLabel>("ChatMSGBox/ChatLog");
@@ -38,9 +43,11 @@ public class Lobby : Control
         _Raum = GetNode<Button>("RaumListe/Raum");
         _Raumbeschreibung = GetNode<Label>("RaumListe/Raum/Raumbeschreibung");
         _SpielerAnzahl = GetNode<Label>("RaumListe/Raum/Spieleranzahl");
+        _RaumButton = (PackedScene)ResourceLoader.Load("res://Szenen/RaumButton.tscn");
 
-        // alle Knoten werden nicht gefunden
         _PlayerNameLabel.Text = _client.PlayerName;
+        //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
+        _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
     }
     
     public void Init(Client c)
@@ -61,9 +68,13 @@ public class Lobby : Control
         {
             updateChatLog(msg);
         }
-        else if(state == Nachricht.RoomCreate)
+        else if(state == Nachricht.AnswerRoomData)
         {
-            CreateNewRoom(msg.Split("|"));
+            _RaumList=JsonConvert.DeserializeObject<List<Raum>>(msg);
+            foreach (Raum r in _RaumList)
+            {
+                CreateNewRoom(r);
+            }
         }
     }
 
@@ -93,18 +104,24 @@ public class Lobby : Control
         _client.SendData(JsonConvert.SerializeObject(message));
     }
 
-    private void CreateNewRoom(string[] text)
+    private void CreateRoomButtons()
     {
-        //text[0] -> Raumersteller Id
-        //text[1] -> Raum von XXX
-        //text[2] -> Spieler 1/2
-        _RaumList.Add(new Raum(Convert.ToInt32(text[0])));
-        
+        foreach(Raum room in _RaumList)
+        {
+            
+        }
+
+
+
+
 
         if(_RaumList.Count==1)
         {
-            _Raumbeschreibung.Text = text[1];
-            _SpielerAnzahl.Text = text[2];
+            _Raumbeschreibung.Text = room.Raumname;
+            if(room.PlayerTwoId==0)
+                _SpielerAnzahl.Text = "Spieler 1/2";
+            else
+                _SpielerAnzahl.Text = "Spieler 2/2";
             _Raum.Visible = true;
             _Raum.Connect("pressed", this, "JoinRoom");
         }
@@ -112,17 +129,34 @@ public class Lobby : Control
         {
             Button btn = new Button();
             btn = _Raum; // neuer Speicherplatz für neuen Raum, keine Zeiger werden weitergegeben
-            btn.GetNode<Label>("RaumListe/Raum/Raumbeschreibung").Text = "Raum von: " + _client.PlayerName;
-            btn.GetNode<Label>("RaumListe/Raum/Spieleranzahl").Text = "Spieler 1/2";
+            btn.GetNode<Label>("Raumbeschreibung").Text = room.Raumname;
+            if(room.PlayerTwoId==0)
+                _SpielerAnzahl.Text = "Spieler 1/2";
+            else
+                _SpielerAnzahl.Text = "Spieler 2/2";
             Vector2 position = new Vector2(_Raum.RectSize.x * _RaumList.Count,(_Raum.RectSize.y + 10) * _RaumList.Count);
             btn.SetPosition(position);
-            _Raum.Connect("pressed", this, "JoinRoom");
+            AddChild(btn);
         }
 
+    }
+
+    public List<Raum> RoomList
+    {
+        get
+        {
+            return _RaumList;
+        }
     }
 
     private void JoinRoom()
     {
 
+    }
+
+    private void _on_RumeAkt_pressed()
+    {
+        //fordert Liste der Räume vom Server an
+        _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
     }
 }
