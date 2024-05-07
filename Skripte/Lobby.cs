@@ -28,21 +28,16 @@ public class Lobby : Control
     private Label _PlayerNameLabel;
     private LineEdit _MSGInput;
     private Client _client;
-    private Button _Raum;
-    private List<Raum> _RaumList; // Liste der Räume welcher der Client hat
-    private Label _Raumbeschreibung;
-    private Label _SpielerAnzahl;
+    private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private PackedScene _RaumButton;
-
+    private GridContainer _RaumListe;
 
     public override void _Ready()
     {
         _ChatLog= GetNode<RichTextLabel>("ChatMSGBox/ChatLog");
         _PlayerNameLabel= GetNode<Label>("ChatMSGBox/HBoxContainer/PlayerNameLabel");
         _MSGInput = GetNode<LineEdit>("ChatMSGBox/HBoxContainer/MessageInput");
-        _Raum = GetNode<Button>("RaumListe/Raum");
-        _Raumbeschreibung = GetNode<Label>("RaumListe/Raum/Raumbeschreibung");
-        _SpielerAnzahl = GetNode<Label>("RaumListe/Raum/Spieleranzahl");
+        _RaumListe = GetNode<GridContainer>("RaumListe");
         _RaumButton = (PackedScene)ResourceLoader.Load("res://Szenen/RaumButton.tscn");
 
         _PlayerNameLabel.Text = _client.PlayerName;
@@ -70,11 +65,8 @@ public class Lobby : Control
         }
         else if(state == Nachricht.AnswerRoomData)
         {
-            _RaumList=JsonConvert.DeserializeObject<List<Raum>>(msg);
-            foreach (Raum r in _RaumList)
-            {
-                CreateNewRoom(r);
-            }
+            _roomList=JsonConvert.DeserializeObject<List<Raum>>(msg);
+            CreateRoomButtons();
         }
     }
 
@@ -106,46 +98,25 @@ public class Lobby : Control
 
     private void CreateRoomButtons()
     {
-        foreach(Raum room in _RaumList)
+        foreach(Node child in _RaumListe.GetChildren())
         {
-            
+            child.QueueFree();
         }
-
-
-
-
-
-        if(_RaumList.Count==1)
+        
+        foreach(Raum room in _roomList)
         {
-            _Raumbeschreibung.Text = room.Raumname;
-            if(room.PlayerTwoId==0)
-                _SpielerAnzahl.Text = "Spieler 1/2";
-            else
-                _SpielerAnzahl.Text = "Spieler 2/2";
-            _Raum.Visible = true;
-            _Raum.Connect("pressed", this, "JoinRoom");
+            PackedScene test = (PackedScene)ResourceLoader.Load("res://Szenen/RaumButton.tscn");
+            RaumButton roomButton = (RaumButton)test.Instance();
+            roomButton.SetAttributes(room);
+            _RaumListe.AddChild(roomButton);
         }
-        else 
-        {
-            Button btn = new Button();
-            btn = _Raum; // neuer Speicherplatz für neuen Raum, keine Zeiger werden weitergegeben
-            btn.GetNode<Label>("Raumbeschreibung").Text = room.Raumname;
-            if(room.PlayerTwoId==0)
-                _SpielerAnzahl.Text = "Spieler 1/2";
-            else
-                _SpielerAnzahl.Text = "Spieler 2/2";
-            Vector2 position = new Vector2(_Raum.RectSize.x * _RaumList.Count,(_Raum.RectSize.y + 10) * _RaumList.Count);
-            btn.SetPosition(position);
-            AddChild(btn);
-        }
-
     }
 
     public List<Raum> RoomList
     {
         get
         {
-            return _RaumList;
+            return _roomList;
         }
     }
 

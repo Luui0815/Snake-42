@@ -45,15 +45,6 @@ margin_right = 400.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
-[node name="RaumListe" type="ItemList" parent="."]
-margin_left = 554.0
-margin_top = 90.0
-margin_right = 963.0
-margin_bottom = 436.0
-max_text_lines = 10
-auto_height = true
-icon_mode = 0
-
 [node name="RaumErstellen" type="Button" parent="."]
 margin_left = 560.0
 margin_top = 469.0
@@ -81,6 +72,12 @@ margin_top = 90.0
 margin_right = 528.0
 margin_bottom = 134.0
 text = "Räume aktualisieren"
+
+[node name="RaumListe" type="GridContainer" parent="."]
+margin_left = 636.0
+margin_top = 52.0
+margin_right = 954.0
+margin_bottom = 179.0
 
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
