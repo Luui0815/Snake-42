@@ -57,6 +57,7 @@ margin_left = 805.0
 margin_top = 470.0
 margin_right = 960.0
 margin_bottom = 517.0
+disabled = true
 text = "Raum verlassen"
 
 [node name="SpielStartenBereit" type="Button" parent="."]
@@ -64,21 +65,23 @@ margin_left = 564.0
 margin_top = 535.0
 margin_right = 961.0
 margin_bottom = 582.0
+disabled = true
 text = "Spiel starten/ Bereit!"
 
 [node name="RäumeAkt" type="Button" parent="."]
-margin_left = 376.0
-margin_top = 90.0
-margin_right = 528.0
-margin_bottom = 134.0
+margin_left = 557.0
+margin_top = 50.0
+margin_right = 709.0
+margin_bottom = 94.0
 text = "Räume aktualisieren"
 
-[node name="RaumListe" type="GridContainer" parent="."]
-margin_left = 636.0
-margin_top = 52.0
-margin_right = 954.0
-margin_bottom = 179.0
+[node name="RaumListe" type="ItemList" parent="."]
+margin_left = 558.0
+margin_top = 113.0
+margin_right = 955.0
+margin_bottom = 452.0
 
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
+[connection signal="pressed" from="RaumVerlassen" to="." method="_on_RaumVerlassen_pressed"]
 [connection signal="pressed" from="RäumeAkt" to="." method="_on_RumeAkt_pressed"]

@@ -29,16 +29,15 @@ public class Lobby : Control
     private LineEdit _MSGInput;
     private Client _client;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
-    private PackedScene _RaumButton;
-    private GridContainer _RaumListe;
+    private ItemList _RaumListe;
 
     public override void _Ready()
     {
         _ChatLog= GetNode<RichTextLabel>("ChatMSGBox/ChatLog");
         _PlayerNameLabel= GetNode<Label>("ChatMSGBox/HBoxContainer/PlayerNameLabel");
         _MSGInput = GetNode<LineEdit>("ChatMSGBox/HBoxContainer/MessageInput");
-        _RaumListe = GetNode<GridContainer>("RaumListe");
-        _RaumButton = (PackedScene)ResourceLoader.Load("res://Szenen/RaumButton.tscn");
+        _RaumListe = GetNode<ItemList>("RaumListe");
+        _RaumListe.Connect("item_activated", this, "JoinRoom");
 
         _PlayerNameLabel.Text = _client.PlayerName;
         //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
@@ -98,17 +97,27 @@ public class Lobby : Control
 
     private void CreateRoomButtons()
     {
-        foreach(Node child in _RaumListe.GetChildren())
-        {
-            child.QueueFree();
-        }
-        
+        _RaumListe.Clear();
+        bool ClientInRaum = false;
         foreach(Raum room in _roomList)
         {
-            PackedScene test = (PackedScene)ResourceLoader.Load("res://Szenen/RaumButton.tscn");
-            RaumButton roomButton = (RaumButton)test.Instance();
-            roomButton.SetAttributes(room);
-            _RaumListe.AddChild(roomButton);
+            _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 ? "       Beitretbar": ""));
+            if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
+            {
+                ClientInRaum = true;
+            }
+        }
+
+        if(ClientInRaum)
+        {
+            //Spieler ist ebereits in einem raum
+            GetNode<Button>("RaumErstellen").Disabled = true;
+            GetNode<Button>("RaumVerlassen").Disabled = false;
+        }
+        else
+        {
+            GetNode<Button>("RaumErstellen").Disabled = false;
+            GetNode<Button>("RaumVerlassen").Disabled = true;
         }
     }
 
@@ -120,14 +129,35 @@ public class Lobby : Control
         }
     }
 
-    private void JoinRoom()
+    private void JoinRoom(int index)
     {
-
+        //Prüfen ob der Client nicht selbst schon in nem Raum ist
+        if(GetNode<Button>("RaumVerlassen").Disabled == true)
+        {
+            //msg MSG = new msg(Nachricht.RoomJoin,_client.id,0,"");
+            _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomJoin,_client.id,0,Convert.ToString(_roomList[index].PlayerOneId))));
+        }
+        else
+        {
+            // ToDo: Popup Fehlermeldung
+        }
     }
 
     private void _on_RumeAkt_pressed()
     {
         //fordert Liste der Räume vom Server an
         _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
+    }
+
+    private void _on_RaumVerlassen_pressed()
+    {
+        foreach(Raum room in _roomList)
+        {
+            if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
+            {
+                // Raumeigenschaften werden vom Server grade gebogen
+                _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomLeft,_client.id,0,JsonConvert.SerializeObject(room))));
+            }
+        }
     }
 }

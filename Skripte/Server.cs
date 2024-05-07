@@ -118,21 +118,80 @@ public class Server : Control
             // 999 -> alle Clients sind das Ziel
             SendDataToAll(JsonConvert.SerializeObject(Message));
         }
-        else if (Message.state == Nachricht.RoomCreate || Message.state == Nachricht.OfferRoomData)
+        else if (Message.state == Nachricht.RoomCreate)
         {
-            if(Message.state==Nachricht.RoomCreate)
-            {
-                //zur RoomList hinzufügen
-                Raum room = new Raum(Message.publisher);
-                string[] arguments = Message.data.Split("|");
-                room.Raumname = arguments[1];
-                _RaumList.Add(room);
-            }
+            //zur RoomList hinzufügen
+            Raum room = new Raum(Message.publisher);
+            string[] arguments = Message.data.Split("|");
+            room.Raumname = arguments[1];
+            _RaumList.Add(room);
 
-
+            SendRaumListToAllClients();
+        }
+        else if(Message.state == Nachricht.OfferRoomData)
+        {
             msg MSG = new msg(Nachricht.AnswerRoomData,0,Message.publisher,JsonConvert.SerializeObject(_RaumList));
             SendDataToOne(JsonConvert.SerializeObject(MSG),Message.publisher);
         }
+        else if(Message.state == Nachricht.RoomJoin)
+        {
+            int PlayerOneId = Convert.ToInt32(Message.data);
+            _RaumList.Find(x => x.PlayerOneId == PlayerOneId).PlayerTwoId = Message.publisher;
+
+            SendRaumListToAllClients();
+        }
+        else if(Message.state == Nachricht.RoomLeft)
+        {
+            Raum room = JsonConvert.DeserializeObject<Raum>(Message.data);
+
+            int index = -1;
+            for (int i = 0; i < _RaumList.Count; i++)
+            {
+                if (_RaumList[i].PlayerOneId == room.PlayerOneId && _RaumList[i].PlayerTwoId == room.PlayerTwoId && _RaumList[i].Raumname == room.Raumname)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            //Wenn Index -1 dann gibts den Raum nicht
+            if(index == -1)
+            {
+                GD.Print("Fehler bei Raum verlassen Raumname:" + room.Raumname);
+                return;
+            }
+
+            if(Message.publisher == room.PlayerOneId)
+            {
+                //Prüfen ob es einen 2. Spieler gibt
+                if(room.PlayerTwoId == 0)
+                {
+                    //Raum löschen, da keiner mehr drin
+                    _RaumList.RemoveAt(index);
+                }
+                else
+                {
+                    //Player2 wird Host
+                    _RaumList[index].PlayerOneId = room.PlayerTwoId;
+                    _RaumList[index].PlayerTwoId = 0;
+                    _RaumList[index].Raumname = "Raum von: " + _ConnectedClients.Find(x => x.GetId == room.PlayerTwoId).Name;
+                }
+            }
+            else
+            {
+                //Spieler 2 hat den Raum verlassen -> d.h. es gibt noch 1 Spieler
+                _RaumList[index].PlayerTwoId = 0;
+            }
+
+            //geupdatete Liste an alle Clients senden
+            SendRaumListToAllClients();
+        }
+    }
+
+    private void SendRaumListToAllClients()
+    {
+        msg MSG = new msg(Nachricht.AnswerRoomData,0,999,JsonConvert.SerializeObject(_RaumList));
+        SendDataToAll(JsonConvert.SerializeObject(MSG));
     }
 
     public void _on_Server_starten_pressed()

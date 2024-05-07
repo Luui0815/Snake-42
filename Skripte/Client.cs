@@ -19,7 +19,8 @@ namespace Snake42
         RoomJoin, // Wenn jemand anderes einem Raum beitritt
         RoomDelete, // entweder wurde das Spiel gestartet oder der Raum geschlossen
         OfferRoomData, // Clients fordern Liste aller Räume vom Server an
-        AnswerRoomData, //nur der Client welcher die Raumliste angefordert hat bekommt sie vom Server geschickt
+        AnswerRoomData, //nur der Client welcher die Raumliste angefordert hat bekommt sie vom Server geschickt, wird auch genutzt um die RaumListe zu updaten
+        RoomLeft,// wen Client Raum verlässt, kann dazu führen das Raum gelöscht wird
 
     }
 }
