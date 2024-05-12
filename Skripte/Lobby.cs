@@ -28,6 +28,7 @@ public class Lobby : Control
     private Label _PlayerNameLabel;
     private LineEdit _MSGInput;
     private Client _client;
+    private Server _server;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private ItemList _RaumListe;
 
@@ -39,15 +40,16 @@ public class Lobby : Control
         _RaumListe = GetNode<ItemList>("RaumListe");
         _RaumListe.Connect("item_activated", this, "JoinRoom");
 
+        //Client und (Server) werden vor dem Aufruf als Nodes der Szenen hinzugefügt, daher geht folgendes
+        _client = GetNode<Client>("Client");
+        _server= GetNode<Server>("Server");
+
+        _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
+
         _PlayerNameLabel.Text = _client.PlayerName;
+
         //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
         _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
-    }
-    
-    public void Init(Client c)
-    {
-        _client = c;
-        _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
     }
 
 

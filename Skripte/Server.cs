@@ -53,8 +53,8 @@ public class Server : Control
 
     private WebSocketServer _WSPeer = new WebSocketServer();
     private PackedScene _serverFormPopup;
-    private RichTextLabel _chatLog;
-    private LineEdit _messageInput;
+    //private RichTextLabel _chatLog;
+    //private LineEdit _messageInput;
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
     private List<Raum> _RaumList=new List<Raum>();
 
@@ -68,14 +68,15 @@ public class Server : Control
         _WSPeer.Connect("data_received",this,"ReceiveData");
 
         _serverFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ServerFormPopup.tscn");
-        _chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
-        _messageInput = GetParent().GetNode<LineEdit>("ErrorMSGBox/HBoxContainer/MessageInput");
+        //folgende Meldungen müssen in Verbindungseinstellungen verlegt werden. NICHT SERVER, das POPUP AUCH
+        //_chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
+        //_messageInput = GetParent().GetNode<LineEdit>("ErrorMSGBox/HBoxContainer/MessageInput");
     }
 
     public void ClientConnected(int id, string proto)
     {
         GD.Print("Server: Client " + id + " hat sich mit Protokoll: " + proto + " verbunden");
-        _chatLog.Text += "Server: Client " + id + " hat sich mit Protokoll: " + proto + " verbunden\n";
+        //_chatLog.Text += "Server: Client " + id + " hat sich mit Protokoll: " + proto + " verbunden\n";
         // Id welcher der Server dem Client vergibt an Client senden
         // ToDo: prüfen ob der Name einmailg ist
         _ConnectedClients.Add(new ConnectedClients(id, "unkown"));
@@ -88,13 +89,13 @@ public class Server : Control
     public void ConnectionCloseRequest(int id, int code, string reason)
     {
         GD.Print("Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason);
-        _chatLog.Text += "Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason +"\n";
+        //_chatLog.Text += "Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason +"\n";
     }
 
     public void ClientDisconnected(int id, bool was_clean=false)
     {
         GD.Print("Server: Client " + id + "ist " + was_clean +" getrennt");
-        _chatLog.Text += "Server: Client " + id + "ist " + was_clean +" getrennt\n";
+        //_chatLog.Text += "Server: Client " + id + "ist " + was_clean +" getrennt\n";
     }
 
     public void ReceiveData(int id)
@@ -104,7 +105,7 @@ public class Server : Control
         GD.Print("Server: Nachricht erhalten:");
         GD.Print(recievedMessage);
 
-        _chatLog.Text += chatMessage + "\n";
+        //_chatLog.Text += chatMessage + "\n";
 
         msg Message = JsonConvert.DeserializeObject<msg>(recievedMessage);
         if(Message.state==Nachricht.name)
@@ -249,12 +250,12 @@ public class Server : Control
         if(error==Error.Ok)
         {
             GD.Print("Server: Server lauscht \n--------------------------------------------------");
-            _chatLog.Text += "Server: Server lauscht auf Port "+ port +"\n";
+            //_chatLog.Text += "Server: Server lauscht auf Port "+ port +"\n";
         }
         else
         {
             GD.Print("Server: Server konnte nicht gestartet werden");
-            _chatLog.Text += "Server: Server konnte nicht gestartet werden\nFehler: " + error.ToString() + "\n";
+            //_chatLog.Text += "Server: Server konnte nicht gestartet werden\nFehler: " + error.ToString() + "\n";
         }
     }
 

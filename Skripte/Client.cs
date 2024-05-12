@@ -31,7 +31,7 @@ public class Client : Control
 
     private WebSocketClient _WSPeer = new WebSocketClient();
     private PackedScene _clientFormPopup;
-    private RichTextLabel _chatLog;
+    //private RichTextLabel _chatLog;
     private string _playerName;
     private int _clientId;
     private Godot.Timer _sendTimer = new Godot.Timer();
@@ -45,7 +45,8 @@ public class Client : Control
         _WSPeer.Connect("data_received", this, "ReceiveData");
 
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
-        _chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
+        // FOLGENDES MUSS IN VERBINDUNGSEINSTELLUNGEN VERLGET WREDEN; SIEHE AUCH SERVER
+        //_chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
 
         // Timer stellen, da Nachrichten zu schnell gesendet werden können
         _sendTimer.WaitTime = 1;
@@ -57,13 +58,13 @@ public class Client : Control
     public void ConnectionClosed(bool was_clean=false)
     {
         GD.Print("Client: Verbindung geschlossen. Geplant: " + was_clean);
-        _chatLog.Text += "Client: Verbindung geschlossen. Geplant: " + was_clean + "\n";
+        //_chatLog.Text += "Client: Verbindung geschlossen. Geplant: " + was_clean + "\n";
     }
 
     public void ConnectionOpened(string proto)
     {
         GD.Print("Client: Verbunden durch Protokoll: " + proto + "\n--------------------------------------------------");
-        _chatLog.Text += "Client: Verbunden durch Protokoll: " + proto + "\n";
+        //_chatLog.Text += "Client: Verbunden durch Protokoll: " + proto + "\n";
     }
 
     public void ReceiveData()
@@ -73,7 +74,7 @@ public class Client : Control
         GD.Print("Client: Nachricht erhalten:");
         GD.Print(recievedMessage);
 
-        _chatLog.Text += chatMessage + "\n";
+        //_chatLog.Text += chatMessage + "\n";
 
         msg Message=JsonConvert.DeserializeObject<msg>(recievedMessage);
         if(Message.state== Nachricht.checkIn)
@@ -116,7 +117,6 @@ public class Client : Control
         Popup popupInstance = (Popup)_clientFormPopup.Instance();
         GetTree().Root.AddChild(popupInstance);
         popupInstance.PopupCentered();
-
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
         LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
         LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
@@ -139,11 +139,12 @@ public class Client : Control
         // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
         PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
         Lobby lobbyInstance = (Lobby)lobby.Instance();
-        lobbyInstance.Init(this);
-        GetParent().GetTree().Root.AddChild(lobbyInstance);
         Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
-        vb.Hide();
-        //Free hier nicht, ka. warum hier nicht geht und bei Verbindungseinstellung es geht
+        vb.RemoveChild(this);
+        lobbyInstance.AddChild(this);
+        vb.GetTree().Root.AddChild(lobbyInstance);
+
+        vb.QueueFree();
     }
 
     public void ConnectToServer(String ip)
@@ -152,12 +153,12 @@ public class Client : Control
         if(error == Error.Ok)
         {
             GD.Print("Client: Client gestartet \n--------------------------------------------------");
-            _chatLog.Text += "Client: Client gestartet \n";
+            //_chatLog.Text += "Client: Client gestartet \n";
         }
         else
         {
             GD.Print("Client: Fehler beim verbinden: " + error.ToString());
-            _chatLog.Text += "Client: Fehler beim verbinden: " + error.ToString() + "\n";
+            //_chatLog.Text += "Client: Fehler beim verbinden: " + error.ToString() + "\n";
         }
     }
 

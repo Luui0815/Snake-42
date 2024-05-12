@@ -47,10 +47,13 @@ public class Verbindungseinstellungen : Control
         // ToDo: vereinfachen, kommt bei Client nochmal 
         PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
         Lobby lobbyInstance = (Lobby)lobby.Instance();
-        lobbyInstance.Init(_client);
+        RemoveChild(_client);
+        RemoveChild(_server);
+        lobbyInstance.AddChild(_client);
+        lobbyInstance.AddChild(_server);
         GetTree().Root.AddChild(lobbyInstance);
-        
-        Hide();
+        QueueFree();
+        //Hide();
         //Free();
     }
 }
