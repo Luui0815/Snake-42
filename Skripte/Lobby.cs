@@ -1,8 +1,10 @@
 using Godot;
+using Godot.Collections;
 using Newtonsoft.Json;
 using Snake42;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 
 namespace Snake42
@@ -31,6 +33,8 @@ public class Lobby : Control
     private Server _server;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private ItemList _RaumListe;
+    private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
+    private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
 
     public override void _Ready()
     {
@@ -55,7 +59,7 @@ public class Lobby : Control
 
     public override void _Process(float delta)
     {
-      
+      WebRTCPeer.Poll();
     }
 
     private void CLientReceivedMSG(Nachricht state, string msg)
@@ -68,6 +72,12 @@ public class Lobby : Control
         {
             _roomList=JsonConvert.DeserializeObject<List<Raum>>(msg);
             CreateRoomButtons();
+        }
+        else if (state == Nachricht.SDPData)
+        {
+            string[] data = msg.Split("|");
+            // 0:type, 1:sdp
+            WebRTCPeer.SetLocalDescription(data[0],data[1]);
         }
     }
 
@@ -107,6 +117,16 @@ public class Lobby : Control
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
                 ClientInRaum = true;
+            }
+
+            //wenn RAum voll ist kann Host das Spiel starten
+            if(room.PlayerOneId == _client.id && room.PlayerTwoId != 0)
+            {
+                GetNode<Button>("SpielStarten").Disabled = false;
+            }
+            else
+            {
+                GetNode<Button>("SpielStarten").Disabled = true;
             }
         }
 
@@ -161,5 +181,43 @@ public class Lobby : Control
                 _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomLeft,_client.id,0,JsonConvert.SerializeObject(room))));
             }
         }
+    }
+
+    private void _on_SpielStarten_pressed()
+    {
+        // Raumhost fragt Spieler 2 ob er eine WebRTCPeer Verbindung aufbauen möchte
+                var iceServers = new Godot.Collections.Dictionary {
+            {"iceServers", new Godot.Collections.Array {
+                new Godot.Collections.Dictionary {
+                    {"urls", "stun:stun.l.google.com:19302"}
+                }
+            }}
+            //noch wietere Stun Server hinzufügen
+        };
+        Error error;
+
+        error=WebRTCPeer.Initialize(iceServers);
+
+        //SDP Session Description machen
+        WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+        //ICE Kandidat wurde erstellt
+        WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+        error=WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+        // hier noc ne Bedingung hin
+        error = WebRTCPeer.CreateOffer();
+    }
+
+    private void WebRTCPeerSDPCreated(string type, string sdp)
+    {
+        WebRTCPeer.SetLocalDescription(type,sdp);
+        //Senden der Beschreibung an den anderen Client
+        msg m = new msg(Nachricht.SDPData,_client.id, _roomList.First(x => x.PlayerOneId == _client.id).PlayerTwoId,type + "|" + sdp);
+        _client.SendData(JsonConvert.SerializeObject(m));
+
+    }
+
+    private void WebRTCPeerIceCandidateCreated(string media, int index, string name)
+    {
+        
     }
 }

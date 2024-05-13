@@ -21,6 +21,7 @@ namespace Snake42
         OfferRoomData, // Clients fordern Liste aller Räume vom Server an
         AnswerRoomData, //nur der Client welcher die Raumliste angefordert hat bekommt sie vom Server geschickt, wird auch genutzt um die RaumListe zu updaten
         RoomLeft,// wen Client Raum verlässt, kann dazu führen das Raum gelöscht wird
+        SDPData, // wird vom Raumhost an Player 2 gesendet,damit er auch die SDP bekommt
 
     }
 }
@@ -85,7 +86,7 @@ public class Client : Control
             SendData(JsonConvert.SerializeObject(msg2));
         }
 
-        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }

@@ -187,6 +187,10 @@ public class Server : Control
             //geupdatete Liste an alle Clients senden
             SendRaumListToAllClients();
         }
+        else if (Message.state == Nachricht.SDPData)
+        {
+            SendDataToOne(Message.data, Message.target);
+        }
     }
 
     private void SendRaumListToAllClients()

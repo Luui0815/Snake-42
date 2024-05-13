@@ -60,7 +60,7 @@ margin_bottom = 517.0
 disabled = true
 text = "Raum verlassen"
 
-[node name="SpielStartenBereit" type="Button" parent="."]
+[node name="SpielStarten" type="Button" parent="."]
 margin_left = 564.0
 margin_top = 535.0
 margin_right = 961.0
@@ -84,4 +84,5 @@ margin_bottom = 452.0
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
 [connection signal="pressed" from="RaumVerlassen" to="." method="_on_RaumVerlassen_pressed"]
+[connection signal="pressed" from="SpielStarten" to="." method="_on_SpielStarten_pressed"]
 [connection signal="pressed" from="RäumeAkt" to="." method="_on_RumeAkt_pressed"]
