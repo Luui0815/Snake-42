@@ -187,7 +187,7 @@ public class Server : Control
             //geupdatete Liste an alle Clients senden
             SendRaumListToAllClients();
         }
-        else if (Message.state == Nachricht.SDPData)
+        else if (Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate)
         {
             SendDataToOne(recievedMessage, Message.target);
         }

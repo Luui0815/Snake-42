@@ -35,6 +35,8 @@ public class Lobby : Control
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
+  
+    
 
     public override void _Ready()
     {
@@ -78,6 +80,13 @@ public class Lobby : Control
             string[] data = msg.Split("|");
             // 0:type, 1:sdp
             WebRTCPeer.SetLocalDescription(data[0],data[1]);
+        }
+        else if (state == Nachricht.ICECandidate)
+        {
+            string[] data = msg.Split('|');
+            WebRTCPeer.AddIceCandidate(data[0],Convert.ToInt32(data[1]),data[2]);
+            Multiplayer.NetworkPeer=WebRTCMultiplayer;
+            Rpc("TestRPCCalls");
         }
     }
 
@@ -218,6 +227,13 @@ public class Lobby : Control
 
     private void WebRTCPeerIceCandidateCreated(string media, int index, string name)
     {
-        
+        msg m = new msg(Nachricht.ICECandidate,_client.id, _roomList.First(x => x.PlayerOneId == _client.id).PlayerTwoId,media + "|" + index + "|" + name);
+        _client.SendData(JsonConvert.SerializeObject(m));
+        Multiplayer.NetworkPeer=WebRTCMultiplayer;
+    }
+
+    private void TestRPCCalls()
+    {
+        GD.Print("Hallo von " + _client.Name);
     }
 }
