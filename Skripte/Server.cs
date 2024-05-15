@@ -189,7 +189,7 @@ public class Server : Control
         }
         else if (Message.state == Nachricht.SDPData)
         {
-            SendDataToOne(Message.data, Message.target);
+            SendDataToOne(recievedMessage, Message.target);
         }
     }
 
@@ -224,15 +224,7 @@ public class Server : Control
 
     public void SendDataToOne(string Data, int id)
     {
-        // Prüfen ob die Nachricht gültiges Json Format hat
-        JSONParseResult JsonParseFehler = JSON.Parse(Data);
-        if(JsonParseFehler.ErrorString=="")
-        {
-            _WSPeer.GetPeer(id).PutPacket(Data.ToString().ToUTF8());
-            GD.Print("Server: Nachricht gesendet: " + Data);
-        }
-        else
-            GD.Print("Server: Nachricht ist kein Json Dokument");
+        _WSPeer.GetPeer(id).PutPacket(Data.ToString().ToUTF8());
     }
 
     public void SendDataToAll(string Data)
