@@ -204,6 +204,11 @@ public class Server : Control
         ShowServerFormPopup();
     }
 
+    public void StopServer()
+    {
+        _WSPeer.Stop();
+    }
+
     private void ShowServerFormPopup()
     {
         Popup popupInstance = (Popup)_serverFormPopup.Instance();

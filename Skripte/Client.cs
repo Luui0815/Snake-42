@@ -210,6 +210,11 @@ public class Client : Control
         }
     }
 
+    public void StopConnection()
+    {
+        _WSPeer.DisconnectFromHost();
+    }
+
     public override void _Process(float delta)
     {
         // Port/Peer offen halten

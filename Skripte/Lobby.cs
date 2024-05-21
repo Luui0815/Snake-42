@@ -70,8 +70,9 @@ public class Lobby : Control
         //Signale verknüpfen
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-        WebRTCMultiplayer.Initialize(1); // k,A
+        WebRTCMultiplayer.Initialize(_client.id, false);
         WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+        WebRTCMultiplayer.Connect("peer_connected", this, nameof(WebRTCPeerConnected));
     }
 
 
@@ -245,13 +246,23 @@ public class Lobby : Control
 
     private void AddPeerToWebRTC()
     {
-        //Multiplayer.NetworkPeer = WebRTCMultiplayer;
-        Rpc("TestRPCCalls");
+        Multiplayer.NetworkPeer = WebRTCMultiplayer;
+        _client.StopConnection();
+        if(_server != null)
+            _server.StopServer();
+        // man sollte vielleicht den Server weiter laufen lassen, da sonst für alle die Verbindung zur lobby abbricht
+        Rpc(nameof(TestRPCCalls));
     }
 
-    [Remote]
+    [Sync]
     private void TestRPCCalls()
     {
         GD.Print("Hallo von " + _client.Name);
+        GetNode<TextEdit>("TextEdit").Text = "Die ultra nice WebRTC Verbindung hat nach Stunden des verzweifelns endlich einen mega freshen RPC Call rausgeballert.\nKnie vor mir nieder du Wicht!";
+    }
+
+    private void WebRTCPeerConnected(int id)
+    {
+        GD.Print("RTC Verbinung hat gepeert");
     }
 }

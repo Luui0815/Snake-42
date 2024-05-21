@@ -81,6 +81,10 @@ margin_top = 113.0
 margin_right = 955.0
 margin_bottom = 452.0
 
+[node name="TextEdit" type="TextEdit" parent="."]
+margin_right = 365.0
+margin_bottom = 64.0
+
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
 [connection signal="pressed" from="RaumVerlassen" to="." method="_on_RaumVerlassen_pressed"]
