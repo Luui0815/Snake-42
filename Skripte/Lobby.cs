@@ -254,11 +254,12 @@ public class Lobby : Control
         Rpc(nameof(TestRPCCalls));
     }
 
-    [Sync]
+    [MasterSync]
     private void TestRPCCalls()
     {
         GD.Print("Hallo von " + _client.Name);
         GetNode<TextEdit>("TextEdit").Text = "Die ultra nice WebRTC Verbindung hat nach Stunden des verzweifelns endlich einen mega freshen RPC Call rausgeballert.\nKnie vor mir nieder du Wicht!";
+        Hide();
     }
 
     private void WebRTCPeerConnected(int id)

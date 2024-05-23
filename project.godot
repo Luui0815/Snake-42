@@ -12,7 +12,10 @@ config_version=4
 
 config/name="Snake 42"
 run/main_scene="res://Szenen/Hauptmenü.tscn"
-config/icon="res://icon.png"
+boot_splash/image="res://Assets/icon.png"
+boot_splash/bg_color=Color( 0.0666667, 0.231373, 0.870588, 1 )
+config/icon="res://Assets/icon.png"
+config/windows_native_icon="res://Assets/Snakeicon.ico"
 
 [gdnative]
 
