@@ -103,8 +103,7 @@ public class Lobby : Control
         {
             string[] data = msg.Split('|');
             WebRTCPeer.AddIceCandidate(data[0],Convert.ToInt32(data[1]),data[2]);
-            if(data[3].Contains("candidate:5"))
-                AddPeerToWebRTC();
+            AddPeerToWebRTC();
         }
     }
 
@@ -240,8 +239,7 @@ public class Lobby : Control
     {
         msg m = new msg(Nachricht.ICECandidate,_client.id,FindOtherRoomMate(),media + "|" + index + "|" + name);
         _client.SendData(JsonConvert.SerializeObject(m));
-        if(name.Contains("candidate:5"))
-                AddPeerToWebRTC();
+        AddPeerToWebRTC();
     }
 
     private void AddPeerToWebRTC()
@@ -254,12 +252,11 @@ public class Lobby : Control
         Rpc(nameof(TestRPCCalls));
     }
 
-    [MasterSync]
+    [RemoteSync]
     private void TestRPCCalls()
     {
         GD.Print("Hallo von " + _client.Name);
         GetNode<TextEdit>("TextEdit").Text = "Die ultra nice WebRTC Verbindung hat nach Stunden des verzweifelns endlich einen mega freshen RPC Call rausgeballert.\nKnie vor mir nieder du Wicht!";
-        Hide();
     }
 
     private void WebRTCPeerConnected(int id)
