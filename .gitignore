@@ -37,3 +37,10 @@ mono_crash.*.json
 .mono/temp/obj/Debug/Snake 42.dll
 .mono/temp/obj/Debug/Snake 42.pdb
 .mono/temp/obj/Debug/Snake 42.sourcelink.json
+/.mono/temp
+/.mono/temp/bin
+/.mono/temp/bin/Debug
+/.mono/temp
+/.mono/temp/obj/Debug
+/.mono/temp/obj/Debug
+/.mono/temp
