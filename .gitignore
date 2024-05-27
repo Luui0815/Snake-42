@@ -26,3 +26,4 @@ mono_crash.*.json
 /.mono/temp/bin/Debug
 /.mono/temp/obj
 /.mono/temp
+/.mono/temp/bin
