@@ -1,6 +1,8 @@
 https://docs.godotengine.org/de/4.x/tutorials/networking/websocket.html
 
-Raum erstellen
-HTML Export
-Testen der Räume
 Client Sercer und Verbindungseinstellungen irgendwie zentrieren, auf eine Node packen, da vieles doppelt
+Verbindungsabbrüche bei Websocket Server un WebRTC Verbindung behandeln
+Wenn man Server auswählt kann man trotzdem den ganzen Verker passiv auf dem Server mitlesen
+man kann sich wieder von dem Server trennen
+Option bei Client und Server starten ob Server erhalten bleiben soll oder nicht
+Option das WebRTC Daten auch ohne Webserver ausgetauscht werden könne. Also das Anwender die SDP Daten bekommt und über discord oder Whatsapp an den anderen schicken muss und umgedreht, sodass man keine Portfreigabe mehr braucht
