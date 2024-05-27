@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Szenen/LevelSelection.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Assets/Spieler2Pfeil.png" type="Texture" id=2]
+[ext_resource path="res://Assets/Spieler1Pfeil.png" type="Texture" id=3]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 330, 272 )
+
+[node name="Gegeneinander" type="Button" parent="."]
+margin_left = 171.0
+margin_top = 82.0
+margin_right = 386.0
+margin_bottom = 147.0
+text = "Gegeneinander"
+
+[node name="Miteiander" type="Button" parent="."]
+margin_left = 842.0
+margin_top = 78.0
+margin_right = 1056.0
+margin_bottom = 144.0
+text = "Miteinander"
+
+[node name="Spieler1Pfeil" type="Sprite" parent="."]
+position = Vector2( 142, 205 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 3 )
+
+[node name="LevelSelectionGegneinander" parent="." instance=ExtResource( 1 )]
+margin_left = 172.0
+margin_top = 172.0
+margin_right = -989.0
+margin_bottom = -384.0
+SelectedLevel = 1
+
+[node name="LevelSelectionMiteinander" parent="." instance=ExtResource( 1 )]
+margin_left = 849.0
+margin_top = 169.0
+margin_right = -312.0
+margin_bottom = -387.0
+SelectedLevel = 1
+
+[node name="Spieler2Pfeil" type="Sprite" parent="."]
+position = Vector2( 820, 205 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 2 )

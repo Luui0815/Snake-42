@@ -16,3 +16,10 @@ mono_crash.*.json
 **/.mono/temp
 .vs/
 *.user
+/.mono/temp
+/.mono/temp/obj
+/.mono/temp/obj/Debug
+/.mono/temp/bin/Debug
+/.mono/temp
+/.mono/temp/obj
+/.mono/temp/obj/Debug
