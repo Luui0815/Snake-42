@@ -20,7 +20,7 @@ public class Snake : Node2D
         SegmentPositions.Add(Position);
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _moveTimer = GetNode<Timer>("MoveTimer");
-        _moveTimer.WaitTime = 0.6f;
+        _moveTimer.WaitTime = 0.5f;
         _moveTimer.Connect("timeout", this, nameof(OnTimerTimeout));
     }
 
@@ -53,6 +53,7 @@ public class Snake : Node2D
 
         if (IsFruitCollision())
         {
+            GD.Print("Frucht gefressen!");
             _fruit.RandomizePosition();
             Grow();
             IncreaseSpeed();
@@ -91,6 +92,7 @@ public class Snake : Node2D
         SegmentPositions.Insert(0, Position);
         _lastPosition = SegmentPositions[SegmentPositions.Count - 1];
         SegmentPositions.RemoveAt(SegmentPositions.Count - 1);
+        GD.Print(SegmentPositions.ToString());
         Update();
     }
 
