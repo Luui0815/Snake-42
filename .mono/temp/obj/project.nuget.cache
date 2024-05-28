@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "wEWMUCJmatVlb9S1YjT4zzeT39b83kwaY06Lxk67gqD407Ra/jnAjIbhBQxBJVvEq+UucHDgIcBGVcz4cOlmzw==",
+  "dgSpecHash": "SRJzIlnaRU8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\lukas\\OneDrive\\Dokumente\\Godot Spiele\\Snake-42\\Snake 42.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\mar\\Documents\\Godot\\Snake-42\\Snake 42.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mar\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

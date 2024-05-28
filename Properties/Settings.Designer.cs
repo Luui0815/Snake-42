@@ -7,7 +7,7 @@
 //     der Code erneut generiert wird.
 // </auto-generated>
 //------------------------------------------------------------------------------
-
+/*
 namespace Snake42.Properties {
     
     
@@ -24,3 +24,4 @@ namespace Snake42.Properties {
         }
     }
 }
+*/

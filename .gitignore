@@ -13,5 +13,37 @@ export_presets.cfg
 .mono/
 data_*/
 mono_crash.*.json
+**/.mono/temp
 .vs/
 *.user
+/.mono/temp
+/.mono/temp/obj
+/.mono/temp/obj/Debug
+/.mono/temp/bin/Debug
+/.mono/temp
+/.mono/temp/obj
+/.mono/temp/obj/Debug
+/.mono/temp/bin/Debug
+/.mono/temp/obj
+/.mono/temp
+/.mono/temp/bin
+/.mono/temp/bin/Debug
+/.mono/temp
+/.mono/temp
+.mono/temp/bin/Debug/Snake 42.dll
+.mono/temp/bin/Debug/Snake 42.pdb
+.mono/temp/obj/Debug/Snake 42.AssemblyInfo.cs
+.mono/temp/obj/Debug/Snake 42.AssemblyInfoInputs.cache
+.mono/temp/obj/Debug/Snake 42.dll
+.mono/temp/obj/Debug/Snake 42.pdb
+.mono/temp/obj/Debug/Snake 42.sourcelink.json
+/.mono/temp
+/.mono/temp/bin
+/.mono/temp/bin/Debug
+/.mono/temp
+/.mono/temp/obj/Debug
+/.mono/temp/obj/Debug
+/.mono/temp
+.mono/temp/obj/Debug/Snake 42.AssemblyInfo.cs
+.mono/temp/obj/Debug/Snake 42.AssemblyInfoInputs.cache
+.mono/temp/obj/Debug/Snake 42.csproj.AssemblyReference.cache
