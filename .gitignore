@@ -44,3 +44,6 @@ mono_crash.*.json
 /.mono/temp/obj/Debug
 /.mono/temp/obj/Debug
 /.mono/temp
+.mono/temp/obj/Debug/Snake 42.AssemblyInfo.cs
+.mono/temp/obj/Debug/Snake 42.AssemblyInfoInputs.cache
+.mono/temp/obj/Debug/Snake 42.csproj.AssemblyReference.cache

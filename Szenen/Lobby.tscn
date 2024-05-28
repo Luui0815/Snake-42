@@ -66,7 +66,7 @@ margin_top = 535.0
 margin_right = 961.0
 margin_bottom = 582.0
 disabled = true
-text = "Spiel starten/ Bereit!"
+text = "Spiel starten"
 
 [node name="RäumeAkt" type="Button" parent="."]
 margin_left = 557.0
@@ -84,6 +84,15 @@ margin_bottom = 452.0
 [node name="TextEdit" type="TextEdit" parent="."]
 margin_right = 365.0
 margin_bottom = 64.0
+
+[node name="ServerOffenLassen" type="CheckButton" parent="."]
+visible = false
+margin_left = 7.0
+margin_top = 69.0
+margin_right = 208.0
+margin_bottom = 109.0
+pressed = true
+text = "Server offen lassen"
 
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]

@@ -49,6 +49,8 @@ public class Lobby : Control
         //Client und (Server) werden vor dem Aufruf als Nodes der Szenen hinzugefügt, daher geht folgendes
         _client = GetNode<Client>("Client");
         _server= GetNode<Server>("Server");
+        if(_server != null)
+            GetNode<CheckButton>("ServerOffenLassen").Visible = true;
 
         _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
 
@@ -139,7 +141,7 @@ public class Lobby : Control
         bool ClientInRaum = false;
         foreach(Raum room in _roomList)
         {
-            _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 ? "       Beitretbar": ""));
+            _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 && room.PlayerOneId != _client.id ? "       Beitretbar": ""));
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
                 ClientInRaum = true;
@@ -203,7 +205,7 @@ public class Lobby : Control
         {
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
-                // Raumeigenschaften werden vom Server grade gebogen
+                // Raumeigenschaften werden vom Server gerade gebogen
                 _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomLeft,_client.id,0,JsonConvert.SerializeObject(room))));
             }
         }
@@ -245,18 +247,30 @@ public class Lobby : Control
     private void AddPeerToWebRTC()
     {
         Multiplayer.NetworkPeer = WebRTCMultiplayer;
-        _client.StopConnection();
-        if(_server != null)
-            _server.StopServer();
-        // man sollte vielleicht den Server weiter laufen lassen, da sonst für alle die Verbindung zur lobby abbricht
-        Rpc(nameof(TestRPCCalls));
+        Rpc(nameof(SwitchToLevelSelectionMenu));
     }
 
     [RemoteSync]
-    private void TestRPCCalls()
+    private void SwitchToLevelSelectionMenu()
     {
-        GD.Print("Hallo von " + _client.Name);
-        GetNode<TextEdit>("TextEdit").Text = "Die ultra nice WebRTC Verbindung hat nach Stunden des verzweifelns endlich einen mega freshen RPC Call rausgeballert.\nKnie vor mir nieder du Wicht!";
+        _client.StopConnection();
+        if(_server != null)
+        {
+            if(GetNode<CheckButton>("ServerOffenLassen").Pressed == false)
+            {
+                _server.StopServer();
+            }
+            else
+            {
+                GlobalVariables.Instance.Lobby = this;
+                Hide();
+            }
+        }
+        else
+        {
+            QueueFree();
+        }
+        GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
     }
 
     private void WebRTCPeerConnected(int id)
