@@ -32,3 +32,5 @@ C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\bin\Debug\New
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.Up2Date
 C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Newtonsoft.Json.dll
 C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.CopyComplete
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\Newtonsoft.Json.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.Up2Date
