@@ -6,3 +6,5 @@ Wenn man Server auswählt kann man trotzdem den ganzen Verker passiv auf dem Ser
 man kann sich wieder von dem Server trennen
 Option bei Client und Server starten ob Server erhalten bleiben soll oder nicht
 Option das WebRTC Daten auch ohne Webserver ausgetauscht werden könne. Also das Anwender die SDP Daten bekommt und über discord oder Whatsapp an den anderen schicken muss und umgedreht, sodass man keine Portfreigabe mehr braucht
+
+Fehlermeldung Popup machen

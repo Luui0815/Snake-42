@@ -5,15 +5,14 @@ public class LevelSelection : Control
 {
     [Export]
     public int SelectedLevel;
+    [Signal]
+    public delegate void LevelSelected();
 
     private CheckBox[] _CheckBoxes = new CheckBox[3];
 
     public override void _Ready()
     {
         _CheckBoxes[0] = GetNode<CheckBox>("Level1");
-        // Level 1 = Standartlevel
-        _CheckBoxes[0].Pressed = true;
-        SelectedLevel = 1;
         _CheckBoxes[1] = GetNode<CheckBox>("Level2");
         _CheckBoxes[2] = GetNode<CheckBox>("Level3");
     }
@@ -35,6 +34,8 @@ public class LevelSelection : Control
 
     private void SwitchSelectedLevel(int LevelNr)
     {
+        EmitSignal(nameof(LevelSelected));
+
         if(SelectedLevel != LevelNr + 1)
         {
             for (int i = 0; i <= 2; i++)
@@ -50,6 +51,25 @@ public class LevelSelection : Control
             _CheckBoxes[LevelNr].Pressed = true;
     }
 
+    public CheckBox[] CheckBoxes
+    {
+        get
+        {
+            return _CheckBoxes;
+        }
+        set
+        {
+            _CheckBoxes = value;
+        }
+    }
+
+    public void UncheckLevelSelection()
+    {
+        foreach(CheckBox cb in _CheckBoxes)
+        {
+            cb.Pressed = false;
+        }
+    }
 
 
 }
