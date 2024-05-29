@@ -246,7 +246,7 @@ public class Lobby : Control
 
     private void AddPeerToWebRTC()
     {
-        Multiplayer.NetworkPeer = WebRTCMultiplayer;
+        GlobalVariables.Instance.Multiplayer.NetworkPeer = WebRTCMultiplayer;
         Rpc(nameof(SwitchToLevelSelectionMenu));
     }
 
