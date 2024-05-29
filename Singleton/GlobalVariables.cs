@@ -6,6 +6,7 @@ public partial class GlobalVariables : Node
     public static GlobalVariables Instance { get; private set; }
 
     public Lobby Lobby { get; set; }
+    public PackedScene ConfirmationDialog { get; set; }
 
     public override void _Ready()
     {

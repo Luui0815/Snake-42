@@ -137,50 +137,45 @@ public class Client : Control
         GD.Print("IP-Adresse: " + ip);
         ConnectToServer("ws://" + ip + ":" + port.ToString());
         _playerName=playerName;
-
-        // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
-        PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
-        Lobby lobbyInstance = (Lobby)lobby.Instance();
-        Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
-        vb.RemoveChild(this);
-        lobbyInstance.AddChild(this);
-        vb.GetTree().Root.AddChild(lobbyInstance);
-
-        vb.QueueFree();
     }
 
     public void ConnectToServer(String ip)
     {
         Error error = _WSPeer.ConnectToUrl(ip);
-        if(error == Error.Ok)
+        if(error == Error.Ok && true==false)
         {
             GD.Print("Client: Client gestartet \n--------------------------------------------------");
-            //_chatLog.Text += "Client: Client gestartet \n";
+            // wenn erfolgreich kann zur lobby gewechselt werden
+            // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
+            PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
+            Lobby lobbyInstance = (Lobby)lobby.Instance();
+            Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
+            vb.RemoveChild(this);
+            lobbyInstance.AddChild(this);
+            vb.GetTree().Root.AddChild(lobbyInstance);
+
+        vb.QueueFree();
         }
         else
         {
             GD.Print("Client: Fehler beim verbinden: " + error.ToString());
-            //_chatLog.Text += "Client: Fehler beim verbinden: " + error.ToString() + "\n";
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindungsfehler","Der Client kann sich nicht auf die Adresse/URL " + ip + " verbinden");
+            GetTree().Root.AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
         }
     }
 
 
     public void SendData(string Data)
     {
-        // Prüfen ob die Nachricht gültiges Json Format hat
-        JSONParseResult JsonParseFehler = JSON.Parse(Data);
-
         if(_sendTimer.TimeLeft==0)
         {
-            if(JsonParseFehler.ErrorString=="")
-            {
-                _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
-                GD.Print("Client: Nachricht gesendet: " + Data);
-                _sendTimer.Start();
 
-            }
-            else
-                GD.Print("Client: Nachricht ist kein Json Dokument");
+            _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
+            GD.Print("Client: Nachricht gesendet: " + Data);
+            _sendTimer.Start();
         }
         else
         {

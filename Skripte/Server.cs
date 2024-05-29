@@ -57,6 +57,7 @@ public class Server : Control
     //private LineEdit _messageInput;
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
     private List<Raum> _RaumList=new List<Raum>();
+    public Error Error {get;set;} = Error.Ok;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -75,8 +76,6 @@ public class Server : Control
 
     public void ClientConnected(int id, string proto)
     {
-        GD.Print("Server: Client " + id + " hat sich mit Protokoll: " + proto + " verbunden");
-        //_chatLog.Text += "Server: Client " + id + " hat sich mit Protokoll: " + proto + " verbunden\n";
         // Id welcher der Server dem Client vergibt an Client senden
         // ToDo: prüfen ob der Name einmailg ist
         _ConnectedClients.Add(new ConnectedClients(id, "unkown"));
@@ -89,13 +88,11 @@ public class Server : Control
     public void ConnectionCloseRequest(int id, int code, string reason)
     {
         GD.Print("Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason);
-        //_chatLog.Text += "Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason +"\n";
     }
 
     public void ClientDisconnected(int id, bool was_clean=false)
     {
         GD.Print("Server: Client " + id + "ist " + was_clean +" getrennt");
-        //_chatLog.Text += "Server: Client " + id + "ist " + was_clean +" getrennt\n";
     }
 
     public void ReceiveData(int id)
@@ -104,8 +101,6 @@ public class Server : Control
         string chatMessage = $"[Client] {id}: " + recievedMessage +"\n";
         GD.Print("Server: Nachricht erhalten:");
         GD.Print(recievedMessage);
-
-        //_chatLog.Text += chatMessage + "\n";
 
         msg Message = JsonConvert.DeserializeObject<msg>(recievedMessage);
         if(Message.state==Nachricht.name)
@@ -223,7 +218,6 @@ public class Server : Control
 
     private void OnPopupConfirmed(int port)
     {
-        GD.Print("Portnummer: " + port);
         StartServer(port);
     }
 
@@ -251,12 +245,17 @@ public class Server : Control
         if(error==Error.Ok)
         {
             GD.Print("Server: Server lauscht \n--------------------------------------------------");
-            //_chatLog.Text += "Server: Server lauscht auf Port "+ port +"\n";
+            Error = Error.Ok;
         }
         else
         {
             GD.Print("Server: Server konnte nicht gestartet werden");
-            //_chatLog.Text += "Server: Server konnte nicht gestartet werden\nFehler: " + error.ToString() + "\n";
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindungsfehler","Der Server konnt auf dem Port " + port + " nicht gestartet werden");
+            GetTree().Root.AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
+            Error=Error.CantOpen;
         }
     }
 
