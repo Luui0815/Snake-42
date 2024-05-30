@@ -74,7 +74,8 @@ public class Lobby : Control
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
         WebRTCMultiplayer.Initialize(_client.id, false);
         WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
-        WebRTCMultiplayer.Connect("peer_connected", this, nameof(WebRTCPeerConnected));
+        // Signale zur Verbindungsabbruch behandeln
+        WebRTCMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.Instance.WebRTCConnectionFailed));
     }
 
 
@@ -187,10 +188,6 @@ public class Lobby : Control
             //msg MSG = new msg(Nachricht.RoomJoin,_client.id,0,"");
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomJoin,_client.id,0,Convert.ToString(_roomList[index].PlayerOneId))));
         }
-        else
-        {
-            // ToDo: Popup Fehlermeldung
-        }
     }
 
     private void _on_RumeAkt_pressed()
@@ -214,7 +211,14 @@ public class Lobby : Control
     private void _on_SpielStarten_pressed()
     {
         if(WebRTCPeer.CreateOffer() != Error.Ok)
+        {
             GD.Print("Fehler bei Erstellung SPD");
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindungsfehler","Peer to Peer verbindung konnt nicht aufgebaut werden");
+            GetTree().Root.AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
+        }
     }
 
     private void WebRTCPeerSDPCreated(string type, string sdp)
@@ -259,6 +263,8 @@ public class Lobby : Control
             if(GetNode<CheckButton>("ServerOffenLassen").Pressed == false)
             {
                 _server.StopServer();
+                if(GlobalVariables.Instance.Lobby != null)
+                    GlobalVariables.Instance.Lobby.QueueFree();
             }
             else
             {
@@ -271,10 +277,5 @@ public class Lobby : Control
             QueueFree();
         }
         GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
-    }
-
-    private void WebRTCPeerConnected(int id)
-    {
-        GD.Print("RTC Verbinung hat gepeert");
     }
 }

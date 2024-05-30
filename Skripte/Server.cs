@@ -53,8 +53,6 @@ public class Server : Control
 
     private WebSocketServer _WSPeer = new WebSocketServer();
     private PackedScene _serverFormPopup;
-    //private RichTextLabel _chatLog;
-    //private LineEdit _messageInput;
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
     private List<Raum> _RaumList=new List<Raum>();
     public Error Error {get;set;} = Error.Ok;
@@ -82,17 +80,22 @@ public class Server : Control
         
         msg message = new msg(Nachricht.checkIn,0,id,"");
         SendDataToOne(JsonConvert.SerializeObject(message),id);
-        
+        // Nachricht das er sich auf Server gekommen ist wird erst gesendet wenn der Name bekannt ist
     }
 
     public void ConnectionCloseRequest(int id, int code, string reason)
     {
         GD.Print("Server: Client " + id + " hat sich abgetrennt mit " + code + " weil " + reason);
+        // das interresiert andere nicht
     }
 
     public void ClientDisconnected(int id, bool was_clean=false)
     {
         GD.Print("Server: Client " + id + "ist " + was_clean +" getrennt");
+        if(was_clean == true)
+            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + _ConnectedClients.Find(x => x.GetId==id).Name) + " hat sich vom Server getrennt"));
+        else
+            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + _ConnectedClients.Find(x => x.GetId==id).Name) + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt"));
     }
 
     public void ReceiveData(int id)
@@ -106,6 +109,8 @@ public class Server : Control
         if(Message.state==Nachricht.name)
         {
             _ConnectedClients.Find(x => x.GetId==id).Name = Message.data;
+            // Nachricht an alle senden das neuer Client sich verbunden hat
+            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + Message.data + " ist dem Server beigetreten")));
         }
         else if (Message.state==Nachricht.chatMSG)
         {
@@ -150,7 +155,7 @@ public class Server : Control
                 }
             }
 
-            //Wenn Index -1 dann gibts den Raum nicht
+            //Wenn Index -1 dann gibts den Raum nicht, sollte nicht vorkommen
             if(index == -1)
             {
                 GD.Print("Fehler bei Raum verlassen Raumname:" + room.Raumname);
@@ -201,6 +206,8 @@ public class Server : Control
 
     public void StopServer()
     {
+        // nochmal an alle Clients senden das es gleich vorbei ist
+        SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Server wird heruntergefahren!")));
         _WSPeer.Stop();
     }
 
@@ -232,11 +239,6 @@ public class Server : Control
         {
             _WSPeer.GetPeer(cc.GetId).PutPacket(Data.ToString().ToUTF8());
         }
-    }
-
-    public void _on_Sende_Hallo_zu_Clients_pressed()
-    {
-        //SendDataToAll("{\"Nachricht\": \"" + Nachricht.answer + "\", \"data\": \"Hallöchen\"}");
     }
 
     public void StartServer(int port)
