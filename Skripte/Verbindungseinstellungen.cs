@@ -6,18 +6,50 @@ public class Verbindungseinstellungen : Control
 {
     private Server _server;
     private Client _client;
+    private bool _BootServer=false;
+    private bool _BootClient = false;
 
     private PackedScene _clientFormPopup;
+    private PackedScene _serverFormPopup;
     public override void _Ready()
     {
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
+        _serverFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ServerFormPopup.tscn");
         _server = GetNode<Server>("Server");
         _client = GetNode<Client>("Client");
     }
 
     public void _on_ServerundClient_pressed()
     {
+        _BootServer=true;
+        _BootClient = true;
         ShowClientPopup();
+    }
+
+    private void _on_Server_starten_pressed()
+    {
+        _BootServer = true;
+        _BootClient = false;
+        ShowServerFormPopup();
+    }
+
+    private void _on_Client_starten_pressed()
+    {
+        _BootClient = true;
+        _BootServer = false;
+        ShowClientPopup();
+    }
+
+    private void ShowServerFormPopup()
+    {
+        Popup popupInstance = (Popup)_serverFormPopup.Instance();
+        GetTree().Root.AddChild(popupInstance);
+        popupInstance.PopupCentered();
+
+        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
+        portInput.Text = "8915"; 
+
+        popupInstance.Connect(nameof(ServerFormPopup.Confirmed), this, "OnPopupConfirmed");
     }
 
     private void ShowClientPopup()
@@ -25,7 +57,6 @@ public class Verbindungseinstellungen : Control
         Popup popupInstance = (Popup)_clientFormPopup.Instance();
         GetTree().Root.AddChild(popupInstance);
         popupInstance.PopupCentered();
-
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
         LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
         LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
@@ -35,25 +66,35 @@ public class Verbindungseinstellungen : Control
 
 
         popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );
-
     }
 
     private void OnPopupConfirmed(string ip, int port, string playerName)
     {
-        _server.StartServer(port);
-        _client.ConnectToServer("ws://" + ip + ":" + port);
-        _client.playerName  = playerName;
+        Error error=Error.Ok;
+        if(_BootServer == true)
+            error = _server.StartServer(port);
+        if(_BootClient == true && error == Error.Ok)
+        {
+            error = _client.ConnectToServer("ws://" + ip + ":" + port);
+            _client.playerName  = playerName;
+        }
 
-        // ToDo: vereinfachen, kommt bei Client nochmal 
-        PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
-        Lobby lobbyInstance = (Lobby)lobby.Instance();
-        RemoveChild(_client);
-        RemoveChild(_server);
-        lobbyInstance.AddChild(_client);
-        lobbyInstance.AddChild(_server);
-        GetTree().Root.AddChild(lobbyInstance);
-        QueueFree();
-        //Hide();
-        //Free();
+        if(error == Error.Ok)
+        {
+            PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
+            Lobby lobbyInstance = (Lobby)lobby.Instance();
+            if(_BootServer == true)
+            {
+                RemoveChild(_server);
+                lobbyInstance.AddChild(_server);
+            }
+            if(_BootClient == true)
+            {
+                RemoveChild(_client);
+                lobbyInstance.AddChild(_client);
+            }
+            GetTree().Root.AddChild(lobbyInstance);
+            QueueFree();
+        }
     }
 }

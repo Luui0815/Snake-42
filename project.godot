@@ -36,6 +36,7 @@ singletons=[ "res://webrtc/webrtc.tres" ]
 [global]
 
 UDP=false
+Export=false
 
 [gui]
 

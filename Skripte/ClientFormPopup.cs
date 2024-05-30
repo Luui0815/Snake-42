@@ -26,7 +26,7 @@ public class ClientFormPopup : Popup
         {
             //EmitSignal(nameof(Confirmed), ip, int.Parse(port));
             EmitSignal("Confirmed", ip, port, playerName);
-            Hide();
+            QueueFree();
         }
     }
 

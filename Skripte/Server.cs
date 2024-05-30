@@ -52,7 +52,6 @@ public class Server : Control
     }
 
     private WebSocketServer _WSPeer = new WebSocketServer();
-    private PackedScene _serverFormPopup;
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
     private List<Raum> _RaumList=new List<Raum>();
     public Error Error {get;set;} = Error.Ok;
@@ -65,11 +64,6 @@ public class Server : Control
         _WSPeer.Connect("client_disconnected", this, "ClientDisconnected");
         _WSPeer.Connect("client_close_request", this, "ConnectionCloseRequest");
         _WSPeer.Connect("data_received",this,"ReceiveData");
-
-        _serverFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ServerFormPopup.tscn");
-        //folgende Meldungen müssen in Verbindungseinstellungen verlegt werden. NICHT SERVER, das POPUP AUCH
-        //_chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
-        //_messageInput = GetParent().GetNode<LineEdit>("ErrorMSGBox/HBoxContainer/MessageInput");
     }
 
     public void ClientConnected(int id, string proto)
@@ -92,10 +86,16 @@ public class Server : Control
     public void ClientDisconnected(int id, bool was_clean=false)
     {
         GD.Print("Server: Client " + id + "ist " + was_clean +" getrennt");
-        if(was_clean == true)
-            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + _ConnectedClients.Find(x => x.GetId==id).Name) + " hat sich vom Server getrennt"));
-        else
-            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + _ConnectedClients.Find(x => x.GetId==id).Name) + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt"));
+        if(_ConnectedClients.Exists(x => x.GetId==id))
+        {
+            string DisconnectedClientName=_ConnectedClients.Find(x => x.GetId==id).Name;
+            _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId==id));
+            if(was_clean == true)
+                SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich vom Server getrennt")));
+            else
+                SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt")));
+        }
+
     }
 
     public void ReceiveData(int id)
@@ -191,6 +191,20 @@ public class Server : Control
         {
             SendDataToOne(recievedMessage, Message.target);
         }
+        else if(Message.state == Nachricht.PeerToPeerConnectionEstablished)
+        {
+            // Roomhost hat seine id und die seines Mitspielers gesendet
+            // beide müssen von Connected Clients getrennt werden, sonst wird an den Mitspieler noch gesendet das der roomhost getrennt wurde
+            // das passiert in SendDataToAll(), da es aber den Mitspieler beriets auch nciht mehr gibt führt das zu einem gravierenden fehler
+            // Clients löschen sich nicht selbst, daher muss server bestätigen das er empfange hat das sie eine peer to perr haben, wenn dies passiert löschen sich clients
+            string PlayerOneName = _ConnectedClients.Find(x => x.GetId==Message.publisher).Name;
+            string PlayerTwoName = _ConnectedClients.Find(x => x.GetId==Convert.ToInt32(Message.data)).Name;
+            //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Message.publisher,"")),Message.publisher);
+            //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Convert.ToInt32(Message.data),"")),Convert.ToInt32(Message.data));
+            _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Message.publisher));
+            _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Convert.ToInt32(Message.data)));
+            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Die Spieler " + PlayerOneName+ " und " + PlayerTwoName + " habben eine runde gestartet")));
+        }
     }
 
     private void SendRaumListToAllClients()
@@ -199,33 +213,12 @@ public class Server : Control
         SendDataToAll(JsonConvert.SerializeObject(MSG));
     }
 
-    public void _on_Server_starten_pressed()
-    {
-        ShowServerFormPopup();
-    }
 
     public void StopServer()
     {
         // nochmal an alle Clients senden das es gleich vorbei ist
-        SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Server wird heruntergefahren!")));
+        SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.ServerWillClosed,0,999,"System: Server wird heruntergefahren!")));
         _WSPeer.Stop();
-    }
-
-    private void ShowServerFormPopup()
-    {
-        Popup popupInstance = (Popup)_serverFormPopup.Instance();
-        GetTree().Root.AddChild(popupInstance);
-        popupInstance.PopupCentered();
-
-        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
-        portInput.Text = "8915"; 
-
-        popupInstance.Connect("Confirmed", this, "OnPopupConfirmed");
-    }
-
-    private void OnPopupConfirmed(int port)
-    {
-        StartServer(port);
     }
 
     public void SendDataToOne(string Data, int id)
@@ -237,17 +230,17 @@ public class Server : Control
     {
         foreach(ConnectedClients cc in _ConnectedClients)
         {
+
             _WSPeer.GetPeer(cc.GetId).PutPacket(Data.ToString().ToUTF8());
         }
     }
 
-    public void StartServer(int port)
+    public Error StartServer(int port)
     {
-        Error error=_WSPeer.Listen(port);
-        if(error==Error.Ok)
+        if(_WSPeer.Listen(port)==Error.Ok)
         {
             GD.Print("Server: Server lauscht \n--------------------------------------------------");
-            Error = Error.Ok;
+            return Error.Ok;
         }
         else
         {
@@ -257,7 +250,7 @@ public class Server : Control
             GetTree().Root.AddChild(ErrorPopup);
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
-            Error=Error.CantOpen;
+            return Error.Failed;
         }
     }
 

@@ -35,7 +35,7 @@ public class Lobby : Control
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
-  
+    private bool _FirstRPCCallEcecuted=false; 
     
 
     public override void _Ready()
@@ -49,33 +49,55 @@ public class Lobby : Control
         //Client und (Server) werden vor dem Aufruf als Nodes der Szenen hinzugefügt, daher geht folgendes
         _client = GetNode<Client>("Client");
         _server= GetNode<Server>("Server");
-        if(_server != null)
+        // verschiedene Szenarien fordern eine unterschiedliche Gestaltung der Lobby
+        //Version 1: Anwender hat Client und Server gestartet
+        if(_server != null && _client != null)
             GetNode<CheckButton>("ServerOffenLassen").Visible = true;
+        //Version 2: Anwender hat nur Server gestartet und kann Lobby passiv beobachten
+        else if(_server != null && _client == null)
+        {
+            GetNode<HBoxContainer>("ChatMSGBox/HBoxContainer").Visible = false;
+            GetNode<Button>("RaumErstellen").Visible=false;
+            GetNode<Button>("RaumVerlassen").Visible=false;
+            GetNode<Button>("SpielStarten").Visible=false;
+            GetNode<Button>("Lobby verlassen").Text = "Server beenden";
+        }
 
-        _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
-
-        _PlayerNameLabel.Text = _client.PlayerName;
-
-        //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
-        _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
-        // WebRTCPeer initialisieren
-        var iceServers = new Godot.Collections.Dictionary {
+        if(_client != null)//kann null sein wenn nur server gestartet wurde
+        {
+             // WebRTCPeer initialisieren
+            var iceServers = new Godot.Collections.Dictionary {
             {"iceServers", new Godot.Collections.Array {
                 new Godot.Collections.Dictionary {
                     {"urls", "stun:stun.l.google.com:19302"}
                 }
             }}
             //noch wietere Stun Server hinzufügen
-        };
-        if(WebRTCPeer.Initialize(iceServers)!= Error.Ok)
-            GD.Print("Fehler bei Webrtc initialisierung");
-        //Signale verknüpfen
-        WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
-        WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-        WebRTCMultiplayer.Initialize(_client.id, false);
-        WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+            };
+            WebRTCPeer.Initialize(iceServers);
+            _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
+            _PlayerNameLabel.Text = _client.PlayerName;
+            //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
+            _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
+            WebRTCMultiplayer.Initialize(_client.id, false);
+            WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+        }
+
+        GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         // Signale zur Verbindungsabbruch behandeln
         WebRTCMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.Instance.WebRTCConnectionFailed));
+        WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+        WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+    }
+
+    private void BackToVerbindungseinstellung()
+    {
+        if(_server != null)
+            _server.StopServer();
+        if(_client != null)
+            _client.StopConnection();
+        QueueFree();
+        GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
 
@@ -107,6 +129,15 @@ public class Lobby : Control
             string[] data = msg.Split('|');
             WebRTCPeer.AddIceCandidate(data[0],Convert.ToInt32(data[1]),data[2]);
             AddPeerToWebRTC();
+        }
+        else if (state == Nachricht.ServerWillClosed)
+        {
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindung verloren","Der Server wurde planmäßig heruntergefahren!\nBitte wenden Sie sich an den Serverbetreiber");
+            ErrorPopup.Connect("confirmed",this,nameof(BackToVerbindungseinstellung));
+            AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
         }
     }
 
@@ -250,14 +281,18 @@ public class Lobby : Control
 
     private void AddPeerToWebRTC()
     {
-        GlobalVariables.Instance.Multiplayer.NetworkPeer = WebRTCMultiplayer;
-        Rpc(nameof(SwitchToLevelSelectionMenu));
+        if(_FirstRPCCallEcecuted == false)
+        {
+            _FirstRPCCallEcecuted = true;
+            GlobalVariables.Instance.Multiplayer.NetworkPeer = WebRTCMultiplayer;
+            Rpc(nameof(SwitchToLevelSelectionMenu));
+        }
+        
     }
 
     [RemoteSync]
     private void SwitchToLevelSelectionMenu()
     {
-        _client.StopConnection();
         if(_server != null)
         {
             if(GetNode<CheckButton>("ServerOffenLassen").Pressed == false)
@@ -268,14 +303,20 @@ public class Lobby : Control
             }
             else
             {
-                GlobalVariables.Instance.Lobby = this;
-                Hide();
+                //lobalVariables.Instance.Lobby = this;
+                RemoveChild(_server);
+                GlobalVariables.Instance.AddChild(_server);
+                _server.Hide();
             }
         }
-        else
+        //RoomHost sendet Nachricht an Server das beide Clients sich vom Server trennen und er beide aus _ConnectedClients löschen kann
+        if(_roomList.Exists(x => x.PlayerOneId == _client.id))
         {
-            QueueFree();
+            _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,_client.id,0,Convert.ToString(FindOtherRoomMate()))));
         }
+        _client.QueueFree();
+        //_client wird durch Server gelöscht
         GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
+        QueueFree();
     }
 }

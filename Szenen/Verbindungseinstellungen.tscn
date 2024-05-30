@@ -36,13 +36,6 @@ margin_right = 898.0
 margin_bottom = 271.0
 text = "Client starten"
 
-[node name="Testdaten senden" type="Button" parent="."]
-margin_left = 493.0
-margin_top = 309.0
-margin_right = 928.0
-margin_bottom = 354.0
-text = "Sende Hallo Welt zum Server"
-
 [node name="ErrorMSGBox" type="VBoxContainer" parent="."]
 margin_left = 15.0
 margin_top = 388.0
@@ -79,13 +72,6 @@ margin_right = 400.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
-[node name="Sende Hallo zu Clients" type="Button" parent="."]
-margin_left = 80.0
-margin_top = 309.0
-margin_right = 472.0
-margin_bottom = 351.0
-text = "Sende Hallo zu Clients"
-
 [node name="ServerundClient" type="Button" parent="."]
 margin_left = 348.0
 margin_top = 220.0
@@ -93,8 +79,6 @@ margin_right = 589.0
 margin_bottom = 278.0
 text = "Server und Client starten"
 
-[connection signal="pressed" from="Server starten" to="Server" method="_on_Server_starten_pressed"]
-[connection signal="pressed" from="Client starten" to="Client" method="_on_Client_starten_pressed"]
-[connection signal="pressed" from="Testdaten senden" to="Client" method="_on_Testdaten_senden_pressed"]
-[connection signal="pressed" from="Sende Hallo zu Clients" to="Server" method="_on_Sende_Hallo_zu_Clients_pressed"]
+[connection signal="pressed" from="Server starten" to="." method="_on_Server_starten_pressed"]
+[connection signal="pressed" from="Client starten" to="." method="_on_Client_starten_pressed"]
 [connection signal="pressed" from="ServerundClient" to="." method="_on_ServerundClient_pressed"]

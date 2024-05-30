@@ -23,7 +23,8 @@ namespace Snake42
         RoomLeft,// wen Client Raum verlässt, kann dazu führen das Raum gelöscht wird
         SDPData, // wird vom Raumhost an Player 2 gesendet,damit er auch die SDP bekommt
         ICECandidate, // für WebRTC ICe Candidate austauschen
-
+        ServerWillClosed, // wenn Server abgeschaltet wird
+        PeerToPeerConnectionEstablished, // derjenige Client welcher Roomhost ist sendet es einmalig an den Server und löscht damit auch seinen Roommate von ConnectedClients
     }
 }
 public class Client : Control
@@ -38,6 +39,7 @@ public class Client : Control
     private int _clientId;
     private Godot.Timer _sendTimer = new Godot.Timer();
     private List<string> _DataSendBuffer = new List<string>(); // Wenn zu viel nachrichten gleichzeitig gesendet werden wollen, wird es hier zwischengespeichert
+    bool _DisconnectFromHost = false;
     public override void _Ready()
     {
         //Signale mit Methoden verknüpfen
@@ -59,7 +61,7 @@ public class Client : Control
     {
         GD.Print("Client: Verbindung geschlossen. Geplant: " + was_clean);
         // nur wenn die Verbindung unerwartet abreist Meldung geben
-        if(was_clean == false)
+        if(was_clean == false && _DisconnectFromHost == false)
         {
             ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
             ErrorPopup.Init("Verbindungsabbruch","Verbindung zum Server wurde verloren");
@@ -79,13 +81,13 @@ public class Client : Control
         GetTree().ChangeScene("res://Szenen/Hauptmenü.tscn");
     }
 
-    public void ConnectionOpened(string proto)
+    private void ConnectionOpened(string proto)
     {
         GD.Print("Client: Verbunden durch Protokoll: " + proto + "\n--------------------------------------------------");
         //_chatLog.Text += "Client: Verbunden durch Protokoll: " + proto + "\n";
     }
 
-    public void ReceiveData()
+    private void ReceiveData()
     {
         string recievedMessage = ConvertDataToString(_WSPeer.GetPeer(1).GetPacket());        
         string chatMessage = "Client: " + recievedMessage +"\n";
@@ -102,8 +104,14 @@ public class Client : Control
             msg msg2 = new msg(Nachricht.name,_clientId,0,_playerName);
             SendData(JsonConvert.SerializeObject(msg2));
         }
+        else if(Message.state== Nachricht.PeerToPeerConnectionEstablished)
+        {
+            // diese Nachricht wird nur an Clients gesendet, welche bereits eine peer to peer connection habne, der WebSocketClient kann gelöscht werden
+            StopConnection();
+            QueueFree();
+        }
 
-        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }
@@ -112,11 +120,6 @@ public class Client : Control
     private String ConvertDataToString(byte[] packet)
     {
         return Encoding.UTF8.GetString(packet);
-    }
-
-    public void _on_Client_starten_pressed()
-    {
-        ShowClientPopup();
     }
 
     public string playerName
@@ -130,23 +133,6 @@ public class Client : Control
         get{ return _clientId; }
     }
 
-    private void ShowClientPopup()
-    {
-        Popup popupInstance = (Popup)_clientFormPopup.Instance();
-        GetTree().Root.AddChild(popupInstance);
-        popupInstance.PopupCentered();
-        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
-        LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
-        LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
-        portInput.Text = "8915";
-        ipInput.Text = "127.0.0.1";
-        playername.Text = "Test1";
-
-
-        popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );
-
-    }
-
     public void OnPopupConfirmed(string ip, int port, string playerName)
     {
         GD.Print("Portnummer: " + port);
@@ -155,51 +141,31 @@ public class Client : Control
         _playerName=playerName;
     }
 
-    public void ConnectToServer(String ip)
+    public Error ConnectToServer(String ip)
     {
-        Error error = _WSPeer.ConnectToUrl(ip);
-        if(error == Error.Ok && true==false)
+        if(_WSPeer.ConnectToUrl(ip) == Error.Ok)
         {
             GD.Print("Client: Client gestartet \n--------------------------------------------------");
-            // wenn erfolgreich kann zur lobby gewechselt werden
-            // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
-            PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
-            Lobby lobbyInstance = (Lobby)lobby.Instance();
-            Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
-            vb.RemoveChild(this);
-            lobbyInstance.AddChild(this);
-            vb.GetTree().Root.AddChild(lobbyInstance);
-
-        vb.QueueFree();
+            return Error.Ok;
         }
         else
         {
-            GD.Print("Client: Fehler beim verbinden: " + error.ToString());
+            GD.Print("Client: Fehler beim verbinden: ");
             ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
             ErrorPopup.Init("Verbindungsfehler","Der Client kann sich nicht auf die Adresse/URL " + ip + " verbinden");
             GetTree().Root.AddChild(ErrorPopup);
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
+            return Error.Failed;
         }
     }
 
 
     public void SendData(string Data)
     {
-        if(_sendTimer.TimeLeft==0)
-        {
-
             _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
             GD.Print("Client: Nachricht gesendet: " + Data);
             _sendTimer.Start();
-        }
-        else
-        {
-            // Zu viele daten auf einmal, in Wartebuffer schreiben
-            _DataSendBuffer.Add(Data);
-            //Geht nicht, Client wartet bis der Timer 0 ist, Server kommt solang nicht zum Zug
-            // bessert sich wenn man alles in ein Skript packt denk ich
-        }
     }
 
     private void SendDataFromBuffer()
@@ -223,6 +189,7 @@ public class Client : Control
 
     public void StopConnection()
     {
+        _DisconnectFromHost = true;
         _WSPeer.DisconnectFromHost();
     }
 

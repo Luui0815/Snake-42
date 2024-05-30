@@ -4,7 +4,7 @@ using System;
 public class ServerFormPopup : Popup
 {
     [Signal]
-    public delegate void Confirmed(int port);
+    public delegate void Confirmed(string ip, int port, string Spielername);
 
     private LineEdit portInput;
 
@@ -18,8 +18,8 @@ public class ServerFormPopup : Popup
         string port = portInput.Text;
         if (ValidatePort(port))
         {
-            EmitSignal(nameof(Confirmed), int.Parse(port));
-            Hide();
+            EmitSignal(nameof(Confirmed),0, int.Parse(port),"");
+            QueueFree();
         }
     }
 
