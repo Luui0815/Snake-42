@@ -8,6 +8,11 @@ public partial class GlobalVariables : Node
     public Lobby Lobby { get; set; }
     public PackedScene ConfirmationDialog { get; set; }
 
+    //wichtig wenn RPC calls nur auf bestimmten teilnehmer ausgeführt werden soo
+    //wird vor dem ersten rpc festgelegt
+    public int RPCSelfId {get;set;}
+    public int RPCRoomMateId {get;set;}
+
     public override void _Ready()
     {
         Instance = this;

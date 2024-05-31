@@ -77,6 +77,7 @@ public class Client : Control
 
     private void BackToMainMenu()
     {
+        StopConnection();
         QueueFree();
         GetTree().ChangeScene("res://Szenen/Hauptmenü.tscn");
     }

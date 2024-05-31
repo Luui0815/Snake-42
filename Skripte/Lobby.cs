@@ -285,6 +285,8 @@ public class Lobby : Control
         {
             _FirstRPCCallEcecuted = true;
             GlobalVariables.Instance.Multiplayer.NetworkPeer = WebRTCMultiplayer;
+            GlobalVariables.Instance.RPCSelfId = _client.id;
+            GlobalVariables.Instance.RPCRoomMateId = FindOtherRoomMate();
             Rpc(nameof(SwitchToLevelSelectionMenu));
         }
         
