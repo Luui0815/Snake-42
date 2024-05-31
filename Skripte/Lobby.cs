@@ -85,7 +85,7 @@ public class Lobby : Control
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         // Signale zur Verbindungsabbruch behandeln
-        WebRTCMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.Instance.WebRTCConnectionFailed));
+        WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.Instance.WebRTCConnectionFailed));
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
     }

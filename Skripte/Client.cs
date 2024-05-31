@@ -104,12 +104,13 @@ public class Client : Control
             msg msg2 = new msg(Nachricht.name,_clientId,0,_playerName);
             SendData(JsonConvert.SerializeObject(msg2));
         }
+        /*
         else if(Message.state== Nachricht.PeerToPeerConnectionEstablished)
         {
             // diese Nachricht wird nur an Clients gesendet, welche bereits eine peer to peer connection habne, der WebSocketClient kann gelöscht werden
             StopConnection();
             QueueFree();
-        }
+        }*/
 
         if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed)// hier weitere Bedingungen hinzufügen
         {
