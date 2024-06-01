@@ -201,6 +201,8 @@ public class Server : Control
             string PlayerTwoName = _ConnectedClients.Find(x => x.GetId==Convert.ToInt32(Message.data)).Name;
             //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Message.publisher,"")),Message.publisher);
             //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Convert.ToInt32(Message.data),"")),Convert.ToInt32(Message.data));
+            _WSPeer.DisconnectPeer(Message.publisher);
+            _WSPeer.DisconnectPeer(Convert.ToInt32(Message.data));
             _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Message.publisher));
             _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Convert.ToInt32(Message.data)));
             SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Die Spieler " + PlayerOneName+ " und " + PlayerTwoName + " habben eine runde gestartet")));
