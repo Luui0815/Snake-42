@@ -321,8 +321,8 @@ public class Lobby : Control
         {
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,_client.id,0,Convert.ToString(FindOtherRoomMate()))));
         }
+        GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
         _client.QueueFree();
-        //_client wird durch Server gelöscht
         GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
         QueueFree();
     }

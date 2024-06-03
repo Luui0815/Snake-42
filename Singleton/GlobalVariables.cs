@@ -12,6 +12,7 @@ public partial class GlobalVariables : Node
     //wird vor dem ersten rpc festgelegt
     public int RPCSelfId {get;set;}
     public int RPCRoomMateId {get;set;}
+    public WebRTCMultiplayer WebRTC {get; set; } 
 
     public override void _Ready()
     {
@@ -48,5 +49,10 @@ public partial class GlobalVariables : Node
             GetTree().Root.AddChild(Lobby);
             Lobby.Show();
         }
+    }
+    public override void _Process(float delta)
+    {
+        if(WebRTC != null)
+            WebRTC.Poll();
     }
 }
