@@ -1,4 +1,7 @@
 https://docs.godotengine.org/de/4.x/tutorials/networking/websocket.html
+Snake:
+https://www.youtube.com/watch?v=-qyDd5XiMsU&ab_channel=vzvz
+https://www.bing.com/videos/riverview/relatedvideo?q=snake+cmooth+animation+godot&mid=05D0B40E823318868FDA05D0B40E823318868FDA&FORM=VIRE
 
 Client Sercer und Verbindungseinstellungen irgendwie zentrieren, auf eine Node packen, da vieles doppelt
 Verbindungsabbrüche bei Websocket Server un WebRTC Verbindung behandeln

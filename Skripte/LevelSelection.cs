@@ -34,8 +34,6 @@ public class LevelSelection : Control
 
     private void SwitchSelectedLevel(int LevelNr)
     {
-        EmitSignal(nameof(LevelSelected));
-
         if(SelectedLevel != LevelNr + 1)
         {
             for (int i = 0; i <= 2; i++)
@@ -49,6 +47,7 @@ public class LevelSelection : Control
         }
         else
             _CheckBoxes[LevelNr].Pressed = true;
+        EmitSignal(nameof(LevelSelected));
     }
 
     public CheckBox[] CheckBoxes
