@@ -97,6 +97,10 @@ margin_right = 961.0
 margin_bottom = 653.0
 text = "Lobby verlassen"
 
+[node name="Label" type="Label" parent="."]
+margin_right = 296.0
+margin_bottom = 79.0
+
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
 [connection signal="pressed" from="RaumVerlassen" to="." method="_on_RaumVerlassen_pressed"]

@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Godot.Collections;
 
 public class LevelSelectionMenu : Control
 {
@@ -19,6 +20,9 @@ public class LevelSelectionMenu : Control
 
         //Standartmäßig Level1 gegeneinader anwählen
         _levelSelectionGegeneinander.CheckBoxes[0].Pressed = true;
+
+        CustomMultiplayer = GlobalVariables.Instance.Multiplayer;
+        CustomMultiplayer.Connect("network_peer_packet",this,"test");
     }
 
     private void LevelSelectionGegeneinanderPressed()
@@ -29,7 +33,9 @@ public class LevelSelectionMenu : Control
         position.y += 20;
         _Spieler1Pfeil.Position = position; 
         //Spieler 2 Pfeil auf Gegenspieler Computer setzen, dort ist man selber ja Spieler 2
-        RpcId(GlobalVariables.Instance.RPCRoomMateId,nameof(SetzeSpieler2PfeilPosition),position);
+        int[] test= CustomMultiplayer.GetNetworkConnectedPeers();
+        int test2 = CustomMultiplayer.GetNetworkUniqueId();
+        Rpc(nameof(SetzeSpieler2PfeilPosition),position);
         _levelSelectionMiteinander.UncheckLevelSelection();
     }
 
@@ -83,5 +89,27 @@ public class LevelSelectionMenu : Control
                 return 1;
         }
         
+    }
+
+    private void _on_Button_pressed()
+    {
+        Rpc("Count");
+        bool t = CustomMultiplayer.HasNetworkPeer();
+        bool x = CustomMultiplayer.IsNetworkServer();
+        CustomMultiplayer.SendBytes("Hallo".ToUTF8());
+    }
+
+    [Sync]
+    private void Count()
+    {
+        int test = CustomMultiplayer.GetRpcSenderId();
+        GD.Print(test);
+        GetNode<Label>("Label").Text =  Convert.ToString(Convert.ToInt32(GetNode<Label>("Label").Text) + 1);
+    }
+
+    private void test(int id, byte[] packet )
+    {
+        string s = packet.GetStringFromUTF8();
+        GD.Print(s);
     }
 }

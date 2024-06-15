@@ -48,3 +48,21 @@ SelectedLevel = 1
 position = Vector2( 67.0001, 205 )
 scale = Vector2( 0.15, 0.15 )
 texture = ExtResource( 2 )
+
+[node name="Button" type="Button" parent="."]
+margin_left = 507.0
+margin_top = 414.0
+margin_right = 715.0
+margin_bottom = 501.0
+text = "RPC Test"
+
+[node name="Label" type="Label" parent="."]
+margin_left = 475.0
+margin_top = 539.0
+margin_right = 760.0
+margin_bottom = 604.0
+text = "0"
+align = 1
+valign = 1
+
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
