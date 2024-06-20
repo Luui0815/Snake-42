@@ -118,6 +118,9 @@ public class Lobby : Control
         if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _FirstRPCCallEcecuted == false)
         {
             _FirstRPCCallEcecuted=true;
+            GlobalVariables.Instance.RPCRoomMateId = FindOtherRoomMate() - 5;
+            GlobalVariables.Instance.RPCSelfId = _client.id - 5;
+            //WebRTCMultiplayer.SetTargetPeer(FindOtherRoomMate());
             CustomMultiplayer.NetworkPeer= WebRTCMultiplayer;
             Rpc("SwitchToLevelSelectionMenu");
         }
@@ -158,9 +161,9 @@ public class Lobby : Control
         else if(state == Nachricht.checkIn)
         {
             // erst jetzt weiß der Client seine richtige ID und kann WebRTC aufbauen
-            Error eee= WebRTCMultiplayer.Initialize(_client.id,false);
+            Error eee= WebRTCMultiplayer.Initialize(_client.id - 5,false);
             WebRTCPeerConnection.ConnectionState i = WebRTCPeer.GetConnectionState();
-            eee=WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+            eee=WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id - 5);
         }
     }
 
