@@ -62,12 +62,13 @@ public class Snake : Node2D
 
     private bool IsGameOver()
     {
-        if (SegmentPositions[0].x < 32 || SegmentPositions[0].x > _windowBorder.x - GridSize.x)
+        GD.Print($"{SegmentPositions[SegmentPositions.Count-1].x}, {SegmentPositions[SegmentPositions.Count - 1].y}");
+        if (SegmentPositions[0].x < 32 || SegmentPositions[0].x > 592)
         {
             GD.Print("Game Over. Schlange hat linkes/rechtes Ende erreicht");
             return true;
         }
-        else if (SegmentPositions[0].y < 32 || SegmentPositions[0].y > _windowBorder.y - GridSize.y)
+        else if (SegmentPositions[0].y < 32 || SegmentPositions[0].y > 320)
         {
             GD.Print("Game Over. Schlange hat oberes/unteres Ende erreicht");
             return true;
@@ -92,7 +93,6 @@ public class Snake : Node2D
         SegmentPositions.Insert(0, Position);
         _lastPosition = SegmentPositions[SegmentPositions.Count - 1];
         SegmentPositions.RemoveAt(SegmentPositions.Count - 1);
-        GD.Print(SegmentPositions.ToString());
         Update();
     }
 
