@@ -6,19 +6,19 @@ using System.Xml.Linq;
 public class Snake : Node2D
 {
     private Vector2 _direction = Vector2.Right;
-    private Vector2 _windowBorder;
     private Vector2 _lastPosition;
     private Timer _moveTimer;
-    private Fruit _fruit;    
+    private Fruit _fruit;
+    private GameController _controller;
     
     public Vector2 GridSize = new Vector2(16, 16);
     public List<Vector2> SegmentPositions = new List<Vector2>();
 
     public override void _Ready()
     {
-        _windowBorder = OS.WindowSize;
-        SegmentPositions.Add(Position);
+        SegmentPositions.Add(GlobalPosition);
         _fruit = GetParent().GetNode<Fruit>("Fruit");
+        _controller = GetParent<GameController>();
         _moveTimer = GetNode<Timer>("MoveTimer");
         _moveTimer.WaitTime = 0.5f;
         _moveTimer.Connect("timeout", this, nameof(OnTimerTimeout));
@@ -62,16 +62,13 @@ public class Snake : Node2D
 
     private bool IsGameOver()
     {
-        GD.Print($"{SegmentPositions[SegmentPositions.Count-1].x}, {SegmentPositions[SegmentPositions.Count - 1].y}");
-        if (SegmentPositions[0].x < 32 || SegmentPositions[0].x > 592)
+        foreach (var obstacle in _controller.obstacles)
         {
-            GD.Print("Game Over. Schlange hat linkes/rechtes Ende erreicht");
-            return true;
-        }
-        else if (SegmentPositions[0].y < 32 || SegmentPositions[0].y > 320)
-        {
-            GD.Print("Game Over. Schlange hat oberes/unteres Ende erreicht");
-            return true;
+            if (GlobalPosition == obstacle.RectGlobalPosition)
+            {
+                GD.Print("Game Over. Schlange hat ein Hindernis getroffen!");
+                return true;
+            }
         }
         if (SegmentPositions.Count >= 3)
         {
@@ -89,8 +86,8 @@ public class Snake : Node2D
 
     private void MoveSnake()
     {
-        Position += _direction * GridSize;
-        SegmentPositions.Insert(0, Position);
+        GlobalPosition += _direction * GridSize;
+        SegmentPositions.Insert(0, GlobalPosition);
         _lastPosition = SegmentPositions[SegmentPositions.Count - 1];
         SegmentPositions.RemoveAt(SegmentPositions.Count - 1);
         Update();
@@ -98,7 +95,7 @@ public class Snake : Node2D
 
     private bool IsFruitCollision()
     {
-        return SegmentPositions[0]*2 == _fruit.Position;
+        return SegmentPositions[0]*2 == _fruit.GlobalPosition;
     }
 
     private void Grow()
