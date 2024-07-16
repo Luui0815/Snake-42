@@ -12,11 +12,22 @@ anchor_left = 0.042
 anchor_top = 0.132
 anchor_right = 0.229
 anchor_bottom = 0.22
-margin_left = 381.992
-margin_top = 188.8
-margin_right = 382.504
-margin_bottom = 189.0
+margin_left = 522.24
+margin_top = 191.96
+margin_right = 522.752
+margin_bottom = 192.16
 text = "Mehrspieler"
+
+[node name="Einzelspieler" type="Button" parent="."]
+anchor_left = 0.042
+anchor_top = 0.132
+anchor_right = 0.229
+anchor_bottom = 0.22
+margin_left = 206.24
+margin_top = 191.96
+margin_right = 206.752
+margin_bottom = 192.16
+text = "Einzelspieler"
 
 [node name="Label" type="Label" parent="."]
 margin_left = 340.0
@@ -26,3 +37,4 @@ margin_bottom = 171.0
 text = "Das wunderbare und einzigartige Snake42 - Snake fo(u)r two"
 
 [connection signal="pressed" from="Verbindung erstellen" to="." method="_on_Verbindung_erstellen_pressed"]
+[connection signal="pressed" from="Einzelspieler" to="." method="_on_Einzelspieler_pressed"]
