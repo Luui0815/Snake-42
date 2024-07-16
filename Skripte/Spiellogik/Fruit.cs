@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 public class Fruit : Node2D
@@ -16,36 +17,44 @@ public class Fruit : Node2D
 
     public void RandomizePosition()
     {
-        Vector2 position = GetRandomPos();
-        foreach(var obstacle in _controller.obstacles)
+        Vector2 position;
+        Random random = new Random();
+
+        do
         {
-            if(position == obstacle.RectGlobalPosition)
-            {
-                position = GetRandomPos();
-                continue;
-            }
+            position = GetRandomPos(random);
         }
-        foreach (var segmentPosition in _snake.SegmentPositions)
-        {
-            if (segmentPosition == position)
-            {
-                position = GetRandomPos();
-                continue;
-            }
-            if (segmentPosition == _snake.SegmentPositions[_snake.SegmentPositions.Count - 1])
-            {
-                this.GlobalPosition = position;
-                GD.Print("Frucht Position: " + position);
-            }
-        }
+        while (IsPositionOccupied(position));
+
+        GlobalPosition = position;
+        GD.Print("Frucht Position: " + position);
     }
 
-    private Vector2 GetRandomPos()
+    private Vector2 GetRandomPos(Random random)
     {
-        Random random = new Random();
-        float xPos = random.Next(8, 33) * 32;
-        float yPos = random.Next(6, 20) * 32;
-
+        float xPos = random.Next(0, 40) * 32;
+        float yPos = random.Next(0, 23) * 32;
         return new Vector2(xPos, yPos);
+    }
+
+    public bool IsPositionOccupied(Vector2 position)
+    {
+        foreach (var obstacle in _controller.Obstacles)
+        {
+            if (obstacle.RectGlobalPosition == position)
+            {
+                return true;
+            }
+        }
+
+        foreach (var segment in _snake.SegmentPositions)
+        {
+            if (segment == position)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

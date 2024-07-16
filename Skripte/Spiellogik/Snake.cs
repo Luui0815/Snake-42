@@ -62,7 +62,7 @@ public class Snake : Node2D
 
     private bool IsGameOver()
     {
-        foreach (var obstacle in _controller.obstacles)
+        foreach (var obstacle in _controller.Obstacles)
         {
             if (GlobalPosition == obstacle.RectGlobalPosition)
             {

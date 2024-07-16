@@ -9,8 +9,10 @@ public class GameController : Node2D
     private Fruit _fruit;
     private int _cellSize = 32;
     private int[,] _gameField;
+    private List<ColorRect> _obstacles = new List<ColorRect>();
 
-    public List<ColorRect> obstacles = new List<ColorRect>();
+    public int[,] GameField { get { return _gameField; } }
+    public List<ColorRect> Obstacles{ get{return _obstacles; } }
 
     public override void _Ready()
     {
@@ -80,7 +82,7 @@ public class GameController : Node2D
                     obstacle.Color = new Color(0, 0, 0, 0); 
                     obstacle.RectSize = new Vector2(32, 32);
                     obstacle.RectGlobalPosition = new Vector2(y * 16, x * 16);
-                    obstacles.Add(obstacle);
+                    Obstacles.Add(obstacle);
                     AddChild(obstacle);
                 }
             }
