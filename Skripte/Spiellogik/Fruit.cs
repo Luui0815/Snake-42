@@ -5,13 +5,13 @@ using System.Xml.Linq;
 
 public class Fruit : Node2D
 {
-    private Snake _snake;
+    private Snake2 _snake;
     private GameController _controller;
     private int _cellSize = 32;
 
     public override void _Ready()
     {
-        _snake = GetParent().GetNode<Snake>("Snake");
+        _snake = GetParent().GetNode<Snake2>("Snake");
         _controller = GetParent<GameController>();
     }
 
@@ -26,7 +26,7 @@ public class Fruit : Node2D
         }
         while (IsPositionOccupied(position));
 
-        GlobalPosition = position;
+        Position = position + new Vector2(16,16);
         GD.Print("Frucht Position: " + position);
     }
 
@@ -57,7 +57,7 @@ public class Fruit : Node2D
             return true;
         }
 
-        foreach (var segment in _snake.SegmentPositions)
+        foreach (var segment in _snake.Points)
         {
             if (segment == position)
             {

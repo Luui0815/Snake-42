@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=1]
-[ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Szenen/Game Elements/Fruit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
+[ext_resource path="res://Szenen/Game Elements/Snake2.tscn" type="PackedScene" id=5]
 
 [sub_resource type="ConvexPolygonShape2D" id=1]
 points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
@@ -244,10 +244,9 @@ cell_size = Vector2( 32, 32 )
 format = 1
 tile_data = PoolIntArray( 196615, 0, 0, 196617, 0, 0, 196634, 3, 0, 262155, 2, 0, 262158, 3, 0, 262161, 2, 0, 262166, 0, 0, 327704, 1, 0, 327712, 2, 0, 393233, 3, 0, 393234, 2, 0, 524301, 3, 0, 524312, 1, 0, 589844, 2, 0, 655371, 2, 0, 655377, 3, 0, 655386, 3, 0, 720917, 3, 0, 720926, 0, 0, 786450, 0, 0, 786458, 0, 0, 786462, 2, 0, 851978, 1, 0, 983048, 2, 0, 1048590, 2, 0, 1048601, 3, 0, 1114129, 3, 0, 1114135, 2, 0, 1179670, 0, 0, 1179678, 3, 0, 1245197, 0, 0 )
 
-[node name="Snake" parent="." instance=ExtResource( 2 )]
-position = Vector2( 320, 160 )
-z_index = 1
-
 [node name="Fruit" parent="." instance=ExtResource( 3 )]
 scale = Vector2( 0.6, 0.6 )
+z_index = 1
+
+[node name="Snake" parent="." instance=ExtResource( 5 )]
 z_index = 1

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 public class GameController : Node2D
 {
-    private Snake _snake;
+    private Snake2 _snake;
     private Fruit _fruit;
 
     private int _cellSize = 32;
@@ -17,7 +17,7 @@ public class GameController : Node2D
 
     public override void _Ready()
     {
-        _snake = GetNode<Snake>("Snake");
+        _snake = GetNode<Snake2>("Snake");
         _fruit = GetNode<Fruit>("Fruit");
 
         string levelName = GetTree().CurrentScene.Name;
@@ -85,7 +85,7 @@ public class GameController : Node2D
                     var obstacle = new ColorRect();
                     obstacle.Color = new Color(0, 0, 0, 0); 
                     obstacle.RectSize = new Vector2(32, 32);
-                    obstacle.RectGlobalPosition = new Vector2(y * 16, x * 16);
+                    obstacle.RectPosition = new Vector2((y*32)+16, (x*32)+16);
                     Obstacles.Add(obstacle);
                     AddChild(obstacle);
                 }

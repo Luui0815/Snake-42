@@ -94,8 +94,8 @@ public class Snake : Node2D
         }
         GlobalPosition += _direction * GridSize;
         SegmentPositions.Insert(0, GlobalPosition);
-        _lastPosition = SegmentPositions[SegmentPositions.Count - 1];
-        SegmentPositions.RemoveAt(SegmentPositions.Count - 1);
+        _lastPosition = SegmentPositions[SegmentPositions.Count-1];
+        SegmentPositions.RemoveAt(SegmentPositions.Count-1);
         Update();
 
         foreach(var segment in SegmentPositions)
