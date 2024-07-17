@@ -7,6 +7,7 @@ public class GameController : Node2D
 {
     private Snake _snake;
     private Fruit _fruit;
+
     private int _cellSize = 32;
     private int[,] _gameField;
     private List<ColorRect> _obstacles = new List<ColorRect>();
@@ -18,17 +19,19 @@ public class GameController : Node2D
     {
         _snake = GetNode<Snake>("Snake");
         _fruit = GetNode<Fruit>("Fruit");
+
         string levelName = GetTree().CurrentScene.Name;
         switch (levelName)
         {
             case "Level1":
                 CreateGameField(1);
-                DrawObstacles();
+                CreateObstacles();
                 break;
             default:
                 GD.Print("Unbekanntes Level: " + levelName);
                 break;
         }
+        _fruit.RandomizePosition();
     }
 
     private void CreateGameField(int levelNr)
@@ -62,6 +65,7 @@ public class GameController : Node2D
                     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
                 };
+                GD.Print("Spielfeld 1 initialisiert");
                 break;
             case 2:
                 break;
@@ -70,7 +74,7 @@ public class GameController : Node2D
         }
     }
 
-    private void DrawObstacles()
+    private void CreateObstacles()
     {
         for (int y = 0; y < _gameField.GetLength(1); y++)
         {

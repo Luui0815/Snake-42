@@ -7,12 +7,12 @@ public class Fruit : Node2D
 {
     private Snake _snake;
     private GameController _controller;
+    private int _cellSize = 32;
 
     public override void _Ready()
     {
         _snake = GetParent().GetNode<Snake>("Snake");
         _controller = GetParent<GameController>();
-        RandomizePosition();
     }
 
     public void RandomizePosition()
@@ -32,25 +32,36 @@ public class Fruit : Node2D
 
     private Vector2 GetRandomPos(Random random)
     {
-        float xPos = random.Next(0, 40) * 32;
-        float yPos = random.Next(0, 23) * 32;
+        int xMax = _controller.GameField.GetLength(1) - 1;
+        int yMax = _controller.GameField.GetLength(0) - 1;
+
+        float xPos = random.Next(7, xMax) * _cellSize;
+        float yPos = random.Next(3, yMax) * _cellSize;
+
         return new Vector2(xPos, yPos);
     }
 
     public bool IsPositionOccupied(Vector2 position)
     {
-        foreach (var obstacle in _controller.Obstacles)
+        int x = (int)(position.x / _cellSize);
+        int y = (int)(position.y / _cellSize);
+
+        if (x < 0 || x >= _controller.GameField.GetLength(1) || y < 0 || y >= _controller.GameField.GetLength(0))
         {
-            if (obstacle.RectGlobalPosition == position)
-            {
-                return true;
-            }
+            return true;
+        }
+
+        if (_controller.GameField[y, x] == 1)
+        {
+            GD.Print("Position ist besetzt");
+            return true;
         }
 
         foreach (var segment in _snake.SegmentPositions)
         {
             if (segment == position)
             {
+                GD.Print("Position ist ein Schlangenteil");
                 return true;
             }
         }

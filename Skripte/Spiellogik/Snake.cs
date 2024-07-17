@@ -6,6 +6,7 @@ using System.Xml.Linq;
 public class Snake : Node2D
 {
     private Vector2 _direction = Vector2.Right;
+    private Vector2 _nextDirection = Vector2.Right;
     private Vector2 _lastPosition;
     private Timer _moveTimer;
     private Fruit _fruit;
@@ -17,6 +18,7 @@ public class Snake : Node2D
     public override void _Ready()
     {
         SegmentPositions.Add(GlobalPosition);
+        SegmentPositions.Add(GlobalPosition - _direction*GridSize*2);
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _controller = GetParent<GameController>();
         _moveTimer = GetNode<Timer>("MoveTimer");
@@ -26,10 +28,10 @@ public class Snake : Node2D
 
     public override void _Process(float delta)
     {
-        if(Input.IsActionPressed("ui_up") && _direction!= Vector2.Down) _direction = Vector2.Up;
-        if(Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _direction = Vector2.Right;
-        if(Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _direction = Vector2.Left;
-        if(Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _direction = Vector2.Down;
+        if(Input.IsActionPressed("ui_up") && _direction!= Vector2.Down) _nextDirection = Vector2.Up;
+        if(Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _nextDirection = Vector2.Right;
+        if(Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _nextDirection = Vector2.Left;
+        if(Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _nextDirection = Vector2.Down;
     }
 
     public override void _Draw()
@@ -86,11 +88,21 @@ public class Snake : Node2D
 
     private void MoveSnake()
     {
+        if ((_nextDirection + _direction).Length() != 0)
+        {
+            _direction = _nextDirection;
+        }
         GlobalPosition += _direction * GridSize;
         SegmentPositions.Insert(0, GlobalPosition);
         _lastPosition = SegmentPositions[SegmentPositions.Count - 1];
         SegmentPositions.RemoveAt(SegmentPositions.Count - 1);
         Update();
+
+        foreach(var segment in SegmentPositions)
+        {
+            GD.Print($"{segment.x}, {segment.y}");
+        }
+        GD.Print("--------------------------------");
     }
 
     private bool IsFruitCollision()
@@ -105,6 +117,6 @@ public class Snake : Node2D
 
     private void IncreaseSpeed()
     {
-        _moveTimer.WaitTime = Math.Max(0.1f, _moveTimer.WaitTime - 0.05f);
+        _moveTimer.WaitTime = Math.Max(0.15f, _moveTimer.WaitTime - 0.04f);
     }
 }
