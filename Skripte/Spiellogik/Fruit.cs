@@ -5,13 +5,13 @@ using System.Xml.Linq;
 
 public class Fruit : Node2D
 {
-    private Snake2 _snake;
+    private Snake _snake;
     private GameController _controller;
     private int _cellSize = 32;
 
     public override void _Ready()
     {
-        _snake = GetParent().GetNode<Snake2>("Snake");
+        _snake = GetParent().GetNode<Snake>("Snake");
         _controller = GetParent<GameController>();
     }
 
@@ -53,7 +53,6 @@ public class Fruit : Node2D
 
         if (_controller.GameField[y, x] == 1)
         {
-            GD.Print("Position ist besetzt");
             return true;
         }
 
@@ -61,7 +60,6 @@ public class Fruit : Node2D
         {
             if (segment == position)
             {
-                GD.Print("Position ist ein Schlangenteil");
                 return true;
             }
         }

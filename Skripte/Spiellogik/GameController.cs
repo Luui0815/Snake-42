@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 public class GameController : Node2D
 {
-    private Snake2 _snake;
+    private Snake _snake;
     private Fruit _fruit;
 
     private int _cellSize = 32;
@@ -17,7 +17,7 @@ public class GameController : Node2D
 
     public override void _Ready()
     {
-        _snake = GetNode<Snake2>("Snake");
+        _snake = GetNode<Snake>("Snake");
         _fruit = GetNode<Fruit>("Fruit");
 
         string levelName = GetTree().CurrentScene.Name;

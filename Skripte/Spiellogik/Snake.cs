@@ -1,49 +1,78 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Linq;
 
 public class Snake : Node2D
 {
     private Vector2 _direction = Vector2.Right;
-    private Vector2 _nextDirection = Vector2.Right;
-    private Vector2 _lastPosition;
-    private Timer _moveTimer;
+    private Vector2 _directionCache;
+    private Vector2[] _points;
+    private Line2D _body;
+    private Node2D _face;
+    private Tween _tween;
     private Fruit _fruit;
     private GameController _controller;
-    
-    public Vector2 GridSize = new Vector2(16, 16);
-    public List<Vector2> SegmentPositions = new List<Vector2>();
+
+    private int _gridSize = 32;
+    private float _moveDelay = 0.45f;
+    private bool _eating = false;
+
+    public Vector2[] Points { get { return _points; } }
 
     public override void _Ready()
     {
-        SegmentPositions.Add(GlobalPosition);
-        SegmentPositions.Add(GlobalPosition - _direction*GridSize*2);
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _controller = GetParent<GameController>();
-        _moveTimer = GetNode<Timer>("MoveTimer");
-        _moveTimer.WaitTime = 0.5f;
-        _moveTimer.Connect("timeout", this, nameof(OnTimerTimeout));
+
+        _body = GetNode<Line2D>("Body");
+        _points = _body.Points;
+        _face = GetNode<Node2D>("Face");
+        _tween = GetNode<Tween>("Tween");
+
+        _directionCache = _direction;
+        MoveSnake();
     }
 
-    public override void _Process(float delta)
+    public override void _Input(InputEvent @event)
     {
-        if(Input.IsActionPressed("ui_up") && _direction!= Vector2.Down) _nextDirection = Vector2.Up;
-        if(Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _nextDirection = Vector2.Right;
-        if(Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _nextDirection = Vector2.Left;
-        if(Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _nextDirection = Vector2.Down;
-    }
-
-    public override void _Draw()
-    {
-        foreach (var segment in SegmentPositions)
+        if (@event.IsPressed())
         {
-            DrawRect(new Rect2(segment, new Vector2(32, 32)), Colors.Black);
+            if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) _directionCache = Vector2.Up;
+            if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _directionCache = Vector2.Right;
+            if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _directionCache = Vector2.Left;
+            if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _directionCache = Vector2.Down;
         }
     }
 
-    private void OnTimerTimeout()
+    private void MoveSnake()
     {
+        _direction = _directionCache;
+        _body.AddPoint(_points[0] + _direction * _gridSize, 0);
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, _moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _tween.Start();
+    }
+
+    private void MoveTween(float argv)
+    {
+        Vector2 newPos = _points[0] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
+        _body.SetPointPosition(0, newPos);
+
+        if (!_eating)
+            _body.SetPointPosition(_body.Points.Length - 1, _points[_points.Length - 1] + (_points[_points.Length - 2] - _points[_points.Length - 1]) * argv);
+        
+        _face.Position = _body.Points[0];
+        _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
+    }
+
+    private void _on_Tween_tween_all_completed()
+    {
+        if(!_eating)
+            _body.RemovePoint(_points.Length);
+
+        _points = _body.Points;
+        CheckFruitCollision();
+
         if (IsGameOver())
         {
             GetTree().Paused = true;
@@ -52,31 +81,43 @@ public class Snake : Node2D
         {
             MoveSnake();
         }
+    }
 
-        if (IsFruitCollision())
+    private void CheckFruitCollision()
+    {
+        if (_body.Points[0] == _fruit.Position)
         {
             GD.Print("Frucht gefressen!");
             _fruit.RandomizePosition();
-            Grow();
             IncreaseSpeed();
+            _eating = true;
         }
+        else
+        {
+            _eating = false;
+        }
+    }
+
+    private void IncreaseSpeed()
+    {
+        _moveDelay = Math.Max(0.08f, _moveDelay - 0.05f);
     }
 
     private bool IsGameOver()
     {
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (GlobalPosition == obstacle.RectGlobalPosition)
+            if (_body.Points[0] == obstacle.RectGlobalPosition)
             {
                 GD.Print("Game Over. Schlange hat ein Hindernis getroffen!");
                 return true;
             }
         }
-        if (SegmentPositions.Count >= 3)
+        if (_points.Length >= 3)
         {
-            for (int i = 1; i < SegmentPositions.Count; i++)
+            for (int i = 1; i < _points.Length; i++)
             {
-                if (SegmentPositions[0] == SegmentPositions[i])
+                if (_points[0] == _points[i])
                 {
                     GD.Print("Game Over. Schlange hat sich selbst gefressen.");
                     return true;
@@ -84,39 +125,5 @@ public class Snake : Node2D
             }
         }
         return false;
-    }
-
-    private void MoveSnake()
-    {
-        if ((_nextDirection + _direction).Length() != 0)
-        {
-            _direction = _nextDirection;
-        }
-        GlobalPosition += _direction * GridSize;
-        SegmentPositions.Insert(0, GlobalPosition);
-        _lastPosition = SegmentPositions[SegmentPositions.Count-1];
-        SegmentPositions.RemoveAt(SegmentPositions.Count-1);
-        Update();
-
-        foreach(var segment in SegmentPositions)
-        {
-            GD.Print($"{segment.x}, {segment.y}");
-        }
-        GD.Print("--------------------------------");
-    }
-
-    private bool IsFruitCollision()
-    {
-        return SegmentPositions[0]*2 == _fruit.GlobalPosition;
-    }
-
-    private void Grow()
-    {
-        SegmentPositions.Add(_lastPosition);
-    }
-
-    private void IncreaseSpeed()
-    {
-        _moveTimer.WaitTime = Math.Max(0.15f, _moveTimer.WaitTime - 0.04f);
     }
 }
