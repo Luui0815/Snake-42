@@ -5,11 +5,16 @@ using System.Runtime.CompilerServices;
 
 public class GameController : Node2D
 {
+    private HighScoreManager _highScoreManager;
     private Snake _snake;
     private Fruit _fruit;
+    private PackedScene _gameOverScreen;
+    private Label _highScoreLabel, _scoreLabel;
 
     private int _cellSize = 32;
+    private int _score = 0;
     private int[,] _gameField;
+    string _levelName;
     private List<ColorRect> _obstacles = new List<ColorRect>();
 
     public int[,] GameField { get { return _gameField; } }
@@ -19,19 +24,26 @@ public class GameController : Node2D
     {
         _snake = GetNode<Snake>("Snake");
         _fruit = GetNode<Fruit>("Fruit");
+        _highScoreManager = new HighScoreManager();
+        _gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
 
-        string levelName = GetTree().CurrentScene.Name;
-        switch (levelName)
+        _highScoreLabel = GetNode<Label>("ScoreLabels/HighScore");
+        _scoreLabel = GetNode<Label>("ScoreLabels/Score");
+        _scoreLabel.Text = "Punktestand: " + _score;
+
+        _levelName = GetTree().CurrentScene.Name;
+        switch (_levelName)
         {
             case "Level1":
                 CreateGameField(1);
                 CreateObstacles();
                 break;
             default:
-                GD.Print("Unbekanntes Level: " + levelName);
+                GD.Print("Unbekanntes Level: " + _levelName);
                 break;
         }
         _fruit.RandomizePosition();
+        UpdateHighScoreDisplay();
     }
 
     private void CreateGameField(int levelNr)
@@ -91,5 +103,29 @@ public class GameController : Node2D
                 }
             }
         }
+    }
+
+    public void UpdateScore()
+    {
+        _score++;
+        _scoreLabel.Text = "Punktestand: " + _score.ToString();
+    }
+
+    private void UpdateHighScoreDisplay()
+    {
+        int highScore = _highScoreManager.GetHighScore(_levelName);
+        _highScoreLabel.Text = "HighScore: " + highScore.ToString();
+    }
+
+    public void OnGameFinished()
+    {
+        GetTree().Paused = true;
+
+        _highScoreManager.SetHighScore(_levelName, _score);
+        UpdateHighScoreDisplay();
+
+        Popup popupInstance = (Popup)_gameOverScreen.Instance();
+        GetTree().Root.AddChild(popupInstance);
+        popupInstance.PopupCentered();
     }
 }

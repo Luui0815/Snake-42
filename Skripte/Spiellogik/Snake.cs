@@ -75,7 +75,7 @@ public class Snake : Node2D
 
         if (IsGameOver())
         {
-            GetTree().Paused = true;
+            _controller.OnGameFinished();
         }
         else
         {
@@ -87,10 +87,11 @@ public class Snake : Node2D
     {
         if (_body.Points[0] == _fruit.Position)
         {
-            GD.Print("Frucht gefressen!");
+            _eating = true;
             _fruit.RandomizePosition();
             IncreaseSpeed();
-            _eating = true;
+            _controller.UpdateScore();
+            GD.Print("Frucht gefressen!");
         }
         else
         {

@@ -7,12 +7,15 @@ public class Fruit : Node2D
 {
     private Snake _snake;
     private GameController _controller;
+    private AnimationPlayer _player;
     private int _cellSize = 32;
 
     public override void _Ready()
     {
         _snake = GetParent().GetNode<Snake>("Snake");
         _controller = GetParent<GameController>();
+        _player = GetChild(0).GetNode<AnimationPlayer>("AnimationPlayer");
+        _player.Play("default");
     }
 
     public void RandomizePosition()
