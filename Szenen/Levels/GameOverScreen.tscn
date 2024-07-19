@@ -2,12 +2,14 @@
 
 [ext_resource path="res://Skripte/GameOverScreen.cs" type="Script" id=1]
 
-[node name="GameOverScreen" type="Popup"]
-visible = true
+[node name="GameOverScreen" type="Control"]
+pause_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = -640.0
-margin_bottom = -360.0
+margin_left = 320.0
+margin_top = 180.0
+margin_right = -320.0
+margin_bottom = -180.0
 script = ExtResource( 1 )
 
 [node name="Background" type="ColorRect" parent="."]
@@ -37,5 +39,3 @@ margin_right = 480.0
 margin_bottom = 210.0
 rect_rotation = 0.395461
 text = "Zurück zur Levelauswahl"
-
-[connection signal="pressed" from="RestartLevel" to="." method="_on_RestartLevel_pressed"]

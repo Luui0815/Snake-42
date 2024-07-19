@@ -124,8 +124,7 @@ public class GameController : Node2D
         _highScoreManager.SetHighScore(_levelName, _score);
         UpdateHighScoreDisplay();
 
-        Popup popupInstance = (Popup)_gameOverScreen.Instance();
-        GetTree().Root.AddChild(popupInstance);
-        popupInstance.PopupCentered();
+        Control popupInstance = (Control)_gameOverScreen.Instance();
+        AddChild(popupInstance);
     }
 }
