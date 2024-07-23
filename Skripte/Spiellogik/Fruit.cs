@@ -15,15 +15,17 @@ public class Fruit : Node2D
     public override void _Ready()
     {
         _snake1 = GetParent().GetNode<Snake>("Snake1");
-        try
-        {
-            _snake2 = GetParent().GetNode<Snake>("Snake2");
-        }
-        catch (Exception e) { GD.Print(e); }
+        _snake2 = GetParent().GetNodeOrNull<Snake>("Snake2");
 
         _controller = GetParent<GameController>();
         _player = GetChild(0).GetNode<AnimationPlayer>("AnimationPlayer");
         _player.Play("default");
+        _player.Connect("animation_finished", this, nameof(OnAnimationFinished));
+    }
+
+    private void OnAnimationFinished(string animationName)
+    {
+        _player.Play(animationName);
     }
 
     public void RandomizePosition()
@@ -67,7 +69,12 @@ public class Fruit : Node2D
             return true;
         }
 
-        if (_snake1.Points.Contains(position) || _snake2.Points.Contains(position))
+        if (_snake1.Points.Contains(position))
+        {
+            return true;
+        }
+
+        if (_snake2 != null && _snake2.Points.Contains(position))
         {
             return true;
         }

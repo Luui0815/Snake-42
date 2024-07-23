@@ -51,11 +51,7 @@ public class Snake : Node2D
         }
         else
         {
-            try
-            {
-                _otherSnake = GetParent().GetNode<Snake>("Snake2");
-            }
-            catch (Exception e) { GD.Print(e); }
+            _otherSnake = GetParent().GetNodeOrNull<Snake>("Snake2");
         }
     }
 
@@ -136,7 +132,9 @@ public class Snake : Node2D
 
     private void IncreaseSpeed()
     {
-        _moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
+        //_moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
+        _moveDelay *= 0.9f;
+        GD.Print(_moveDelay.ToString());
     }
 
     private bool IsGameOver()
@@ -154,13 +152,17 @@ public class Snake : Node2D
         {
             if (_otherSnake.Points.Contains(_body.Points[0]))
             {
-                //if (_body.Points[0] == _otherSnake._body.Points[0])
-                //{
-                //    GD.Print($"Unentschieden. {Name} und {_otherSnake.Name} sind kollidiert.");
-                //    return true;
-                //}
-                GD.Print($"Game Over fuer {Name}. Ist mit {_otherSnake.Name} kollidiert!");
-                return true;
+                if (_body.Points[0] == _otherSnake.Points[0])
+                {
+                    GD.Print($"Unentschieden. {Name} und {_otherSnake.Name} sind kollidiert.");
+                    return true;
+                }
+                else
+                {
+                    GD.Print($"Game Over fuer {Name}. Ist mit {_otherSnake.Name} kollidiert!");
+                    return true;
+                }
+
             }
         }
 
