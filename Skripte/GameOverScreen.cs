@@ -20,6 +20,6 @@ public class GameOverScreen : Control
     {
         GetTree().Paused = false;
         GD.Print("Button gedrueckt");
-        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+        GetTree().ChangeScene("res://Szenen/LevelSelectionSingle.tscn");
     }
 }

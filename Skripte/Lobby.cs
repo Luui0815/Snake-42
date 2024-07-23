@@ -283,7 +283,6 @@ public class Lobby : Control
         _webRtcPeer.SetLocalDescription(type,sdp);
         msg m = new msg(Nachricht.SDPData,_client.id,FindOtherRoomMate(),type + "|" + sdp);
         _client.SendData(JsonConvert.SerializeObject(m));
-
     }
 
     private int FindOtherRoomMate()

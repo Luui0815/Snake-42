@@ -101,7 +101,7 @@ public class Snake : Node2D
 
     private void IncreaseSpeed()
     {
-        _moveDelay = Math.Max(0.08f, _moveDelay - 0.05f);
+        _moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
     }
 
     private bool IsGameOver()

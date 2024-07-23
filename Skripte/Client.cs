@@ -165,9 +165,9 @@ public class Client : Control
 
     public void SendData(string Data)
     {
-            _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
-            GD.Print("Client: Nachricht gesendet: " + Data);
-            _sendTimer.Start();
+        _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
+        GD.Print("Client: Nachricht gesendet: " + Data);
+        _sendTimer.Start();
     }
 
     private void SendDataFromBuffer()
