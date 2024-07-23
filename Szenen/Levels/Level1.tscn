@@ -249,7 +249,9 @@ tile_data = PoolIntArray( 196615, 0, 0, 196617, 0, 0, 196634, 3, 0, 262155, 2, 0
 [node name="Fruit" parent="." instance=ExtResource( 3 )]
 scale = Vector2( 0.6, 0.6 )
 
-[node name="Snake" parent="." instance=ExtResource( 5 )]
+[node name="Snake1" parent="." instance=ExtResource( 5 )]
+
+[node name="Snake2" parent="." instance=ExtResource( 5 )]
 
 [node name="ScoreLabels" type="ColorRect" parent="."]
 margin_left = 1088.0

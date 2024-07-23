@@ -13,10 +13,12 @@ public class Snake : Node2D
     private Tween _tween;
     private Fruit _fruit;
     private GameController _controller;
+    private Snake _otherSnake;
 
     private int _gridSize = 32;
     private float _moveDelay = 0.45f;
     private bool _eating = false;
+    private bool _isPlayerOne;
 
     public Vector2[] Points { get { return _points; } }
 
@@ -34,14 +36,47 @@ public class Snake : Node2D
         MoveSnake();
     }
 
+    public void SetPlayerSettings(bool isPlayerOne)
+    {
+        _isPlayerOne = isPlayerOne;
+        if (!isPlayerOne)
+        {
+            _otherSnake = GetParent().GetNode<Snake>("Snake1");
+            _body.DefaultColor = new Color(255, 255, 0, 1);
+            for(int i = 0; i < _points.Length; i++)
+            {
+                _points[i] += new Vector2(0, 2*_gridSize);
+                _body.SetPointPosition(i, _points[i]);
+            }
+        }
+        else
+        {
+            try
+            {
+                _otherSnake = GetParent().GetNode<Snake>("Snake2");
+            }
+            catch (Exception e) { GD.Print(e); }
+        }
+    }
+
     public override void _Input(InputEvent @event)
     {
         if (@event.IsPressed())
         {
-            if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) _directionCache = Vector2.Up;
-            if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _directionCache = Vector2.Right;
-            if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _directionCache = Vector2.Left;
-            if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _directionCache = Vector2.Down;
+            if (_isPlayerOne)
+            {
+                if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) _directionCache = Vector2.Up;
+                if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) _directionCache = Vector2.Right;
+                if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) _directionCache = Vector2.Left;
+                if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) _directionCache = Vector2.Down;
+            }
+            else
+            {
+                if (Input.IsActionPressed("move_right") && _direction != Vector2.Left) _directionCache = Vector2.Right;
+                if (Input.IsActionPressed("move_left") && _direction != Vector2.Right) _directionCache = Vector2.Left;
+                if (Input.IsActionPressed("move_up") && _direction != Vector2.Down) _directionCache = Vector2.Up;
+                if (Input.IsActionPressed("move_down") && _direction != Vector2.Up) _directionCache = Vector2.Down;
+            }
         }
     }
 
@@ -91,7 +126,7 @@ public class Snake : Node2D
             _fruit.RandomizePosition();
             IncreaseSpeed();
             _controller.UpdateScore();
-            GD.Print("Frucht gefressen!");
+            GD.Print($"{Name} hat Frucht gefressen!");
         }
         else
         {
@@ -110,17 +145,32 @@ public class Snake : Node2D
         {
             if (_body.Points[0] == obstacle.RectGlobalPosition)
             {
-                GD.Print("Game Over. Schlange hat ein Hindernis getroffen!");
+                GD.Print($"Game Over fuer {Name}. hat ein Hindernis getroffen!");
                 return true;
             }
         }
+
+        if (_otherSnake != null)
+        {
+            if (_otherSnake.Points.Contains(_body.Points[0]))
+            {
+                //if (_body.Points[0] == _otherSnake._body.Points[0])
+                //{
+                //    GD.Print($"Unentschieden. {Name} und {_otherSnake.Name} sind kollidiert.");
+                //    return true;
+                //}
+                GD.Print($"Game Over fuer {Name}. Ist mit {_otherSnake.Name} kollidiert!");
+                return true;
+            }
+        }
+
         if (_points.Length >= 3)
         {
             for (int i = 1; i < _points.Length; i++)
             {
                 if (_points[0] == _points[i])
                 {
-                    GD.Print("Game Over. Schlange hat sich selbst gefressen.");
+                    GD.Print($"Game Over fuer {Name}. Hat sich selbst gefressen!");
                     return true;
                 }
             }

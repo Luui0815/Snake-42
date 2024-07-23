@@ -11,6 +11,3 @@ Option bei Client und Server starten ob Server erhalten bleiben soll oder nicht
 Option das WebRTC Daten auch ohne Webserver ausgetauscht werden könne. Also das Anwender die SDP Daten bekommt und über discord oder Whatsapp an den anderen schicken muss und umgedreht, sodass man keine Portfreigabe mehr braucht
 
 Fehlermeldung Popup machen
-
-Schlange: Es scheint eine fehlende Synchronisierung zwischen den koordinaten zb. beim Position Attribut eines Nodes zu geben und den Koordinaten, welche man für ein Rechteck zum zeichnen angibt (was sehr verwirrend ist)
---> Die bewegung der schlange funktioniert nicht so wie sie soll, bsp. richtung wechselt von runter zu rechts: --> hintere teile bewegen sich mit nach rechts, anstatt einfach den schritten des kopfes zu folgen

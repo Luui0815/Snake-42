@@ -6,7 +6,8 @@ using System.Runtime.CompilerServices;
 public class GameController : Node2D
 {
     private HighScoreManager _highScoreManager;
-    private Snake _snake;
+    private Snake _snake1;
+    private Snake _snake2;
     private Fruit _fruit;
     private PackedScene _gameOverScreen;
     private Label _highScoreLabel, _scoreLabel;
@@ -22,7 +23,16 @@ public class GameController : Node2D
 
     public override void _Ready()
     {
-        _snake = GetNode<Snake>("Snake");
+        _snake1 = GetNode<Snake>("Snake1");
+        _snake1?.SetPlayerSettings(true);
+
+        try
+        {
+            _snake2 = GetNode<Snake>("Snake2");
+            _snake2?.SetPlayerSettings(false);
+        }
+        catch (Exception e) { GD.Print(e); }
+
         _fruit = GetNode<Fruit>("Fruit");
         _highScoreManager = new HighScoreManager();
         _gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
@@ -32,33 +42,17 @@ public class GameController : Node2D
         _scoreLabel.Text = "Punktestand: " + _score;
 
         _levelName = GetTree().CurrentScene.Name;
-        switch (_levelName)
-        {
-            case "Level1":
-                CreateGameField(1);
-                CreateObstacles();
-                break;            
-            case "Level2":
-                CreateGameField(2);
-                CreateObstacles();
-                break;            
-            case "Level3":
-                CreateGameField(3);
-                CreateObstacles();
-                break;
-            default:
-                GD.Print("Unbekanntes Level: " + _levelName);
-                break;
-        }
+        CreateGameField();
+
         _fruit.RandomizePosition();
         UpdateHighScoreDisplay();
     }
 
-    private void CreateGameField(int levelNr)
+    private void CreateGameField()
     {
-        switch (levelNr)
+        switch (_levelName)
         {
-            case 1:
+            case "Level1":
                 _gameField = new int[,]
                 {
                     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -87,7 +81,7 @@ public class GameController : Node2D
                 };
                 GD.Print("Spielfeld 1 initialisiert");
                 break;
-            case 2:
+            case "Level2":
                 _gameField = new int[,]
                 {
                     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -116,7 +110,7 @@ public class GameController : Node2D
                 };
                 GD.Print("Spielfeld 2 initialisiert");
                 break;
-            case 3:
+            case "Level3":
                 _gameField = new int[,]
                 {
                     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -148,6 +142,7 @@ public class GameController : Node2D
             default:
                 break;
         }
+        CreateObstacles();
     }
 
     private void CreateObstacles()

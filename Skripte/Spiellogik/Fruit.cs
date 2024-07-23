@@ -1,18 +1,26 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 public class Fruit : Node2D
 {
-    private Snake _snake;
+    private Snake _snake1;
+    private Snake _snake2;
     private GameController _controller;
     private AnimationPlayer _player;
     private int _cellSize = 32;
 
     public override void _Ready()
     {
-        _snake = GetParent().GetNode<Snake>("Snake");
+        _snake1 = GetParent().GetNode<Snake>("Snake1");
+        try
+        {
+            _snake2 = GetParent().GetNode<Snake>("Snake2");
+        }
+        catch (Exception e) { GD.Print(e); }
+
         _controller = GetParent<GameController>();
         _player = GetChild(0).GetNode<AnimationPlayer>("AnimationPlayer");
         _player.Play("default");
@@ -59,12 +67,9 @@ public class Fruit : Node2D
             return true;
         }
 
-        foreach (var segment in _snake.Points)
+        if (_snake1.Points.Contains(position) || _snake2.Points.Contains(position))
         {
-            if (segment == position)
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;
