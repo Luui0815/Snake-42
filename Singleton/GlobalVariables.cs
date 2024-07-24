@@ -52,7 +52,5 @@ public partial class GlobalVariables : Node
     }
     public override void _Process(float delta)
     {
-        if(WebRTC != null)
-            WebRTC.Poll();
     }
 }

@@ -118,17 +118,31 @@ public class Lobby : Control
             
         if(StartConnection == true)
         {
-            
-
             if(WebRTCPeerConnection.ConnectionState.Connected == _webRtcPeer.GetConnectionState() && _firstRpcCallExecuted == false)
             {
                 _firstRpcCallExecuted=true;
                 GlobalVariables.Instance.RPCRoomMateId = FindOtherRoomMate() - 5;
                 GlobalVariables.Instance.RPCSelfId = _client.id - 5;
                 //WebRTCMultiplayer.SetTargetPeer(FindOtherRoomMate());
-                Multiplayer.NetworkPeer= _webRtcMultiplayer;
-                Rpc("SwitchToLevelSelectionMenu");
+                SwitchToLevelSelectionMenu();
             }
+        }
+
+        if (waitForDeletingWS==true)
+        {
+            try
+            {
+                _client.QueueFree();
+            }
+            catch
+            {
+                GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
+                Hide();
+                //GetTree().NetworkPeer = null;
+                GetTree().SetNetworkPeer(_webRtcMultiplayer);
+                waitForDeletingWS = false;
+            }
+            
         }
 
     }
@@ -147,9 +161,8 @@ public class Lobby : Control
         else if (state == Nachricht.SDPData)
         {
             StartConnection=true;
-        int test = FindOtherRoomMate();
-        GD.Print(FindOtherRoomMate() + "------------------------------");
-        _webRtcMultiplayer.AddPeer(_webRtcPeer, FindOtherRoomMate() - 5);
+            int test = FindOtherRoomMate();
+            GD.Print(FindOtherRoomMate() + "------------------------------");
             string[] data = msg.Split("|");
             // 0:type, 1:sdp
             _webRtcPeer.SetRemoteDescription(data[0],data[1]);
@@ -158,7 +171,7 @@ public class Lobby : Control
         {
             string[] data = msg.Split('|');
             _webRtcPeer.AddIceCandidate(data[0],Convert.ToInt32(data[1]),data[2]);
-            //AddPeerToWebRTC();
+
         }
         else if (state == Nachricht.ServerWillClosed)
         {
@@ -281,6 +294,8 @@ public class Lobby : Control
         StartConnection=true;
         int test = FindOtherRoomMate();
         GD.Print(FindOtherRoomMate() + "------------------------------");
+        _webRtcMultiplayer.Initialize(_client.id - 5,true);
+        WebRTCPeerConnection.ConnectionState s =_webRtcPeer.GetConnectionState();
         _webRtcMultiplayer.AddPeer(_webRtcPeer, FindOtherRoomMate() - 5);
         WebRTCPeerConnection.ConnectionState t = _webRtcPeer.GetConnectionState();
         if(_webRtcPeer.CreateOffer() != Error.Ok)
@@ -325,9 +340,7 @@ public class Lobby : Control
     {
         GetNode<Label>("Label").Text = "NAchricht von " + id +" erhalten"; 
     }
-
-
-    [RemoteSync]
+    bool waitForDeletingWS =false;
     private void SwitchToLevelSelectionMenu()
     {
         int test = Multiplayer.GetRpcSenderId();
@@ -353,9 +366,10 @@ public class Lobby : Control
         {
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,_client.id,0,Convert.ToString(FindOtherRoomMate()))));
         }
-        GlobalVariables.Instance.WebRTC = _webRtcMultiplayer;
-        _client.QueueFree();
-        GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
-        QueueFree();
+        //GlobalVariables.Instance.WebRTC = _webRtcMultiplayer;
+        _client.StopConnection();
+        waitForDeletingWS = true;
+
+        //QueueFree();
     }
 }

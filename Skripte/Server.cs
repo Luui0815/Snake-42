@@ -221,6 +221,7 @@ public class Server : Control
         // nochmal an alle Clients senden das es gleich vorbei ist
         SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.ServerWillClosed,0,999,"System: Server wird heruntergefahren!")));
         _WSPeer.Stop();
+        QueueFree();
     }
 
     public void SendDataToOne(string Data, int id)
