@@ -93,10 +93,10 @@ public class LevelSelectionMenu : Control
 
     private void _on_Button_pressed()
     {
-        Rpc("Count");
+        RpcId(0,"Count");
         bool t = CustomMultiplayer.HasNetworkPeer();
         bool x = CustomMultiplayer.IsNetworkServer();
-        //CustomMultiplayer.SendBytes("Hallo".ToUTF8());
+        CustomMultiplayer.SendBytes("Hallo".ToUTF8());
     }
 
     [Sync]

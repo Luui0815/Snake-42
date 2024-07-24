@@ -79,6 +79,16 @@ margin_right = 589.0
 margin_bottom = 278.0
 text = "Server und Client starten"
 
+[node name="Button" type="Button" parent="."]
+anchor_right = 0.1
+anchor_bottom = 0.112
+margin_left = 306.0
+margin_top = 333.0
+margin_right = 536.0
+margin_bottom = 316.36
+text = "Peer To Peer Direktaufbau"
+
 [connection signal="pressed" from="Server starten" to="." method="_on_Server_starten_pressed"]
 [connection signal="pressed" from="Client starten" to="." method="_on_Client_starten_pressed"]
 [connection signal="pressed" from="ServerundClient" to="." method="_on_ServerundClient_pressed"]
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

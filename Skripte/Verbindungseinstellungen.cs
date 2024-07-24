@@ -103,4 +103,9 @@ public class Verbindungseinstellungen : Control
         GetTree().Root.AddChild(lobbyInstance);
         QueueFree();
     }
+
+    private void _on_Button_pressed()
+    {
+        GetTree().ChangeScene("res://Szenen/PeerToPeerMenu.tscn");
+    }
 }
