@@ -79,7 +79,7 @@ public class Snake : Node2D
     private void MoveSnake()
     {
         _direction = _directionCache;
-        _body.AddPoint(_points[0] + _direction * _gridSize, 0);
+        _body.AddPoint(_points[0], 0);
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, _moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -94,6 +94,7 @@ public class Snake : Node2D
         
         _face.Position = _body.Points[0];
         _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
+
     }
 
     private void _on_Tween_tween_all_completed()

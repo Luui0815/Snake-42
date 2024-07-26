@@ -4,7 +4,7 @@
 [ext_resource path="res://Assets/Eye-modified.png" type="Texture" id=2]
 
 [sub_resource type="Curve" id=1]
-_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.98494, 0.481818 ), -0.421142, 0.0, 0, 0 ]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.995238, 0.518182 ), -0.999999, 0.0, 0, 0 ]
 
 [node name="Snake2" type="Node2D"]
 script = ExtResource( 1 )
@@ -19,6 +19,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Tween" type="Tween" parent="."]
+playback_process_mode = 0
 
 [node name="Face" type="Node2D" parent="."]
 position = Vector2( 336, 336 )
