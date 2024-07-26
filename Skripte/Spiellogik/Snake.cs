@@ -81,7 +81,7 @@ public class Snake : Node2D
     private void MoveSnake()
     {
         _direction = _directionCache;
-        _body.AddPoint(_points[0], 0);
+        //_body.AddPoint(_points[0], 0);
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, _moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -90,36 +90,66 @@ public class Snake : Node2D
     {
         if(_Merker == false)
         {
-        Vector2 newPos = _points[0] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
-        _body.SetPointPosition(0, newPos);
-
-        if (!_eating)
-            _body.SetPointPosition(_body.Points.Length - 1, _points[_points.Length - 1] + (_points[_points.Length - 2] - _points[_points.Length - 1]) * argv);
-        
-        _face.Position = _body.Points[0];
-        _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
-
-        // wenn argv = 1 dann ist eine Schleife durch
-        if(argv == 1 && _Merker == false)
-        {
-            _Merker = true;
-           if(!_eating)
-            _body.RemovePoint(_points.Length);
-
-            _points = _body.Points;
-            CheckFruitCollision();
-
-            if (IsGameOver())
+            int i = 0;
+            foreach(Vector2 pos in _body.Points)
             {
-                _controller.OnGameFinished();
+                Vector2 newPos,diff=Vector2.Zero;
+                if(i == 0)
+                    newPos =  _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
+                    /*
+                else if(i == _body.Points.Count() - 1)
+                {
+                    diff = Vector2.Zero;
+                    if(_points[i-1].x - _points[i].x != 0)
+                        diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
+                    if(_points[i-1].y - _points[i].y != 0)
+                        diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
+                    
+                    newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                }
+                */
+                else
+                {
+                    diff = Vector2.Zero;
+                    if(_points[i-1].x - _points[i].x != 0)
+                        diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
+                    if(_points[i-1].y - _points[i].y != 0)
+                        diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
+                    
+                    newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                }
+                _body.SetPointPosition(i, newPos);
+                i++;
             }
-            else
+
+            if(_eating == true)
             {
-                _direction = _directionCache;
-                _body.AddPoint(_points[0], 0);
-            } 
+                _body.AddPoint(new Vector2(_body.GetPointPosition(_body.Points.Length).x - _gridSize, _body.GetPointPosition(_body.Points.Length).x - _gridSize));
+                _points = _body.Points;
+                _eating = false;
+            }
+
+            _face.Position = _body.Points[0];
+            _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
+
+            // wenn argv = 1 dann ist eine Schleife durch
+            if(argv == 1)
+            {
+                _Merker = true;
+                _points = _body.Points;
+                CheckFruitCollision();
+
+                if (IsGameOver())
+                {
+                   _controller.OnGameFinished();
+                }
+                else
+                {
+                    _direction = _directionCache;
+                } 
+            }
         }
-        }
+
         if(argv != 1)
             _Merker = false;
     }
@@ -154,7 +184,7 @@ public class Snake : Node2D
         }
         else
         {
-            _eating = false;
+            //_eating = false;
         }
     }
 

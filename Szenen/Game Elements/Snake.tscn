@@ -4,7 +4,7 @@
 [ext_resource path="res://Assets/Eye-modified.png" type="Texture" id=2]
 
 [sub_resource type="Curve" id=1]
-_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.995238, 0.518182 ), -0.999999, 0.0, 0, 0 ]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.97619, 0.790909 ), -0.954546, 0.0, 0, 0 ]
 
 [node name="Snake2" type="Node2D"]
 script = ExtResource( 1 )
