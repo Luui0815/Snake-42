@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 public class Snake : Node2D
@@ -19,6 +20,7 @@ public class Snake : Node2D
     private float _moveDelay = 0.45f;
     private bool _eating = false;
     private bool _isPlayerOne;
+    private bool _Merker = false;
 
     public Vector2[] Points { get { return _points; } }
 
@@ -86,6 +88,8 @@ public class Snake : Node2D
 
     private void MoveTween(float argv)
     {
+        if(_Merker == false)
+        {
         Vector2 newPos = _points[0] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
         _body.SetPointPosition(0, newPos);
 
@@ -95,6 +99,29 @@ public class Snake : Node2D
         _face.Position = _body.Points[0];
         _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
 
+        // wenn argv = 1 dann ist eine Schleife durch
+        if(argv == 1 && _Merker == false)
+        {
+            _Merker = true;
+           if(!_eating)
+            _body.RemovePoint(_points.Length);
+
+            _points = _body.Points;
+            CheckFruitCollision();
+
+            if (IsGameOver())
+            {
+                _controller.OnGameFinished();
+            }
+            else
+            {
+                _direction = _directionCache;
+                _body.AddPoint(_points[0], 0);
+            } 
+        }
+        }
+        if(argv != 1)
+            _Merker = false;
     }
 
     private void _on_Tween_tween_all_completed()
