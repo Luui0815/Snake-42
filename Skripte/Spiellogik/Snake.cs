@@ -19,6 +19,7 @@ public class Snake : Node2D
     private int _gridSize = 32;
     private float _moveDelay = 0.45f;
     private bool _eating = false;
+    private bool _growing = false;
     private bool _isPlayerOne;
     private bool _Merker = false;
 
@@ -96,7 +97,7 @@ public class Snake : Node2D
                 Vector2 newPos,diff=Vector2.Zero;
                 if(i == 0)
                     newPos =  _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
-                    /*
+                /*
                 else if(i == _body.Points.Count() - 1)
                 {
                     diff = Vector2.Zero;
@@ -110,13 +111,21 @@ public class Snake : Node2D
                 */
                 else
                 {
-                    diff = Vector2.Zero;
-                    if(_points[i-1].x - _points[i].x != 0)
-                        diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
-                    if(_points[i-1].y - _points[i].y != 0)
-                        diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
+                    if(!(_growing == true && i == _body.Points.Count() -1))
+                    {
+                        diff = Vector2.Zero;
+                        if(_points[i-1].x - _points[i].x != 0)
+                            diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
+                        if(_points[i-1].y - _points[i].y != 0)
+                            diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
                     
-                    newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                    }
+                    else
+                    {
+                        // letztes Körperteil darf nicht bewegt werden!
+                        newPos = _body.GetPointPosition(i);
+                    }
                 }
                 _body.SetPointPosition(i, newPos);
                 i++;
@@ -124,7 +133,8 @@ public class Snake : Node2D
 
             if(_eating == true)
             {
-                _body.AddPoint(new Vector2(_body.GetPointPosition(_body.Points.Length).x - _gridSize, _body.GetPointPosition(_body.Points.Length).x - _gridSize));
+                _body.AddPoint(_body.GetPointPosition(_body.Points.Count()-1));
+                _growing = true;
                 _points = _body.Points;
                 _eating = false;
             }
@@ -138,6 +148,9 @@ public class Snake : Node2D
                 _Merker = true;
                 _points = _body.Points;
                 CheckFruitCollision();
+
+                if(_growing == true)
+                    _growing = false;
 
                 if (IsGameOver())
                 {
