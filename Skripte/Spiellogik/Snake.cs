@@ -194,6 +194,7 @@ public class Snake : Node2D
             IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
+            IncreaseSpeed();
         }
         else
         {
@@ -204,7 +205,7 @@ public class Snake : Node2D
     private void IncreaseSpeed()
     {
         //_moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
-        _moveDelay *= 0.9f;
+        _moveDelay *= 0.35f;
         GD.Print(_moveDelay.ToString());
     }
 
