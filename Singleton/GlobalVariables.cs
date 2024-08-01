@@ -4,12 +4,12 @@ using System;
 public partial class GlobalVariables : Node
 {
     public static GlobalVariables Instance { get; private set; }
+    public int LevelDifficulty {get;set;}=0; // 0= einfach, 1= mittel, 2=schwer, 3=Profi
+    public int LevelMode {get;set;}=3;//0=miteinander,1=gegeneinader,3=solo
 
     public Lobby Lobby { get; set; }
     public PackedScene ConfirmationDialog { get; set; }
 
-    //wichtig wenn RPC calls nur auf bestimmten teilnehmer ausgeführt werden soo
-    //wird vor dem ersten rpc festgelegt
     public int RPCSelfId {get;set;}
     public int RPCRoomMateId {get;set;}
     public WebRTCMultiplayer WebRTC {get; set; } 

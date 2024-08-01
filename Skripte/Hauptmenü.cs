@@ -5,7 +5,7 @@ public class Hauptmenü : Control
 {
 	public void _on_Einzelspieler_pressed()
 	{
-		GetTree().ChangeScene("res://Szenen/LevelSelectionSingle.tscn");
+		GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
 	}
 
 	public void _on_Verbindung_erstellen_pressed()

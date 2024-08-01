@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://Szenen/LevelSelection.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Szenen/OptionMenu.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Spieler2Pfeil.png" type="Texture" id=2]
 [ext_resource path="res://Assets/Spieler1Pfeil.png" type="Texture" id=3]
 [ext_resource path="res://Skripte/LevelSelectionMenu.cs" type="Script" id=4]

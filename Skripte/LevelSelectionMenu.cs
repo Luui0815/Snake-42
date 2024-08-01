@@ -4,6 +4,7 @@ using Godot.Collections;
 
 public class LevelSelectionMenu : Control
 {
+    /*
     private LevelSelection _levelSelectionGegeneinander;
     private LevelSelection _levelSelectionMiteinander;
     private Sprite _Spieler1Pfeil;
@@ -112,4 +113,5 @@ public class LevelSelectionMenu : Control
         string s = packet.GetStringFromUTF8();
         GD.Print(s);
     }
+    */
 }
