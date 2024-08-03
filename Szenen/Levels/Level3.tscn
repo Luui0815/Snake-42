@@ -251,6 +251,10 @@ scale = Vector2( 0.6, 0.6 )
 
 [node name="Snake1" parent="." instance=ExtResource( 2 )]
 
+[node name="Snake2" parent="." instance=ExtResource( 2 )]
+process_priority = -1
+z_index = 1
+
 [node name="ScoreLabels" type="ColorRect" parent="."]
 margin_left = 1088.0
 margin_top = 96.0

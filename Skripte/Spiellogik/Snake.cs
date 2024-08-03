@@ -17,7 +17,7 @@ public class Snake : Node2D
     private Snake _otherSnake;
 
     private int _gridSize = 32;
-    private float _moveDelay = 0.45f;
+    public float moveDelay;
     private bool _eating = false;
     private bool _growing = false;
     private bool _isPlayerOne;
@@ -39,12 +39,19 @@ public class Snake : Node2D
         MoveSnake();
     }
 
-    public void SetPlayerSettings(bool isPlayerOne)
+    public void SetPlayerSettings(bool isPlayerOne, Snake otherSnake = null)
     {
         _isPlayerOne = isPlayerOne;
+        Snake s = null;
         if (!isPlayerOne)
         {
-            _otherSnake = GetParent().GetNode<Snake>("Snake1");
+            if(GetParent() != null)
+                s = GetParent().GetNodeOrNull<Snake>("Snake1");
+            if (s != null)
+                _otherSnake = s;
+            else
+                _otherSnake = otherSnake;
+
             _body.DefaultColor = new Color(255, 255, 0, 1);
             for(int i = 0; i < _points.Length; i++)
             {
@@ -83,7 +90,7 @@ public class Snake : Node2D
     {
         _direction = _directionCache;
         //_body.AddPoint(_points[0], 0);
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, _moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
@@ -205,8 +212,8 @@ public class Snake : Node2D
     private void IncreaseSpeed()
     {
         //_moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
-        _moveDelay *= 0.35f;
-        GD.Print(_moveDelay.ToString());
+        moveDelay *= 0.35f;
+        GD.Print(moveDelay.ToString());
     }
 
     private bool IsGameOver()

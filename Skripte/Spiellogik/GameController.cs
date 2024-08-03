@@ -26,8 +26,46 @@ public class GameController : Node2D
 		_snake1 = GetNode<Snake>("Snake1");
 		_snake1?.SetPlayerSettings(true);
 
-		_snake2 = GetNodeOrNull<Snake>("Snake2");
-		_snake2?.SetPlayerSettings(false);
+		_snake2 = GetNode<Snake>("Snake2");
+
+		// folgendes BITTE NICHT durch eine Formel ersetzen, da mn es so feiner einstellen kann!
+		switch(GlobalVariables.Instance.LevelDifficulty)
+		{
+			case 0:
+			{
+				// einfach
+				_snake1.moveDelay = _snake2.moveDelay = 0.35f;
+				break;
+			}
+			case 1:
+			{
+				// mittel
+				_snake1.moveDelay = _snake2.moveDelay = 0.45f;
+				break;
+			}
+			case 2:
+			{
+				// mittel
+				_snake1.moveDelay = _snake2.moveDelay = 0.55f;
+				break;
+			}
+			case 3:
+			{
+				// mittel
+				_snake1.moveDelay = _snake2.moveDelay = 0.75f;
+				break;
+			}
+		}
+
+		if(GlobalVariables.Instance.LevelMode == 2)
+		{
+			RemoveChild(_snake2);
+			_snake2.QueueFree();
+		}
+		else	
+		    _snake2.SetPlayerSettings(false);
+
+
 
 
 		_fruit = GetNode<Fruit>("Fruit");
