@@ -8,6 +8,7 @@ public class GameController : Node2D
 	private HighScoreManager _highScoreManager;
 	private Snake _snake1;
 	private Snake _snake2;
+	private SnakeMiteinander _snakeTogether;
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
 	private Label _highScoreLabel, _scoreLabel;
@@ -27,6 +28,7 @@ public class GameController : Node2D
 		_snake1?.SetPlayerSettings(true);
 
 		_snake2 = GetNode<Snake>("Snake2");
+		_snakeTogether = GetNode<SnakeMiteinander>("Snake3");
 
 		// folgendes BITTE NICHT durch eine Formel ersetzen, da mn es so feiner einstellen kann!
 		switch(GlobalVariables.Instance.LevelDifficulty)
@@ -34,38 +36,55 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 0.35f;
+				_snake1.moveDelay = _snake2.moveDelay = _snakeTogether.moveDelay = 0.35f;
 				break;
 			}
 			case 1:
 			{
 				// mittel
-				_snake1.moveDelay = _snake2.moveDelay = 0.45f;
+				_snake1.moveDelay = _snake2.moveDelay = _snakeTogether.moveDelay = 0.45f;
 				break;
 			}
 			case 2:
 			{
 				// mittel
-				_snake1.moveDelay = _snake2.moveDelay = 0.55f;
+				_snake1.moveDelay = _snake2.moveDelay= _snakeTogether.moveDelay = 0.55f;
 				break;
 			}
 			case 3:
 			{
 				// mittel
-				_snake1.moveDelay = _snake2.moveDelay = 0.75f;
+				_snake1.moveDelay = _snake2.moveDelay= _snakeTogether.moveDelay = 0.75f;
 				break;
 			}
 		}
 
-		if(GlobalVariables.Instance.LevelMode == 2)
+		switch (GlobalVariables.Instance.LevelMode)
 		{
-			RemoveChild(_snake2);
-			_snake2.QueueFree();
+			case 0:
+			{
+				// Miteinander
+				_snake1.QueueFree();
+				_snake2.QueueFree();
+				_snakeTogether.MoveSnake();
+				break;
+			}
+			case 1:
+			{
+				_snake2.SetPlayerSettings(false);
+				_snakeTogether.QueueFree();
+				_snake1.MoveSnake();
+				_snake2.MoveSnake();
+				break;
+			}
+			case 2:
+			{
+				_snake2.QueueFree();
+				_snakeTogether.QueueFree();
+				_snake1.MoveSnake();
+				break;
+			}
 		}
-		else	
-		    _snake2.SetPlayerSettings(false);
-
-
 
 
 		_fruit = GetNode<Fruit>("Fruit");

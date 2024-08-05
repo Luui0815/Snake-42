@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=1]
+[ext_resource path="res://Szenen/Game Elements/SnakeMiteinander.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Szenen/Game Elements/Fruit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
 [ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=5]
@@ -278,3 +279,6 @@ margin_bottom = 160.0
 text = "Test"
 align = 1
 valign = 1
+
+[node name="Snake3" parent="." instance=ExtResource( 2 )]
+position = Vector2( 59, 0 )

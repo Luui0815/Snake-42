@@ -6,22 +6,22 @@ using System.Linq;
 
 public class Snake : Node2D
 {
-    private Vector2 _direction = Vector2.Right;
-    private Vector2 _directionCache;
-    private Vector2[] _points;
-    private Line2D _body;
-    private Node2D _face;
-    private Tween _tween;
-    private Fruit _fruit;
-    private GameController _controller;
-    private Snake _otherSnake;
+    protected Vector2 _direction = Vector2.Right;
+    protected Vector2 _directionCache;
+    protected Vector2[] _points;
+    protected Line2D _body;
+    protected Node2D _face;
+    protected Tween _tween;
+    protected Fruit _fruit;
+    protected GameController _controller;
+    protected Snake _otherSnake;
 
-    private int _gridSize = 32;
+    protected int _gridSize = 32;
     public float moveDelay;
-    private bool _eating = false;
-    private bool _growing = false;
-    private bool _isPlayerOne;
-    private bool _Merker = false;
+    protected bool _eating = false;
+    protected bool _growing = false;
+    protected bool _isPlayerOne;
+    protected bool _Merker = false;
 
     public Vector2[] Points { get { return _points; } }
 
@@ -36,7 +36,6 @@ public class Snake : Node2D
         _tween = GetNode<Tween>("Tween");
 
         _directionCache = _direction;
-        MoveSnake();
     }
 
     public void SetPlayerSettings(bool isPlayerOne, Snake otherSnake = null)
@@ -86,7 +85,7 @@ public class Snake : Node2D
         }
     }
 
-    private void MoveSnake()
+    public virtual void MoveSnake()
     {
         _direction = _directionCache;
         //_body.AddPoint(_points[0], 0);
@@ -94,7 +93,7 @@ public class Snake : Node2D
         _tween.Start();
     }
 
-    private void MoveTween(float argv)
+    protected virtual void MoveTween(float argv)
     {
         if(_Merker == false)
         {
@@ -104,18 +103,6 @@ public class Snake : Node2D
                 Vector2 newPos,diff=Vector2.Zero;
                 if(i == 0)
                     newPos =  _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
-                /*
-                else if(i == _body.Points.Count() - 1)
-                {
-                    diff = Vector2.Zero;
-                    if(_points[i-1].x - _points[i].x != 0)
-                        diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
-                    if(_points[i-1].y - _points[i].y != 0)
-                        diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
-                    
-                    newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
-                }
-                */
                 else
                 {
                     if(!(_growing == true && i == _body.Points.Count() -1))
@@ -174,7 +161,7 @@ public class Snake : Node2D
             _Merker = false;
     }
 
-    private void _on_Tween_tween_all_completed()
+    protected void _on_Tween_tween_all_completed()
     {
         if(!_eating)
             _body.RemovePoint(_points.Length);
@@ -192,7 +179,7 @@ public class Snake : Node2D
         }
     }
 
-    private void CheckFruitCollision()
+    protected void CheckFruitCollision()
     {
         if (_body.Points[0] == _fruit.Position)
         {
@@ -209,14 +196,14 @@ public class Snake : Node2D
         }
     }
 
-    private void IncreaseSpeed()
+    protected void IncreaseSpeed()
     {
         //_moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
         moveDelay *= 0.35f;
         GD.Print(moveDelay.ToString());
     }
 
-    private bool IsGameOver()
+    protected bool IsGameOver()
     {
         foreach (var obstacle in _controller.Obstacles)
         {
