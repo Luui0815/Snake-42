@@ -6,8 +6,8 @@ using System.Linq;
 
 public class Snake : Node2D
 {
-    protected Vector2 _direction = Vector2.Right;
-    protected Vector2 _directionCache;
+    private Vector2 _direction = Vector2.Right;
+    private Vector2 _directionCache;
     protected Vector2[] _points;
     protected Line2D _body;
     protected Node2D _face;
