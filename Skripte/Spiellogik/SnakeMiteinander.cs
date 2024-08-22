@@ -24,8 +24,9 @@ public class SnakeMiteinander : Snake
         _face1 = GetNode<Node2D>("Face1");
         _face2 = GetNode<Node2D>("Face2");
         _tween = GetNode<Tween>("Tween");
-
-        _directionCache = _direction;
+        _playersTurn = 1;
+        _directionCachePlayer1 = Vector2.Right;
+        _directionCachePlayer2 = Vector2.Left;
         _isPlayerOne = true;
         MoveSnake();
         _face =  _face1;
@@ -60,7 +61,7 @@ public class SnakeMiteinander : Snake
         // aktuelle Richtung in die gelaufen werden soll ermitteln
 
         if (_playersTurn == 1)
-           currentDirection = _directionPlayer1;
+           currentDirection = _directionCachePlayer1;
         else
            currentDirection = _directionCachePlayer2;
 
@@ -70,12 +71,8 @@ public class SnakeMiteinander : Snake
             foreach(Vector2 pos in _body.Points)
             {
                 Vector2 newPos,diff=Vector2.Zero;
-                if(i == 0 && _playersTurn == 1) // bei Spiler1 ist der Kopf bei Index 0
-                    newPos =  _points[i] + currentDirectionirection * new Vector2(_gridSize * argv, _gridSize * argv);
-                else if (i == _body.Points.Count() - 1 && _playersTurn == 2) // bei Spiler2 ist der Kopf beim letzten Index!
-                {
-                    newPos =  _points[_body.Points.Count() - 1] + currentDirection * new Vector2(_gridSize * argv, _gridSize * argv);
-                }
+                if(i == 0)
+                    newPos =  _points[i] + currentDirection * new Vector2(_gridSize * argv, _gridSize * argv);
                 else
                 {
                     // Beim wachsen wird das Extrakörperteil genu in der Mitte des Körpers hinzugefügt
@@ -124,7 +121,10 @@ public class SnakeMiteinander : Snake
                 {
                     _growing = false;
                     // nachdem die Schlange gewachsen ist wird die Stuerung an den anderen abgegeben
-                    if(_playersTurn ==)
+                    if(_playersTurn == 1)
+                        _playersTurn = 2;
+                    else
+                        _playersTurn = 1;
                 }
 
                 if (IsGameOver())
@@ -133,10 +133,14 @@ public class SnakeMiteinander : Snake
                 }
                 else
                 {
-                    _direction = _directionCache;
+                    _directionPlayer1 = _directionCachePlayer1;
+                    _directionPlayer2 = _directionCachePlayer2;
                 } 
             }
         }
+        
+        if(argv != 1)
+            _Merker = false;
     }
 
 
