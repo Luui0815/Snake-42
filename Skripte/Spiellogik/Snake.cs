@@ -160,8 +160,8 @@ public class Snake : Node2D
         if(argv != 1)
             _Merker = false;
     }
-
-    protected void _on_Tween_tween_all_completed()
+    /*
+    protected virtual void _on_Tween_tween_all_completed()
     {
         if(!_eating)
             _body.RemovePoint(_points.Length);
@@ -178,7 +178,7 @@ public class Snake : Node2D
             MoveSnake();
         }
     }
-
+    */
     protected void CheckFruitCollision()
     {
         if (_body.Points[0] == _fruit.Position)

@@ -28,8 +28,9 @@ public class SnakeMiteinander : Snake
         _directionCachePlayer1 = Vector2.Right;
         _directionCachePlayer2 = Vector2.Left;
         _isPlayerOne = true;
-        MoveSnake();
+        
         _face =  _face1;
+        MoveSnake();
     }
 
     public override void _Input(InputEvent @event)
@@ -45,18 +46,20 @@ public class SnakeMiteinander : Snake
         if (Input.IsActionPressed("move_left") && _directionPlayer2 != Vector2.Right) _directionCachePlayer2 = Vector2.Left;
         if (Input.IsActionPressed("move_up") && _directionPlayer2 != Vector2.Down) _directionCachePlayer2 = Vector2.Up;
         if (Input.IsActionPressed("move_down") && _directionPlayer2 != Vector2.Up) _directionCachePlayer2 = Vector2.Down;
+        
     }
 
     public override void MoveSnake()
     {
         _directionPlayer1 = _directionCachePlayer1;
         _directionPlayer2 = _directionCachePlayer2;
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _tween.InterpolateMethod(this, "MoveTween", 0f, 100f, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
     protected override void MoveTween(float argv)
     {
+        argv /= 100;
         Vector2 currentDirection;
         // aktuelle Richtung in die gelaufen werden soll ermitteln
 
@@ -64,7 +67,7 @@ public class SnakeMiteinander : Snake
            currentDirection = _directionCachePlayer1;
         else
            currentDirection = _directionCachePlayer2;
-
+        
         if (_Merker == false)
         {
             int i = 0;
@@ -75,8 +78,7 @@ public class SnakeMiteinander : Snake
                     newPos =  _points[i] + currentDirection * new Vector2(_gridSize * argv, _gridSize * argv);
                 else
                 {
-                    // Beim wachsen wird das Extrakörperteil genu in der Mitte des Körpers hinzugefügt
-                    if(!(_growing == true && i == _body.Points.Count() / 2))
+                    if(!(_growing == true && i == _body.Points.Count() -1))
                     {
                         diff = Vector2.Zero;
                         if(_points[i-1].x - _points[i].x != 0)
@@ -88,7 +90,7 @@ public class SnakeMiteinander : Snake
                     }
                     else
                     {
-                        // mittlerstes Körperteil darf nicht bewegt werden!
+                        // letztes Körperteil darf nicht bewegt werden!
                         newPos = _body.GetPointPosition(i);
                     }
                 }
@@ -105,10 +107,10 @@ public class SnakeMiteinander : Snake
             }
 
             _face1.Position = _body.Points[0];
-            _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
-
             _face2.Position = _body.Points[_body.Points.Count() - 1];
-            _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Right));
+            
+            _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
+            _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
 
             // wenn argv = 1 dann ist eine Schleife durch
             if(argv == 1)
@@ -138,9 +140,9 @@ public class SnakeMiteinander : Snake
                 } 
             }
         }
-        
         if(argv != 1)
             _Merker = false;
+        
     }
 
 
