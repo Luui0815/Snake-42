@@ -26,12 +26,11 @@ margin_right = 1269.0
 margin_bottom = 69.0
 text = "Nachricht senden"
 
-[node name="SendendeNachricht" type="Label" parent="."]
+[node name="SendendeNachricht" type="TextEdit" parent="."]
 margin_left = 983.0
 margin_top = 78.0
-margin_right = 1265.0
-margin_bottom = 255.0
-text = "Hallo"
+margin_right = 1251.0
+margin_bottom = 118.0
 
 [node name="RPCTestButton" type="Button" parent="."]
 margin_left = 24.0
@@ -46,6 +45,15 @@ margin_top = 517.0
 margin_right = 522.0
 margin_bottom = 686.0
 text = "1"
+
+[node name="PeerInfo" type="TextEdit" parent="."]
+anchor_right = 0.016
+anchor_bottom = 0.056
+margin_left = 853.0
+margin_top = 194.0
+margin_right = 1206.52
+margin_bottom = 459.68
+readonly = true
 
 [connection signal="pressed" from="Senden" to="." method="_on_Senden_pressed"]
 [connection signal="pressed" from="RPCTestButton" to="." method="_on_RPCTestButton_pressed"]

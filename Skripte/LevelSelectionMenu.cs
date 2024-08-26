@@ -19,10 +19,7 @@ public class LevelSelectionMenu : Control
         // PeerInfo
         var d = GlobalVariables.Instance.WebRTC.GetPeers();
         GD.Print(d);
-	    foreach(int k in d)
-        {
-            GlobalVariables.Instance.WebRTC.GetPeer(k);
-        }
+	    GetNode<TextEdit>("PeerInfo").Text = d.ToString();
     }
     
     private void _on_RPCTestButton_pressed()

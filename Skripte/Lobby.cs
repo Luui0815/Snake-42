@@ -83,11 +83,11 @@ public class Lobby : Control
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         // Signale zur Verbindungsabbruch behandeln
-        Error e = WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
-        Error ee = WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
+        WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
+        WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
 
-        e = CustomMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
-        ee = CustomMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
+        CustomMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
+        CustomMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
         
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
@@ -160,6 +160,8 @@ public class Lobby : Control
             Error eee= WebRTCMultiplayer.Initialize(_client.id,false);
             WebRTCPeerConnection.ConnectionState i = WebRTCPeer.GetConnectionState();
             // eignen Peer hinzufügen NICHT WebRTCPEER
+            //WebRTCPeerConnection peer = new WebRTCPeerConnection();
+            //peer.Initialize(_iceServers);
             eee=WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
         }
     }
@@ -264,7 +266,9 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
-        if(WebRTCPeer.CreateOffer() != Error.Ok)
+        //WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+        Error e = WebRTCPeer.CreateOffer();
+        if(e!= Error.Ok)
         {
             GD.Print("Fehler bei Erstellung SPD");
             ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
