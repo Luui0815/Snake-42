@@ -265,6 +265,7 @@ public class Server : Control
     public override void _Process(float delta)
     {
         // gesendte Nachrichten empfangen
-        _WSPeer.Poll();
+        if(_WSPeer != null)
+            _WSPeer.Poll();
     }
 }
