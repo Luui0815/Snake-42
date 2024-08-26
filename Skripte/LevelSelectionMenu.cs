@@ -15,7 +15,14 @@ public class LevelSelectionMenu : Control
 
     private void _on_Senden_pressed()
     {
-        Multiplayer.SendBytes(GetNode<Label>("SendendeNachricht").Text.ToUTF8());
+        Multiplayer.SendBytes(GetNode<TextEdit>("SendendeNachricht").Text.ToUTF8());
+        // PeerInfo
+        var d = GlobalVariables.Instance.WebRTC.GetPeers();
+        GD.Print(d);
+	    foreach(int k in d)
+        {
+            GlobalVariables.Instance.WebRTC.GetPeer(k);
+        }
     }
     
     private void _on_RPCTestButton_pressed()
@@ -23,7 +30,7 @@ public class LevelSelectionMenu : Control
         Rpc(nameof(TestRpc));
     }
 
-    [Remote]
+    [RemoteSync]
     private void TestRpc()
     {
         GetNode<Label>("RPCTest").Text += "1";
