@@ -34,6 +34,7 @@ public class Lobby : Control
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
+    private WebRTCPeerConnection TestPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
     private bool _FirstRPCCallEcecuted=false; 
     private Dictionary _iceServers = new Godot.Collections.Dictionary {
@@ -73,6 +74,7 @@ public class Lobby : Control
         if(_client != null)//kann null sein wenn nur server gestartet wurde
         {
             WebRTCPeer.Initialize(_iceServers);
+            TestPeer.Initialize(_iceServers);
             _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
             _PlayerNameLabel.Text = _client.PlayerName;
             //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
@@ -92,6 +94,8 @@ public class Lobby : Control
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
 
+        TestPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+        TestPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
         
         //ee = WebRTCMultiplayer.Connect("data_received", this, nameof(GetWebtRTCTest));
         //e = WebRTCPeer.Connect("data_received", this, nameof(GetWebtRTCTest));
@@ -162,7 +166,7 @@ public class Lobby : Control
             // eignen Peer hinzufügen NICHT WebRTCPEER
             //WebRTCPeerConnection peer = new WebRTCPeerConnection();
             //peer.Initialize(_iceServers);
-            eee=WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+            eee=WebRTCMultiplayer.AddPeer(TestPeer, _client.id);
         }
     }
 
@@ -220,6 +224,10 @@ public class Lobby : Control
             //Spieler ist ebereits in einem raum
             GetNode<Button>("RaumErstellen").Disabled = true;
             GetNode<Button>("RaumVerlassen").Disabled = false;
+            // RTCPeer vom Anderen hinzufügen
+            Dictionary d = WebRTCMultiplayer.GetPeers();
+            GD.Print(d.ToString());
+            WebRTCMultiplayer.AddPeer(WebRTCPeer,FindOtherRoomMate());
         }
         else
         {
@@ -258,6 +266,8 @@ public class Lobby : Control
         {
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
+                // Peer des andern wieder löschen
+                WebRTCMultiplayer.RemovePeer(FindOtherRoomMate());
                 // Raumeigenschaften werden vom Server gerade gebogen
                 _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomLeft,_client.id,0,JsonConvert.SerializeObject(room))));
             }
@@ -266,7 +276,6 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
-        //WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
         Error e = WebRTCPeer.CreateOffer();
         if(e!= Error.Ok)
         {
