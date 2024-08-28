@@ -34,9 +34,8 @@ public class Lobby : Control
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
-    private WebRTCPeerConnection TestPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
-    private bool _FirstRPCCallEcecuted=false; 
+    private bool _RTCconnected = false; 
     private Dictionary _iceServers = new Godot.Collections.Dictionary {
             {"iceServers", new Godot.Collections.Array {
                 new Godot.Collections.Dictionary {
@@ -73,34 +72,23 @@ public class Lobby : Control
 
         if(_client != null)//kann null sein wenn nur server gestartet wurde
         {
-            WebRTCPeer.Initialize(_iceServers);
-            TestPeer.Initialize(_iceServers);
             _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
             _PlayerNameLabel.Text = _client.PlayerName;
             //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
         }
 
-        CustomMultiplayer = GlobalVariables.Instance.Multiplayer;
-
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         // Signale zur Verbindungsabbruch behandeln
         WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
         WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
 
-        CustomMultiplayer.Connect("network_peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
-        CustomMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
         
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-
-        TestPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
-        TestPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-        
-        //ee = WebRTCMultiplayer.Connect("data_received", this, nameof(GetWebtRTCTest));
-        //e = WebRTCPeer.Connect("data_received", this, nameof(GetWebtRTCTest));
     }
 
+    // ToDo: Folgende Methode geht nicht richtig, denk ich
     private void BackToVerbindungseinstellung()
     {
         if(_server != null)
@@ -114,15 +102,14 @@ public class Lobby : Control
 
     public override void _Process(float delta)
     {
-        WebRTCPeer.Poll();
+        // WebRTCPeer.Poll();
         WebRTCMultiplayer.Poll();
 
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _FirstRPCCallEcecuted == false)
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCconnected == false)
         {
-            _FirstRPCCallEcecuted=true;
+            _RTCconnected=true;
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
-            CustomMultiplayer.NetworkPeer= WebRTCMultiplayer;
-            Rpc("SwitchToLevelSelectionMenu");
+            SwitchToLevelSelectionMenu();
         }
     }
 
@@ -162,11 +149,6 @@ public class Lobby : Control
         {
             // erst jetzt weiß der Client seine richtige ID und kann WebRTC aufbauen
             Error eee= WebRTCMultiplayer.Initialize(_client.id,false);
-            WebRTCPeerConnection.ConnectionState i = WebRTCPeer.GetConnectionState();
-            // eignen Peer hinzufügen NICHT WebRTCPEER
-            //WebRTCPeerConnection peer = new WebRTCPeerConnection();
-            //peer.Initialize(_iceServers);
-            eee=WebRTCMultiplayer.AddPeer(TestPeer, _client.id);
         }
     }
 
@@ -205,6 +187,12 @@ public class Lobby : Control
             _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 && room.PlayerOneId != _client.id ? "       Beitretbar": ""));
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
+                // RTC Peers des gegenüber setzten
+                if(FindOtherRoomMate() != 0 && !WebRTCMultiplayer.HasPeer(FindOtherRoomMate()))
+                {
+                    WebRTCPeer.Initialize(_iceServers);
+                    WebRTCMultiplayer.AddPeer(WebRTCPeer, FindOtherRoomMate());
+                }
                 ClientInRaum = true;
             }
 
@@ -224,10 +212,6 @@ public class Lobby : Control
             //Spieler ist ebereits in einem raum
             GetNode<Button>("RaumErstellen").Disabled = true;
             GetNode<Button>("RaumVerlassen").Disabled = false;
-            // RTCPeer vom Anderen hinzufügen
-            Dictionary d = WebRTCMultiplayer.GetPeers();
-            GD.Print(d.ToString());
-            WebRTCMultiplayer.AddPeer(WebRTCPeer,FindOtherRoomMate());
         }
         else
         {
@@ -276,8 +260,8 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
-        Error e = WebRTCPeer.CreateOffer();
-        if(e!= Error.Ok)
+        WebRTCMultiplayer.AddPeer(WebRTCPeer,FindOtherRoomMate());
+        if(WebRTCPeer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erstellung SPD");
             ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
@@ -312,7 +296,6 @@ public class Lobby : Control
     {
         msg m = new msg(Nachricht.ICECandidate,_client.id,FindOtherRoomMate(),media + "|" + index + "|" + name);
         _client.SendData(JsonConvert.SerializeObject(m));
-        //AddPeerToWebRTC();
     }
 
     private void GetWebtRTCTest(int id)
@@ -320,11 +303,9 @@ public class Lobby : Control
         GetNode<Label>("Label").Text = "NAchricht von " + id +" erhalten"; 
     }
 
-
-    [RemoteSync]
     private void SwitchToLevelSelectionMenu()
     {
-        int test = CustomMultiplayer.GetRpcSenderId();
+        //int test = CustomMultiplayer.GetRpcSenderId();
         if(_server != null)
         {
             if(GetNode<CheckButton>("ServerOffenLassen").Pressed == false)
