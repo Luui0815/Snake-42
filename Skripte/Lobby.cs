@@ -5,6 +5,7 @@ using Snake42;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Snake42
@@ -108,8 +109,22 @@ public class Lobby : Control
         if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCconnected == false)
         {
             _RTCconnected=true;
+            WebRTCPeer = new WebRTCPeerConnection();
+            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+            WebRTCPeer.Initialize(_iceServers);
+            WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+            
+            foreach(Raum r in _roomList)
+            {
+                if(r.PlayerTwoId == _client.id)
+                {
+                    WebRTCPeer.CreateOffer();
+                    return;
+                }
+            }
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
-            SwitchToLevelSelectionMenu();
+            //SwitchToLevelSelectionMenu();
         }
     }
 
@@ -261,7 +276,6 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
-        /*
         if(WebRTCPeer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erstellung SPD");
@@ -271,7 +285,6 @@ public class Lobby : Control
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
         }
-        */
     }
 
     private void WebRTCPeerSDPCreated(string type, string sdp)
@@ -333,5 +346,15 @@ public class Lobby : Control
         _client.QueueFree();
         GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
         QueueFree();
+    }
+
+    private void _on_PrintRTC_pressed()
+    {
+        GetNode<Label>("RTCVerbindungen").Text = WebRTCMultiplayer.GetPeers().ToString();
+    }
+
+    private void _on_SwitchToLevelSelection_pressed()
+    {
+        SwitchToLevelSelectionMenu();
     }
 }

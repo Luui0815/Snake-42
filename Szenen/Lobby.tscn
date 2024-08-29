@@ -101,8 +101,31 @@ text = "Lobby verlassen"
 margin_right = 296.0
 margin_bottom = 79.0
 
+[node name="PrintRTC" type="Button" parent="."]
+margin_left = 19.0
+margin_top = 611.0
+margin_right = 150.0
+margin_bottom = 664.0
+text = "RTC Anzeigen"
+
+[node name="RTCVerbindungen" type="Label" parent="."]
+margin_left = 5.0
+margin_top = 663.0
+margin_right = 1234.0
+margin_bottom = 718.0
+autowrap = true
+
+[node name="SwitchToLevelSelection" type="Button" parent="."]
+margin_left = 183.0
+margin_top = 612.0
+margin_right = 316.0
+margin_bottom = 666.0
+text = "Weiter"
+
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
 [connection signal="pressed" from="RaumVerlassen" to="." method="_on_RaumVerlassen_pressed"]
 [connection signal="pressed" from="SpielStarten" to="." method="_on_SpielStarten_pressed"]
 [connection signal="pressed" from="RäumeAkt" to="." method="_on_RumeAkt_pressed"]
+[connection signal="pressed" from="PrintRTC" to="." method="_on_PrintRTC_pressed"]
+[connection signal="pressed" from="SwitchToLevelSelection" to="." method="_on_SwitchToLevelSelection_pressed"]
