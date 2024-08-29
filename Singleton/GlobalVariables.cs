@@ -13,7 +13,7 @@ public partial class GlobalVariables : Node
     public int RPCSelfId {get;set;}
     public int RPCRoomMateId {get;set;}
     public WebRTCMultiplayer WebRTC {get; set; } 
-    public WebRTCDataChannel RTCdc {get; set; } 
+    public WebRTCDataChannel[] RTCdc {get; set; } 
 
     public override void _Ready()
     {

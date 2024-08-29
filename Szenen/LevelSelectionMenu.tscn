@@ -55,5 +55,11 @@ margin_right = 1206.52
 margin_bottom = 459.68
 readonly = true
 
+[node name="DataChannel" type="Label" parent="."]
+margin_top = 673.0
+margin_right = 1281.0
+margin_bottom = 719.0
+autowrap = true
+
 [connection signal="pressed" from="Senden" to="." method="_on_Senden_pressed"]
 [connection signal="pressed" from="RPCTestButton" to="." method="_on_RPCTestButton_pressed"]

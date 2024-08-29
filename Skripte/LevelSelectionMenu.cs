@@ -4,10 +4,10 @@ using Godot.Collections;
 
 public class LevelSelectionMenu : Control
 {
-    private WebRTCDataChannel dc;
+    private WebRTCDataChannel[] dc;
+
     public override void _Ready()
     {
-        dc = GlobalVariables.Instance.RTCdc;
         Multiplayer.NetworkPeer = GlobalVariables.Instance.WebRTC;
         Multiplayer.Connect("network_peer_packet",this,nameof(ReceivePacket));
     }
@@ -21,11 +21,6 @@ public class LevelSelectionMenu : Control
             GetNode<Label>("EmpfangeneNachricht").Text = GlobalVariables.Instance.WebRTC.GetPacket().GetStringFromUTF8();
         }
         */
-        dc.Poll();
-        if(dc.GetAvailablePacketCount() > 0)
-        {
-            GetNode<Label>("DataChannel").Text = dc.GetPacket().GetStringFromUTF8();
-        }
     }
     
     private void ReceivePacket(int id, byte[] packet )
