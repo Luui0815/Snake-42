@@ -192,6 +192,7 @@ public class Lobby : Control
                 {
                     WebRTCPeer.Initialize(_iceServers);
                     WebRTCMultiplayer.AddPeer(WebRTCPeer, FindOtherRoomMate());
+                    
                 }
                 ClientInRaum = true;
             }
@@ -260,7 +261,7 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
-        WebRTCMultiplayer.AddPeer(WebRTCPeer,FindOtherRoomMate());
+        /*
         if(WebRTCPeer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erstellung SPD");
@@ -270,6 +271,7 @@ public class Lobby : Control
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
         }
+        */
     }
 
     private void WebRTCPeerSDPCreated(string type, string sdp)
