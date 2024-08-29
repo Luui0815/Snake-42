@@ -355,6 +355,9 @@ public class Lobby : Control
 
     private void _on_SwitchToLevelSelection_pressed()
     {
+        Dictionary d = WebRTCMultiplayer.GetPeer(_client.id);
+        GlobalVariables.Instance.RTCdc = d["channels"] as WebRTCDataChannel;
+        GD.Print(d.ToString());
         SwitchToLevelSelectionMenu();
     }
 }
