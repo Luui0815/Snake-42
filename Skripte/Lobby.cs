@@ -33,6 +33,7 @@ public class Lobby : Control
     private Client _client;
     private Server _server;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
+    private Raum _myRoom;
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
@@ -83,10 +84,15 @@ public class Lobby : Control
         // Signale zur Verbindungsabbruch behandeln
         WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
         WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
+        WebRTCMultiplayer.Connect("peer_connected",this,"Test");
 
         
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+    }
+    private void Test(int id)
+    {
+        int t = id;
     }
 
     // ToDo: Folgende Methode geht nicht richtig, denk ich
@@ -100,32 +106,52 @@ public class Lobby : Control
         GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
-
+    private int _RTCState=0;
     public override void _Process(float delta)
     {
         // WebRTCPeer.Poll();
         WebRTCMultiplayer.Poll();
-
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCconnected == false)
+        /*
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 0)
         {
-            _RTCconnected=true;
+            // RTC Server wurde verbunden!
+            // nun Spiler 1 verbinden
+            _RTCState=1;
             WebRTCPeer = new WebRTCPeerConnection();
             WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
             WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
             WebRTCPeer.Initialize(_iceServers);
-            WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
+            WebRTCMultiplayer.AddPeer(WebRTCPeer, _myRoom.PlayerOneId);
             
-            foreach(Raum r in _roomList)
-            {
-                if(r.PlayerTwoId == _client.id)
-                {
-                    WebRTCPeer.CreateOffer();
-                    return;
-                }
-            }
-            GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
-            //SwitchToLevelSelectionMenu();
+            // CreateOffer nur wenn client==playerone
+            if(_client.id == _myRoom.PlayerOneId)
+                WebRTCPeer.CreateOffer();
+
+        }*/
+
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 0)
+        {
+            // Spieler1 wurde verbunden!
+            // nun Spiler 2 verbinden
+            _RTCState=2;
+            WebRTCPeer = new WebRTCPeerConnection();
+            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+            WebRTCPeer.Initialize(_iceServers);
+            WebRTCMultiplayer.AddPeer(WebRTCPeer, _myRoom.PlayerTwoId);
+            
+            // CreateOffer nur wenn client==player2
+            if(_client.id == _myRoom.PlayerOneId)
+                WebRTCPeer.CreateOffer();
+            
         }
+
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 2)
+        {
+            // Spielr2 verbunden Verbindung fertig!
+             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
+        }
+        
     }
 
     private void CLientReceivedMSG(Nachricht state, string msg)
@@ -163,7 +189,12 @@ public class Lobby : Control
         else if(state == Nachricht.checkIn)
         {
             // erst jetzt weiß der Client seine richtige ID und kann WebRTC aufbauen
-            Error eee= WebRTCMultiplayer.Initialize(_client.id,false);
+            // Error eee= WebRTCMultiplayer.Initialize(1,true);
+            WebRTCPeer = new WebRTCPeerConnection();
+            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
+            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+            WebRTCPeer.Initialize(_iceServers);
+            // WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
         }
     }
 
@@ -203,13 +234,31 @@ public class Lobby : Control
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
                 // RTC Peers des gegenüber setzten
+                /*
                 if(FindOtherRoomMate() != 0 && !WebRTCMultiplayer.HasPeer(FindOtherRoomMate()))
                 {
                     WebRTCPeer.Initialize(_iceServers);
                     WebRTCMultiplayer.AddPeer(WebRTCPeer, FindOtherRoomMate());
                     
                 }
+                */
+                if(room.PlayerOneId != 0 && room.PlayerTwoId != 0)
+                {
+                    if(room.PlayerOneId == _client.id)
+                    {
+                        WebRTCMultiplayer.Initialize(1,true);
+                        WebRTCMultiplayer.AddPeer(WebRTCPeer, 1);
+
+                    }
+                    else
+                    {
+                        WebRTCMultiplayer.Initialize(_client.id,true);
+                        WebRTCMultiplayer.AddPeer(WebRTCPeer, 1);
+                    }
+                }
+
                 ClientInRaum = true;
+                _myRoom = room;
             }
 
             //wenn RAum voll ist kann Host das Spiel starten
