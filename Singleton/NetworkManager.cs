@@ -76,9 +76,9 @@ public class NetworkManager : Node
                     case _RtcMsgState.RPC:
                     {
                         string[] msg = data.Data.Split("|"); //0 = NodePath, 1 = Method, wenn mehr = Args
-                        if (msg.Length > 3)
+                        if (msg.Length >= 3)
                         {           
-                            rpc(msg[0], msg[1], true, JsonConvert.DeserializeObject(msg[3]));
+                            rpc(msg[0], msg[1], true, JsonConvert.DeserializeObject<object[]>(msg[2]));
                         }
                         else
                         {
@@ -115,7 +115,11 @@ public class NetworkManager : Node
         // wenn remote, hat der andere ihn schon ausgeführt!
         if(remoterpc == false)
         {
-            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args))));
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))));
         } 
     }
 

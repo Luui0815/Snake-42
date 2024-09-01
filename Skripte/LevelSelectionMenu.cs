@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Godot;
 using Godot.Collections;
 
@@ -47,11 +48,48 @@ public class LevelSelectionMenu : Control
     }
     private void _on_RPCTestButton_pressed()
     {
-        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc));
+        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc1));
+    }
+
+    int i = 4;
+    private void _on_RPCTest2_pressed()
+    {
+        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc2));
+    }
+
+    private void _on_RPCTest3_pressed()
+    {
+        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc3),false,GetNode<TextEdit>("fürTest2").Text.ToInt());
+    }
+
+    private void _on_RPCTest4_pressed()
+    {
+        Sprite S = new Sprite();
+        S.Position = new Vector2(1056,607);
+        S.Texture =  ResourceLoader.Load<Texture>("res://.import/icon.png-ec880de02d5dab0aa15458af9d6c53ed.stex");
+
+        NetworkManager.NetMan.rpc(GetPath(), nameof(TestRpc4),false,S);
     }
     
-    private void TestRpc()
+    private void TestRpc1()
     {
         GetNode<Label>("RPCTest").Text += "\nHallo hier RPC";
+    }
+
+    private void TestRpc2()
+    {
+        i++;
+        GetNode<Label>("RPCTest").Text += "\nTest2: i=" + i;
+    }
+
+    private void TestRpc3(int Zahl)
+    {
+        i = Zahl;
+        GetNode<Label>("RPCTest").Text += "\nTest2: i=" + i;
+    }
+
+    private void TestRpc4(object AS)
+    {
+        AddChild(AS as Sprite);
     }
 }

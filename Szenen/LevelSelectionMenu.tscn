@@ -37,13 +37,13 @@ margin_left = 24.0
 margin_top = 538.0
 margin_right = 239.0
 margin_bottom = 665.0
-text = "TestRPC"
+text = "TestRPC1"
 
 [node name="RPCTest" type="Label" parent="."]
-margin_left = 340.0
-margin_top = 517.0
-margin_right = 522.0
-margin_bottom = 686.0
+margin_left = 270.0
+margin_top = 213.0
+margin_right = 647.0
+margin_bottom = 674.0
 text = "1"
 
 [node name="PeerInfo" type="TextEdit" parent="."]
@@ -61,5 +61,35 @@ margin_right = 1281.0
 margin_bottom = 719.0
 autowrap = true
 
+[node name="RPCTest2" type="Button" parent="."]
+margin_left = 51.0
+margin_top = 461.0
+margin_right = 226.0
+margin_bottom = 505.0
+text = "RpcTest2"
+
+[node name="RPCTest3" type="Button" parent="."]
+margin_left = 51.0
+margin_top = 286.0
+margin_right = 217.0
+margin_bottom = 371.0
+text = "RPCTest3"
+
+[node name="RPCTest4" type="Button" parent="."]
+margin_left = 57.0
+margin_top = 213.0
+margin_right = 199.0
+margin_bottom = 268.0
+text = "RPCTest4"
+
+[node name="fürTest2" type="TextEdit" parent="."]
+margin_left = 42.0
+margin_top = 383.0
+margin_right = 228.0
+margin_bottom = 432.0
+
 [connection signal="pressed" from="Senden" to="." method="_on_Senden_pressed"]
 [connection signal="pressed" from="RPCTestButton" to="." method="_on_RPCTestButton_pressed"]
+[connection signal="pressed" from="RPCTest2" to="." method="_on_RPCTest2_pressed"]
+[connection signal="pressed" from="RPCTest3" to="." method="_on_RPCTest3_pressed"]
+[connection signal="pressed" from="RPCTest4" to="." method="_on_RPCTest4_pressed"]
