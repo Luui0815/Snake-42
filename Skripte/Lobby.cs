@@ -84,16 +84,18 @@ public class Lobby : Control
         // Signale zur Verbindungsabbruch behandeln
         WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
         WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance,"WebRTCConnectionFailed");
-        WebRTCMultiplayer.Connect("peer_connected",this,"Test");
+        // WebRTCMultiplayer.Connect("peer_connected",this,"Test");
 
         
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
     }
+    /*
     private void Test(int id)
     {
         int t = id;
     }
+    */
 
     // ToDo: Folgende Methode geht nicht richtig, denk ich
     private void BackToVerbindungseinstellung()
@@ -127,7 +129,7 @@ public class Lobby : Control
             if(_client.id == _myRoom.PlayerOneId)
                 WebRTCPeer.CreateOffer();
 
-        }*/
+        }
 
         if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 0)
         {
@@ -150,6 +152,12 @@ public class Lobby : Control
         {
             // Spielr2 verbunden Verbindung fertig!
              GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
+        }
+        */
+
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState())
+        {
+            GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
         }
         
     }
@@ -233,32 +241,15 @@ public class Lobby : Control
             _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 && room.PlayerOneId != _client.id ? "       Beitretbar": ""));
             if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
             {
-                // RTC Peers des gegenüber setzten
-                /*
-                if(FindOtherRoomMate() != 0 && !WebRTCMultiplayer.HasPeer(FindOtherRoomMate()))
-                {
-                    WebRTCPeer.Initialize(_iceServers);
-                    WebRTCMultiplayer.AddPeer(WebRTCPeer, FindOtherRoomMate());
-                    
-                }
-                */
+                // RTC Peer setzten wenn Raum voll!
                 if(room.PlayerOneId != 0 && room.PlayerTwoId != 0)
                 {
-                    if(room.PlayerOneId == _client.id)
-                    {
-                        WebRTCMultiplayer.Initialize(1,true);
-                        WebRTCMultiplayer.AddPeer(WebRTCPeer, 1);
-
-                    }
-                    else
-                    {
-                        WebRTCMultiplayer.Initialize(_client.id,true);
-                        WebRTCMultiplayer.AddPeer(WebRTCPeer, 1);
-                    }
+                    WebRTCMultiplayer.Initialize(_client.id,false); // Verbindung wird mit id = 1 gestartet
+                    WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
                 }
 
                 ClientInRaum = true;
-                _myRoom = room;
+                // _myRoom = room;
             }
 
             //wenn RAum voll ist kann Host das Spiel starten

@@ -4,14 +4,13 @@ using Godot.Collections;
 
 public class LevelSelectionMenu : Control
 {
-    private WebRTCDataChannel[] dc;
-
     public override void _Ready()
     {
-        Multiplayer.Clear();
-        Multiplayer.NetworkPeer = GlobalVariables.Instance.WebRTC;
-        Multiplayer.Connect("network_peer_packet",this,nameof(ReceivePacket));
-        // Selbstegamchter RPC
+        //Multiplayer.NetworkPeer = GlobalVariables.Instance.WebRTC;
+        //Multiplayer.Connect("network_peer_packet",this,nameof(ReceivePacket));
+        // Selbstegamchte Klasse für RPC aufrufen
+        NetworkManager.NetMan.Init(GlobalVariables.Instance.WebRTC);
+        NetworkManager.NetMan.Connect("MessageReceived", this, nameof(ReceiveMsg));
     }
 
     public override void _Process(float delta)
@@ -20,20 +19,27 @@ public class LevelSelectionMenu : Control
         GlobalVariables.Instance.WebRTC.Poll();
         if(GlobalVariables.Instance.WebRTC.GetAvailablePacketCount() > 0)
         {
-            GetNode<Label>("EmpfangeneNachricht").Text = GlobalVariables.Instance.WebRTC.GetPacket().GetStringFromUTF8();
+            GetNode<Label>("EmpfangeneNachricht").Text ="NAchticht von WebRTC Verbindung" + GlobalVariables.Instance.WebRTC.GetPacket().GetStringFromUTF8();
         }
         */
     }
-    
+
     private void ReceivePacket(int id, byte[] packet )
     {
-        GetNode<Label>("EmpfangeneNachricht").Text = packet.GetStringFromUTF8();
+        GetNode<Label>("EmpfangeneNachricht").Text = "MSG von " + id + ": " + packet.GetStringFromUTF8();
+    }
+    
+    private void ReceiveMsg(string msg)
+    {
+        GetNode<Label>("EmpfangeneNachricht").Text = msg;
     }
     
     private void _on_Senden_pressed()
     {
-        Multiplayer.SendBytes(GetNode<TextEdit>("SendendeNachricht").Text.ToUTF8());
+        //string msg = GetNode<TextEdit>("SendendeNachricht").Text + " From MultiplayerAPI";
+        //Multiplayer.SendBytes(msg.ToUTF8());
         //GlobalVariables.Instance.WebRTC.PutPacket(GetNode<TextEdit>("SendendeNachricht").Text.ToUTF8());
+        NetworkManager.NetMan.SendMessage(GetNode<TextEdit>("SendendeNachricht").Text);
         // PeerInfo
         var d = GlobalVariables.Instance.WebRTC.GetPeers();
         GD.Print(d);
@@ -41,12 +47,11 @@ public class LevelSelectionMenu : Control
     }
     private void _on_RPCTestButton_pressed()
     {
-        //RPC.MyRPC.rpc(GetPath(),nameof(TestRpc));
+        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc));
     }
     
     private void TestRpc()
     {
-        GetNode<Label>("RPCTest").Text += "\nHallo hier RPC Meine ID: " + Multiplayer.GetNetworkUniqueId();
-        GD.Print("RPC wurd ausgelöst von: " + GlobalVariables.Instance.WebRTC.GetPeers().ToString());
+        GetNode<Label>("RPCTest").Text += "\nHallo hier RPC";
     }
 }

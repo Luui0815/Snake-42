@@ -20,7 +20,7 @@ config/windows_native_icon="res://Assets/Snakeicon.ico"
 [autoload]
 
 GlobalVariables="*res://Singleton/GlobalVariables.cs"
-NetworkManager="*res://Skripte/NetworkManager.cs"
+NetworkManager="*res://Singleton/NetworkManager.cs"
 
 [display]
 
