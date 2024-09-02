@@ -67,7 +67,7 @@ public class NetworkManager : Node
         // nach neuen RTC nachrichten ausschau halten und diese dann KAtegoreien einorden
         if(_multiplayer.GetAvailablePacketCount() > 0)
         {
-            _RtcMsg data = (_RtcMsg) _multiplayer.GetVar(true);
+            _RtcMsg data = _RtcMsg.ConvertTo_RtcMsg(_multiplayer.GetPacket().GetStringFromUTF8());
             if(data != null)
             {
                 // gültige Nachricht kam an => gucken was sie bedeutet
@@ -119,25 +119,20 @@ public class NetworkManager : Node
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            SendVariantMessage(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings)));
+            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))));
         } 
-    }
-
-    private void SendVariantMessage(_RtcMsg msg)
-    {
-        _multiplayer.PutVar(msg,true);
     }
 
     public void SendMessage(string text)
     {
-        SendVariantMessage(new _RtcMsg(_RtcMsgState.CostumMsg, text));
+        SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.CostumMsg, text)));
     }
 
-    /*
+    
     private void SendRawMessage(string message)
     {
         _multiplayer.PutPacket(message.ToUTF8());
     }
-    */
+    
 
 }

@@ -20,8 +20,6 @@ public class PeerToPeerMenu : Control
         Peer.Initialize(iceServers);
 
         MultiplayerPeer = new WebRTCMultiplayer();
-        MultiplayerPeer.Initialize(Convert.ToInt32(GetNode<TextEdit>("SelfPeerId").Text)); // eigene id angeben
-        MultiplayerPeer.AddPeer(Peer,Convert.ToInt32(GetNode<TextEdit>("ForeignPeerId").Text)); // id des anderen angeben!
 
         // Signale verbinden!
         Peer.Connect("session_description_created", this, nameof(SDPCreated));
@@ -40,14 +38,16 @@ public class PeerToPeerMenu : Control
     private void WebRTCPeerIceCandidateCreated(string media, int index, string name) 
     {
         // wieder auf Labels ausgeben
-        GetNode<TextEdit>("TextSelfMedia").Text = media;
-        GetNode<TextEdit>("TextSelfIndex").Text = index.ToString();
-        GetNode<TextEdit>("TextSelfName").Text = name;
+        GetNode<TextEdit>("TextSelfMedia").Text += media + "\n";
+        GetNode<TextEdit>("TextSelfIndex").Text += index.ToString() + "\n";
+        GetNode<TextEdit>("TextSelfName").Text += name + "\n";
     }
 
 
     private void _on_StartConnection_pressed()
     {
+        MultiplayerPeer.Initialize(GetNode<TextEdit>("id").Text.ToInt(),false); // eigene id angeben
+        MultiplayerPeer.AddPeer(Peer,GetNode<TextEdit>("id").Text.ToInt()); // id des anderen angeben!
         if(Peer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erzeugung SDP!");
@@ -70,26 +70,23 @@ public class PeerToPeerMenu : Control
         Peer.AddIceCandidate(GetNode<TextEdit>("TextForeignMedia").Text, Convert.ToInt32(GetNode<TextEdit>("TextForeignIndex").Text), GetNode<TextEdit>("TextForeignName").Text);
     }
 
-    private void _on_SendHallo_pressed()
-    {
-        if (Multiplayer.NetworkPeer == null)
-        {
-            Multiplayer.NetworkPeer = MultiplayerPeer;
-            Multiplayer.Connect("network_peer_packet",this,"receiveHallo");
-        }
-        
-        Multiplayer.SendBytes("Hallo!".ToUTF8());
-    }
-
-    private void receiveHallo(int id, byte[] packet)
-    {
-        GD.Print("nachricht von " + id + " : " + packet.GetStringFromUTF8());
-    }
-
-
     public override void _Process(float delta)
     {
-        Peer.Poll();
-        //MultiplayerPeer.Poll(); muss einfach nicht
+        MultiplayerPeer.Poll();
+        if(WebRTCPeerConnection.ConnectionState.Connected == Peer.GetConnectionState())
+        {
+            GlobalVariables.Instance.WebRTC = MultiplayerPeer;
+        }
+    }
+
+    private void _on_Button_pressed()
+    {
+        GetNode<Label>("RpcInfo").Text = MultiplayerPeer.GetPeers().ToString();
+    }
+
+    private void _on_weiter_pressed()
+    {
+        GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
+        QueueFree();
     }
 }
