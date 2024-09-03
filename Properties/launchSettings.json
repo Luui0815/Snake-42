@@ -6,7 +6,7 @@
     },
     "Profil \"1\"": {
       "commandName": "Executable",
-      "executablePath": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64.exe",
+      "executablePath": "C:\\Users\\lukas\\OneDrive\\Dokumente\\Godot Spiele\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64\\Godot_v3.5.3-stable_mono_win64.exe",
       "commandLineArgs": "-d",
       "workingDirectory": ".",
       "remoteDebugEnabled": true

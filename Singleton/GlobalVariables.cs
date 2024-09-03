@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using Snake42;
 using System;
 using System.Linq;
@@ -12,6 +13,22 @@ public partial class GlobalVariables : Node
     public PackedScene ConfirmationDialog { get; set; }
 
     public WebRTCMultiplayer WebRTC {get; set; } 
+    public WebRTCPeerConnection WebRTCPeer {get; set; }
+
+    static public readonly Dictionary IceServers = new Dictionary 
+    {
+        {"iceServers", 
+            new Godot.Collections.Array 
+            {
+                new Godot.Collections.Dictionary 
+                {
+                    {"urls", "stun:stun.l.google.com:19302"}
+                }
+            }
+        }
+        // Weiter Stun Server hinzufügen!
+    };
+
 
     public override void _Ready()
     {
@@ -56,9 +73,7 @@ public partial class GlobalVariables : Node
             // Prüfen ob das Spiel geschlossen wurde, wenn ja peers trennen
             if(WebRTC.IsQueuedForDeletion())
             {
-                WebRTCPeerConnection peer = (WebRTCPeerConnection)WebRTC.GetPeer(1).Cast<WebRTCPeerConnection>();
-                // 1 da alle peers die id 1 haben da nur 2 Teilnehmer da ist das ok, da nur 1 Verbindung steht!
-                peer.Close();
+                WebRTCPeer.Close();
             }
         }
     }

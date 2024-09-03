@@ -9,17 +9,21 @@ public class NetworkManager : Node
 {
     [Signal]
     public delegate void MessageReceived(string msg);
+    [Signal]
+    public delegate void AudioStreamReceived(byte[] data);
 
     // Klasse welche benutzt wird um Nachrichten zu versenden, nur für NetworkManager interresant
     private class _RtcMsg
     {
         public _RtcMsgState MsgState;
         public string Data;
+        public byte[] AudioStream;
 
-        public _RtcMsg(_RtcMsgState state, string data)
+        public _RtcMsg(_RtcMsgState state, string data = null, byte[] audioStream = null)
         {
             MsgState = state;
             Data = data;
+            AudioStream = audioStream;
         }
 
         public static string ConvertToJson(_RtcMsg msg)
@@ -34,7 +38,7 @@ public class NetworkManager : Node
                 return JsonConvert.DeserializeObject<_RtcMsg>(msg);
 
             }
-            catch
+            catch(Exception e)
             {
                 return null;
             }
@@ -46,6 +50,7 @@ public class NetworkManager : Node
         RPC, // Benutzt um RPC Aufrufe zu kennzeichnen
         CostumMsg, // da NetworkManager nur als eine API benutzt werden soll muss, sich der Benutzer wenn er mehr NNachrichten zu unterschidlichen Zwecken 
         // versenden will eigene Nachrichtenstati ausdenken => Signal wird emittiert
+        AudioStream,
     }
 
     // Die Klasse empfängt alle Nachrichten die über WebRTC gehen und macht auch RPCs
@@ -92,6 +97,13 @@ public class NetworkManager : Node
                         // Der API Nuter muss sich, wenn er mehrere verschiedene Stati austauschen will drüber klar werden wie er das machen will
                         break;
                     }
+                    case _RtcMsgState.AudioStream:
+                    {
+                        EmitSignal(nameof(AudioStreamReceived), data.AudioStream);
+                        // wenn Breakpoint in Übertragung während Audio Streams gesetzt ist dann kommt es hier zum Buffer überlauf
+                        // Lösung: keine Breakpoint setzen! wenn audio aktiv
+                        break;
+                    }
                 }
             }
         }
@@ -119,19 +131,24 @@ public class NetworkManager : Node
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))));
+            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))).ToUTF8());
         } 
     }
 
     public void SendMessage(string text)
     {
-        SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.CostumMsg, text)));
+        SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.CostumMsg, text)).ToUTF8());
+    }
+
+    public void SendAudio(byte[] stream)
+    {
+        SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.AudioStream, null, stream)).ToUTF8());
     }
 
     
-    private void SendRawMessage(string message)
+    private void SendRawMessage(byte[] message)
     {
-        _multiplayer.PutPacket(message.ToUTF8());
+        _multiplayer.PutPacket(message);
     }
     
 

@@ -38,14 +38,6 @@ public class Lobby : Control
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
     private bool _RTCconnected = false; 
-    private Dictionary _iceServers = new Godot.Collections.Dictionary {
-            {"iceServers", new Godot.Collections.Array {
-                new Godot.Collections.Dictionary {
-                    {"urls", "stun:stun.l.google.com:19302"}
-                }
-            }}
-            //noch wietere Stun Server hinzufügen
-    };
 
     public override void _Ready()
     {
@@ -88,7 +80,7 @@ public class Lobby : Control
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
 
-        WebRTCPeer.Initialize(_iceServers);
+        WebRTCPeer.Initialize(GlobalVariables.IceServers);
         WebRTCMultiplayer.Initialize(1,false); // Verbindung wird mit id = 1 gestartet, da nur 2 spieler und nur 1 Verbindung benötigt wird!
         WebRTCMultiplayer.AddPeer(WebRTCPeer,1);
     }
@@ -151,6 +143,7 @@ public class Lobby : Control
 
         if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState())
         {
+            GlobalVariables.Instance.WebRTCPeer = WebRTCPeer;
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
         }
         

@@ -63,15 +63,7 @@ public class PeerToPeerMenu : Control
     public override void _Ready()
     {
         Peer = new WebRTCPeerConnection();
-        var iceServers = new Godot.Collections.Dictionary {
-            {"iceServers", new Godot.Collections.Array {
-                new Godot.Collections.Dictionary {
-                    {"urls", "stun:stun.l.google.com:19302"}
-                }
-            }}
-            //noch wietere Stun Server hinzufügen
-            };
-        Peer.Initialize(iceServers);
+        Peer.Initialize(GlobalVariables.IceServers);
 
         MultiplayerPeer = new WebRTCMultiplayer();
         MultiplayerPeer.Initialize(1,false);

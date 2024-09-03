@@ -88,8 +88,19 @@ margin_top = 383.0
 margin_right = 228.0
 margin_bottom = 432.0
 
+[node name="AudioAktiv" type="Button" parent="."]
+margin_left = 684.0
+margin_top = 577.0
+margin_right = 878.0
+margin_bottom = 634.0
+toggle_mode = true
+text = "Adio Aktiv"
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+
 [connection signal="pressed" from="Senden" to="." method="_on_Senden_pressed"]
 [connection signal="pressed" from="RPCTestButton" to="." method="_on_RPCTestButton_pressed"]
 [connection signal="pressed" from="RPCTest2" to="." method="_on_RPCTest2_pressed"]
 [connection signal="pressed" from="RPCTest3" to="." method="_on_RPCTest3_pressed"]
 [connection signal="pressed" from="RPCTest4" to="." method="_on_RPCTest4_pressed"]
+[connection signal="pressed" from="AudioAktiv" to="." method="_on_AudioAktiv_pressed"]

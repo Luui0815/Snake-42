@@ -2,9 +2,13 @@ using System;
 using System.Data;
 using Godot;
 using Godot.Collections;
+using NAudio.Wave;
 
 public class LevelSelectionMenu : Control
 {
+    private AudioStreamPlayer _AudioPlayer;
+    private BufferedWaveProvider _bufferedProvider;
+    private WaveOutEvent _waveOut;
     public override void _Ready()
     {
         //Multiplayer.NetworkPeer = GlobalVariables.Instance.WebRTC;
@@ -12,17 +16,16 @@ public class LevelSelectionMenu : Control
         // Selbstegamchte Klasse für RPC aufrufen
         NetworkManager.NetMan.Init(GlobalVariables.Instance.WebRTC);
         NetworkManager.NetMan.Connect("MessageReceived", this, nameof(ReceiveMsg));
+        NetworkManager.NetMan.Connect("AudioStreamReceived", this, nameof(AudioStreamReceived));
+
+        _waveOut = new WaveOutEvent();
+        _bufferedProvider = new BufferedWaveProvider(new WaveFormat(44100, 1));
+        _waveOut.Init(_bufferedProvider);
+        _waveOut.Play();
     }
 
     public override void _Process(float delta)
     {
-        /*
-        GlobalVariables.Instance.WebRTC.Poll();
-        if(GlobalVariables.Instance.WebRTC.GetAvailablePacketCount() > 0)
-        {
-            GetNode<Label>("EmpfangeneNachricht").Text ="NAchticht von WebRTC Verbindung" + GlobalVariables.Instance.WebRTC.GetPacket().GetStringFromUTF8();
-        }
-        */
     }
 
     private void ReceivePacket(int id, byte[] packet )
@@ -91,5 +94,32 @@ public class LevelSelectionMenu : Control
     private void TestRpc4(object AS)
     {
         AddChild(AS as Sprite);
+    }
+
+    private WaveInEvent waveIn;
+    private void _on_AudioAktiv_pressed()
+    {
+        if(GetNode<Button>("AudioAktiv").Pressed == true)
+        {
+            waveIn = new WaveInEvent();
+            waveIn.WaveFormat = new WaveFormat(44100, 1);
+            waveIn.DataAvailable += OnDataAvailable;
+            waveIn.StartRecording();
+        }
+        else
+        {
+            waveIn.StopRecording();
+            _waveOut.Stop();
+        }
+    }
+
+    private void OnDataAvailable(object sender, WaveInEventArgs e)
+    {
+        NetworkManager.NetMan.SendAudio(e.Buffer);
+    }
+
+    private void AudioStreamReceived(byte[] data)
+    {
+        _bufferedProvider.AddSamples(data, 0 ,data.Length);
     }
 }
