@@ -1,10 +1,29 @@
 using Godot;
+using Godot.Collections;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 public class PeerToPeerMenu : Control
 {
     private WebRTCPeerConnection Peer;
     private WebRTCMultiplayer MultiplayerPeer;
+
+    // Speicherstruktur für die ICe Kandidaten
+    private struct IceCandidate
+    {
+        public string Media {get;}
+        public int Index {get;}
+        public string Name {get;}
+
+        public IceCandidate(string media, int index, string name)
+        {
+            Media = media;
+            Index = index;
+            Name = name;
+        }
+    }
+    private List<IceCandidate> _IceList = new List<IceCandidate>();
 
     public override void _Ready()
     {
@@ -20,55 +39,73 @@ public class PeerToPeerMenu : Control
         Peer.Initialize(iceServers);
 
         MultiplayerPeer = new WebRTCMultiplayer();
+        MultiplayerPeer.Initialize(1,false);
+        MultiplayerPeer.AddPeer(Peer,1);
 
         // Signale verbinden!
         Peer.Connect("session_description_created", this, nameof(SDPCreated));
         Peer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
     }
 
-    private void SDPCreated(string type, string sdp)
-    {
-        Peer.SetLocalDescription(type,sdp);
-        // Daten in Label schreiben, damit User ihn austauschen kann!
-        GetNode<TextEdit>("TextSelfType").Text = type;
-        GetNode<TextEdit>("TextSelfSDPData").Text = sdp;
-        // Signal ICE Candiadte Created wird emiittiert => WebRTCPeerIceCandidateCreated
-    }
-
-    private void WebRTCPeerIceCandidateCreated(string media, int index, string name) 
-    {
-        // wieder auf Labels ausgeben
-        GetNode<TextEdit>("TextSelfMedia").Text += media + "\n";
-        GetNode<TextEdit>("TextSelfIndex").Text += index.ToString() + "\n";
-        GetNode<TextEdit>("TextSelfName").Text += name + "\n";
-    }
-
-
+    // Schritt1: Partner A erzeugt seine SPD und ICe Kandidaten und gibt sie aus!
     private void _on_StartConnection_pressed()
     {
-        MultiplayerPeer.Initialize(GetNode<TextEdit>("id").Text.ToInt(),false); // eigene id angeben
-        MultiplayerPeer.AddPeer(Peer,GetNode<TextEdit>("id").Text.ToInt()); // id des anderen angeben!
         if(Peer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erzeugung SDP!");
             // Signal session_description_created => SDPCreated wird aufgerufen
         }
     }
+    private void SDPCreated(string type, string sdp)
+    {
+        Peer.SetLocalDescription(type,sdp);
+        // Daten kompakt in Label schreiben, damit User ihn austauschen kann!
+        GetNode<TextEdit>("SelfSDPData").Text = type + "|" + sdp;
+        // Signal ICE Candiadte Created wird emiittiert => WebRTCPeerIceCandidateCreated
+    }
 
+    private void WebRTCPeerIceCandidateCreated(string media, int index, string name) 
+    {
+        // es werden mehrere Ice Kandidaten erzeugt, d.h. die Methode wird öfers aufgerufen
+        _IceList.Add(new IceCandidate(media, index, name));
+        GetNode<TextEdit>("SelfIceCandidates").Text = JsonConvert.SerializeObject(_IceList);
+    }
+
+    // Schritt2: PartnerB bekommt die SDP Daten von Partner A und setzt sie als entfernte SDP
     private void _on_SetRemoteData_pressed()
     {
-        if(Peer.SetRemoteDescription(GetNode<TextEdit>("TextForeignType").Text, GetNode<TextEdit>("TextForeignSDPData").Text) != Error.Ok)
+        string[] data = GetNode<TextEdit>("ForeignSDPData").Text.Split("|");
+        if(data.Length != 2)
+        {
+            GD.Print("Falsche SDP Daten!");
+            return;
+        }
+
+        if(Peer.SetRemoteDescription(data[0], data[1]) != Error.Ok)
         {
             GD.Print("Fehler bei Erzeugung Remote SDP!");
         }
         // Signal session_description_created => SDPCreated wird aufgerufen
     }
+    // nachdem Partner B die RemoteSDP Daten gestzt hat, erstellt er seine ICE KAndidaten
+    // das ist das gleiche wie wenn A sie erstellt desween sie Methode:WebRTCPeerIceCandidateCreated
 
+    // danach fügt Partner B die IceKandidaten von Partner A seiner Verbindung hinzu
     private void _on_SetICEData_pressed()
     {
         // IceData welche von dem anderen Peer erzeugt wurden als Fremde Daten speichern!
-        Peer.AddIceCandidate(GetNode<TextEdit>("TextForeignMedia").Text, Convert.ToInt32(GetNode<TextEdit>("TextForeignIndex").Text), GetNode<TextEdit>("TextForeignName").Text);
+        string data = GetNode<TextEdit>("ForeignIceCandidates").Text;
+        List<IceCandidate> ForeignIceList = JsonConvert.DeserializeObject<List<IceCandidate>>(data);
+
+        foreach(IceCandidate ice in ForeignIceList)
+        {
+            Peer.AddIceCandidate(ice.Media, ice.Index, ice.Name);
+        }
     }
+
+    // Nachdem Partner B die Ice Kandidaten an Partner A übermittelt der 
+    // setzt auch wie Partner B die SPD remote und ICE von B
+    // danach sollte die Verbindung stehen
 
     public override void _Process(float delta)
     {
