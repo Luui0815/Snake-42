@@ -1,6 +1,7 @@
 using Godot;
 using Snake42;
 using System;
+using System.Linq;
 public partial class GlobalVariables : Node
 {
     public static GlobalVariables Instance { get; private set; }
@@ -10,10 +11,7 @@ public partial class GlobalVariables : Node
     public Lobby Lobby { get; set; }
     public PackedScene ConfirmationDialog { get; set; }
 
-    public int RPCSelfId {get;set;}
-    public int RPCRoomMateId {get;set;}
     public WebRTCMultiplayer WebRTC {get; set; } 
-    public WebRTCDataChannel[] RTCdc {get; set; } 
 
     public override void _Ready()
     {
@@ -53,5 +51,15 @@ public partial class GlobalVariables : Node
     }
     public override void _Process(float delta)
     {
+        if(WebRTC != null)
+        {
+            // Prüfen ob das Spiel geschlossen wurde, wenn ja peers trennen
+            if(WebRTC.IsQueuedForDeletion())
+            {
+                WebRTCPeerConnection peer = (WebRTCPeerConnection)WebRTC.GetPeer(1).Cast<WebRTCPeerConnection>();
+                // 1 da alle peers die id 1 haben da nur 2 Teilnehmer da ist das ok, da nur 1 Verbindung steht!
+                peer.Close();
+            }
+        }
     }
 }

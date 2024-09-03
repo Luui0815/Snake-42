@@ -25,7 +25,7 @@ public class PeerToPeerMenu : Control
                 SDP = sdp;
             }
         }
-        public SDPData SDP_Data {get;}
+        public SDPData SDP_Data {get; set;}
     
         // Daten für ICE Kandidaten
         public struct IceCandidateData
@@ -80,6 +80,8 @@ public class PeerToPeerMenu : Control
         // Signale verbinden!
         Peer.Connect("session_description_created", this, nameof(SDPCreated));
         Peer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+        MultiplayerPeer.Connect("peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
+        MultiplayerPeer.Connect("server_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
     }
 
     // Schritt1: Partner A erzeugt seine SPD und ICe Kandidaten und gibt sie aus!
