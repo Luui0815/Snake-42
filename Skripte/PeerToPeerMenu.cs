@@ -9,21 +9,56 @@ public class PeerToPeerMenu : Control
     private WebRTCPeerConnection Peer;
     private WebRTCMultiplayer MultiplayerPeer;
 
-    // Speicherstruktur für die ICe Kandidaten
-    private struct IceCandidate
+    // um es dem benutzer einfacher zu machen werden die SDB und ICe Kandidaten zu einer großen Speicherstrucktur
+    // zusammengeafsst und einmalig als Sting in Json übertragen, nicht SDP und ICE einzeln
+    private class WebRTCData
     {
-        public string Media {get;}
-        public int Index {get;}
-        public string Name {get;}
-
-        public IceCandidate(string media, int index, string name)
+        // Daten für SDP
+        public struct SDPData
         {
-            Media = media;
-            Index = index;
-            Name = name;
+            public string Type {get;}
+            public string SDP {get;}
+
+            public SDPData(string type, string sdp)
+            {
+                Type = type;
+                SDP = sdp;
+            }
+        }
+        public SDPData SDP_Data {get;}
+    
+        // Daten für ICE Kandidaten
+        public struct IceCandidateData
+        {
+            public string Media {get;}
+            public int Index {get;}
+            public string Name {get;}
+
+            public IceCandidateData(string media, int index, string name)
+            {
+                Media = media;
+                Index = index;
+                Name = name;
+            }
+        }
+        // da es im Normalfall deutlich mehr als 1 ICEKAndidaten gibt alle Kandidaten in einer Liste sammeln
+        public List<IceCandidateData> ListIceCandidates {get;}
+        // Konstuktor und co.
+        public WebRTCData(string type, string sdp)
+        {
+            // zuerst muss man nur die SDP Daten haben, danach werden die einzelnen ICE Kandidaten eingtragen
+            SDP_Data = new SDPData(type, sdp);
+            ListIceCandidates = new List<IceCandidateData>();
+        }
+
+        public void AddIce(string media, int index, string name)
+        {
+            ListIceCandidates.Add(new IceCandidateData(media, index, name));
         }
     }
-    private List<IceCandidate> _IceList = new List<IceCandidate>();
+
+    private WebRTCData _LocalRtcData;
+    private WebRTCData _RemoteRtcData;
 
     public override void _Ready()
     {
@@ -59,50 +94,46 @@ public class PeerToPeerMenu : Control
     private void SDPCreated(string type, string sdp)
     {
         Peer.SetLocalDescription(type,sdp);
-        // Daten kompakt in Label schreiben, damit User ihn austauschen kann!
-        GetNode<TextEdit>("SelfSDPData").Text = type + "|" + sdp;
-        // Signal ICE Candiadte Created wird emiittiert => WebRTCPeerIceCandidateCreated
+        // SDP Daten WebRTCDAta speichern
+        _LocalRtcData = new WebRTCData(type, sdp);
     }
 
     private void WebRTCPeerIceCandidateCreated(string media, int index, string name) 
     {
         // es werden mehrere Ice Kandidaten erzeugt, d.h. die Methode wird öfers aufgerufen
-        _IceList.Add(new IceCandidate(media, index, name));
-        GetNode<TextEdit>("SelfIceCandidates").Text = JsonConvert.SerializeObject(_IceList);
+        _LocalRtcData.AddIce(media, index, name);
+        // da man nichr die genaue Anzahl der Kandidaten und damit die aufrufe der Methode weiß muss man jedesmal
+        // _localRtcdata jedesmal in Json konvertieren und ausgeben
+        GetNode<TextEdit>("SelfRtcData").Text = JsonConvert.SerializeObject(_LocalRtcData);
     }
 
-    // Schritt2: PartnerB bekommt die SDP Daten von Partner A und setzt sie als entfernte SDP
+    // Schritt2: PartnerB bekommt die SDP und ICe Daten von Partner A und drückt auf speichern
     private void _on_SetRemoteData_pressed()
     {
-        string[] data = GetNode<TextEdit>("ForeignSDPData").Text.Split("|");
-        if(data.Length != 2)
+        // json.string in RTCData konvertiren
+        try
         {
-            GD.Print("Falsche SDP Daten!");
-            return;
+            _RemoteRtcData = JsonConvert.DeserializeObject<WebRTCData>(GetNode<TextEdit>("ForeignRtcData").Text);
         }
-
-        if(Peer.SetRemoteDescription(data[0], data[1]) != Error.Ok)
+        catch
+        {
+            // Todo: Fehlerpop erscheinen lassen
+            GD.Print("In den übertragenen RTC DAten liegt ein Fehler vor! Versuche es erneut");
+        }
+        // SDP von Partner A als remote SDp setzen
+        if(Peer.SetRemoteDescription(_RemoteRtcData.SDP_Data.Type, _RemoteRtcData.SDP_Data.SDP) != Error.Ok)
         {
             GD.Print("Fehler bei Erzeugung Remote SDP!");
         }
         // Signal session_description_created => SDPCreated wird aufgerufen
-    }
-    // nachdem Partner B die RemoteSDP Daten gestzt hat, erstellt er seine ICE KAndidaten
-    // das ist das gleiche wie wenn A sie erstellt desween sie Methode:WebRTCPeerIceCandidateCreated
 
-    // danach fügt Partner B die IceKandidaten von Partner A seiner Verbindung hinzu
-    private void _on_SetICEData_pressed()
-    {
-        // IceData welche von dem anderen Peer erzeugt wurden als Fremde Daten speichern!
-        string data = GetNode<TextEdit>("ForeignIceCandidates").Text;
-        List<IceCandidate> ForeignIceList = JsonConvert.DeserializeObject<List<IceCandidate>>(data);
-
-        foreach(IceCandidate ice in ForeignIceList)
+        //ICe Kandidaten von Partner A hinzufügen
+        foreach(WebRTCData.IceCandidateData ice in _RemoteRtcData.ListIceCandidates)
         {
             Peer.AddIceCandidate(ice.Media, ice.Index, ice.Name);
         }
     }
-
+    // ab hier werden RTCDaten von Partner B erzeugt, erst SDp dann Ice
     // Nachdem Partner B die Ice Kandidaten an Partner A übermittelt der 
     // setzt auch wie Partner B die SPD remote und ICE von B
     // danach sollte die Verbindung stehen
