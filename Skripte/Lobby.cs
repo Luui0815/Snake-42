@@ -73,7 +73,7 @@ public class Lobby : Control
         {
             // der Serverbetriber soll auch alle Nachrichten in der Lobby sehen!
             GetNode<Button>("RäumeAkt").Visible = false;
-            _client.Connect(nameof(Server.ServerInfo), this, nameof(MSGReceived));
+            _server.Connect(nameof(Server.ServerInfo), this, nameof(MSGReceived));
         }
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));

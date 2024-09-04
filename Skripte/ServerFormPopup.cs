@@ -21,6 +21,8 @@ public class ServerFormPopup : Popup
             try
             {
                 EmitSignal(nameof(Confirmed),0, int.Parse(port),"");
+            }
+            catch{}
             QueueFree();
         }
     }

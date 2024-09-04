@@ -103,10 +103,13 @@ public class Server : Control
         {
             string DisconnectedClientName=_ConnectedClients.Find(x => x.GetId==id).Name;
             _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId==id));
+            msg msg;
             if(was_clean == true)
-                SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich vom Server getrennt")));
+                msg = new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich vom Server getrennt");
             else
-                SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt")));
+                msg = new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt");
+            SendDataToAll(JsonConvert.SerializeObject(msg));
+            EmitSignal(nameof(ServerInfo), msg.state, msg.data);
             // Prüfen ob sie sich in einem Raum befunden haben!
             foreach(Raum r in _RaumList)
             {
@@ -243,7 +246,7 @@ public class Server : Control
             Raum room = JsonConvert.DeserializeObject<Raum>(Message.data);
             foreach(RoomMatesOnStarting mr in _MatesOnStartingGame)
             {
-                if(mr.room == room)
+                if(mr.room.PlayerOneId == room.PlayerOneId && mr.room.PlayerTwoId == room.PlayerTwoId)
                 {
                     index = _MatesOnStartingGame.IndexOf(mr);
                 }
@@ -251,7 +254,9 @@ public class Server : Control
             if(index != -1)
             {
                 // beide haben den Request gesendet => Raum löschen, Clients löschen, ChatMsg an alle andern senden
-                if(!_RaumList.Remove(room))
+                int LengthBefore = _RaumList.Count();
+                _RaumList.RemoveAt(index);
+                if(LengthBefore == _RaumList.Count())
                 {
                     throw new Exception("2 Clients haben eine RTC Verbindung aufgebaut und dies bestätigt. Aber der Raum in dem sie noch sind existiert nicht! => Unmöglich");
                 }

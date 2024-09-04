@@ -1,9 +1,10 @@
 Verbindungsabbruch Handling bei WebRTc Verbindung
 Gucken wie WebExport + Android
-Sprachchat über anderen Datenchannel mit UDP
-Daten und RPC Stream über TCP
+Spiel stürzt ab wenn Audio Stream beendet wird
+Popupt PeerToPeer abgebrochen sorgt für endlosschleife
 
 zu Testen: 
-Meldung wenn 2. Spiler RTC Verbindung starten
-Meödung wenn 1 Spieler im Raum die Lobby verlässt
-Server Info bei nur Server
+Meldung wenn 2. Spiler RTC Verbindung starten => geht
+Meödung wenn 1 Spieler im Raum die Lobby verlässt => geht
+Server Info bei nur Server => geht
+Server muss Raumlisten sehen!
