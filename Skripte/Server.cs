@@ -30,6 +30,8 @@ namespace Snake42
 
 public class Server : Control
 {
+    [Signal]
+    public delegate void ServerInfo(Nachricht state, string msg);
     private class ConnectedClients
     {
         public ConnectedClients(int id, string name)
@@ -51,12 +53,24 @@ public class Server : Control
         string name;
     }
 
+    private class RoomMatesOnStarting // wird nur benutzt um zu sagen das 2 Spieler eine RTC Verbindung aufgebaut haben und das Spiel starten
+    {
+        public Raum room;
+        public bool deletable; // wenn der Spieler welches die Anfrage gesendet hat merkt dasa es das objekt schon gibt, haben beide die ANfrage gestellt und es kann gelöscht werden
+
+        public RoomMatesOnStarting(Raum room)
+        {
+            this.room = room;
+            deletable = false;
+        }
+    }
+
     private WebSocketServer _WSPeer = new WebSocketServer();
     private List<ConnectedClients> _ConnectedClients = new List<ConnectedClients>();
-    private List<Raum> _RaumList=new List<Raum>();
+    private List<RoomMatesOnStarting> _MatesOnStartingGame = new List<RoomMatesOnStarting>();
+    private List<Raum> _RaumList = new List<Raum>();
     public Error Error {get;set;} = Error.Ok;
 
-    // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         //Signale verbinden
@@ -69,12 +83,11 @@ public class Server : Control
     public void ClientConnected(int id, string proto)
     {
         // Id welcher der Server dem Client vergibt an Client senden
-        // ToDo: prüfen ob der Name einmailg ist
         _ConnectedClients.Add(new ConnectedClients(id, "unkown"));
         
         msg message = new msg(Nachricht.checkIn,0,id,"");
         SendDataToOne(JsonConvert.SerializeObject(message),id);
-        // Nachricht das er sich auf Server gekommen ist wird erst gesendet wenn der Name bekannt ist
+        // Nachricht das er auf Server gekommen ist wird erst gesendet wenn der Name bekannt ist
     }
 
     public void ConnectionCloseRequest(int id, int code, string reason)
@@ -94,6 +107,33 @@ public class Server : Control
                 SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich vom Server getrennt")));
             else
                 SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + DisconnectedClientName + " hat sich aufgrund eines Verbindungsfehlers vom Server getrennt")));
+            // Prüfen ob sie sich in einem Raum befunden haben!
+            foreach(Raum r in _RaumList)
+            {
+                if(r.PlayerOneId == id)
+                {
+                    // Prüfen ob noch ein 2. drin ist
+                    if(r.PlayerTwoId != 0)
+                    {
+                        // Spieler 2 wird zum Spieler 1
+                        int index = _RaumList.IndexOf(r);
+                        _RaumList[index].Raumname = "Raum von: " + _ConnectedClients.Find(x => x.GetId == r.PlayerTwoId).Name;
+                        _RaumList[index].PlayerOneId = r.PlayerTwoId;
+                        _RaumList[index].PlayerTwoId = 0;
+                    }
+                    else
+                    {
+                        // wenn kein Spiler 2 raum löschen
+                        _RaumList.Remove(r);
+                    }
+                }
+                else if(r.PlayerTwoId == id)
+                {
+                    // einfach id aus Raumlöschen
+                    _RaumList[_RaumList.IndexOf(r)].PlayerTwoId = 0;
+                }
+                SendRaumListToAllClients();
+            }
         }
 
     }
@@ -110,7 +150,10 @@ public class Server : Control
         {
             _ConnectedClients.Find(x => x.GetId==id).Name = Message.data;
             // Nachricht an alle senden das neuer Client sich verbunden hat
-            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + Message.data + " ist dem Server beigetreten")));
+            Message = new msg(Nachricht.chatMSG,0,999,"System: Der Spieler " + Message.data + " ist dem Server beigetreten");
+            SendDataToAll(JsonConvert.SerializeObject(Message));
+            // das dann auch als ServerInfo dem Serverbetreiber mitteilen, falls er nicht auch Client ist
+            EmitSignal(nameof(ServerInfo), Message.state, Message.data);
         }
         else if (Message.state==Nachricht.chatMSG)
         {
@@ -118,6 +161,7 @@ public class Server : Control
             Message = new msg(Nachricht.chatMSG,0,999,Message.data);
             // 999 -> alle Clients sind das Ziel
             SendDataToAll(JsonConvert.SerializeObject(Message));
+            EmitSignal(nameof(ServerInfo), Message.state, Message.data);
         }
         else if (Message.state == Nachricht.RoomCreate)
         {
@@ -191,21 +235,41 @@ public class Server : Control
         {
             SendDataToOne(recievedMessage, Message.target);
         }
-        else if(Message.state == Nachricht.PeerToPeerConnectionEstablished)
+        else if(Message.state == Nachricht.StartGame)
         {
-            // Roomhost hat seine id und die seines Mitspielers gesendet
-            // beide müssen von Connected Clients getrennt werden, sonst wird an den Mitspieler noch gesendet das der roomhost getrennt wurde
-            // das passiert in SendDataToAll(), da es aber den Mitspieler beriets auch nciht mehr gibt führt das zu einem gravierenden fehler
-            // Clients löschen sich nicht selbst, daher muss server bestätigen das er empfange hat das sie eine peer to perr haben, wenn dies passiert löschen sich clients
-            string PlayerOneName = _ConnectedClients.Find(x => x.GetId==Message.publisher).Name;
-            string PlayerTwoName = _ConnectedClients.Find(x => x.GetId==Convert.ToInt32(Message.data)).Name;
-            //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Message.publisher,"")),Message.publisher);
-            //SendDataToOne(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,0,Convert.ToInt32(Message.data),"")),Convert.ToInt32(Message.data));
-            _WSPeer.DisconnectPeer(Message.publisher);
-            _WSPeer.DisconnectPeer(Convert.ToInt32(Message.data));
-            _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Message.publisher));
-            _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Convert.ToInt32(Message.data)));
-            SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.chatMSG,0,999,"System: Die Spieler " + PlayerOneName+ " und " + PlayerTwoName + " habben eine runde gestartet")));
+            // Nachricht wird von beiden gesendet!, aber nur einmal soll eine Nachricht kommen und auch keine Verbindungsabbruc nachricht
+            // prüfen ob sein Kollege nicht schon schneller war und es den Eintrag schon gibt!
+            int index = -1;
+            Raum room = JsonConvert.DeserializeObject<Raum>(Message.data);
+            foreach(RoomMatesOnStarting mr in _MatesOnStartingGame)
+            {
+                if(mr.room == room)
+                {
+                    index = _MatesOnStartingGame.IndexOf(mr);
+                }
+            }
+            if(index != -1)
+            {
+                // beide haben den Request gesendet => Raum löschen, Clients löschen, ChatMsg an alle andern senden
+                if(!_RaumList.Remove(room))
+                {
+                    throw new Exception("2 Clients haben eine RTC Verbindung aufgebaut und dies bestätigt. Aber der Raum in dem sie noch sind existiert nicht! => Unmöglich");
+                }
+                string p1 = _ConnectedClients.Find(x => x.GetId == room.PlayerOneId).Name;
+                string p2 = _ConnectedClients.Find(x => x.GetId == room.PlayerTwoId).Name;
+                if(!( _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == room.PlayerOneId)) && _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == room.PlayerTwoId))))
+                {
+                    throw new Exception("2 Clients haben eine RTC Verbindung aufgebaut und dies bestätigt. Sie sind aber dem Server nicht bekannt! => Unmöglich");
+                }
+                msg msg = new msg(Nachricht.chatMSG,0,999, "Die Spieler: " + p1 +" und " + p2 + " haben ein Spiel gestartet!");
+                SendDataToAll(JsonConvert.SerializeObject(msg));
+                EmitSignal(nameof(ServerInfo), msg.state, msg.data);
+            }
+            else
+            {
+                // dieser Client ist der 1. der den Request sendet
+                _MatesOnStartingGame.Add(new RoomMatesOnStarting(room));
+            }
         }
     }
 
@@ -213,6 +277,7 @@ public class Server : Control
     {
         msg MSG = new msg(Nachricht.AnswerRoomData,0,999,JsonConvert.SerializeObject(_RaumList));
         SendDataToAll(JsonConvert.SerializeObject(MSG));
+        EmitSignal(nameof(ServerInfo), MSG.state, MSG.data);
     }
 
 
@@ -265,7 +330,10 @@ public class Server : Control
     public override void _Process(float delta)
     {
         // gesendte Nachrichten empfangen
-        if(_WSPeer != null)
+        try
+        {
             _WSPeer.Poll();
+        }
+        catch{}
     }
 }

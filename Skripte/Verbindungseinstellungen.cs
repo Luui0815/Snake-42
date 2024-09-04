@@ -89,7 +89,8 @@ public class Verbindungseinstellungen : Control
 
         PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
         Lobby lobbyInstance = (Lobby)lobby.Instance();
-
+        GetTree().ChangeScene("res://Szenen/Lobby.tscn");
+        Lobby = get
         if (_bootServer)
         {
             RemoveChild(_server);
@@ -101,7 +102,7 @@ public class Verbindungseinstellungen : Control
             lobbyInstance.AddChild(_client);
         }
         GetTree().Root.AddChild(lobbyInstance);
-        QueueFree();
+        Free();
     }
 
     private void _on_Button_pressed()

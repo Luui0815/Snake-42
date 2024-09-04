@@ -2,3 +2,8 @@ Verbindungsabbruch Handling bei WebRTc Verbindung
 Gucken wie WebExport + Android
 Sprachchat über anderen Datenchannel mit UDP
 Daten und RPC Stream über TCP
+
+zu Testen: 
+Meldung wenn 2. Spiler RTC Verbindung starten
+Meödung wenn 1 Spieler im Raum die Lobby verlässt
+Server Info bei nur Server

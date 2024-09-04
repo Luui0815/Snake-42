@@ -13,7 +13,6 @@ public partial class GlobalVariables : Node
     public PackedScene ConfirmationDialog { get; set; }
 
     public WebRTCMultiplayer WebRTC {get; set; } 
-    public WebRTCPeerConnection WebRTCPeer {get; set; }
 
     static public readonly Dictionary IceServers = new Dictionary 
     {
@@ -68,13 +67,5 @@ public partial class GlobalVariables : Node
     }
     public override void _Process(float delta)
     {
-        if(WebRTC != null)
-        {
-            // Prüfen ob das Spiel geschlossen wurde, wenn ja peers trennen
-            if(WebRTC.IsQueuedForDeletion())
-            {
-                WebRTCPeer.Close();
-            }
-        }
     }
 }

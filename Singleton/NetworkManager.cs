@@ -38,7 +38,7 @@ public class NetworkManager : Node
                 return JsonConvert.DeserializeObject<_RtcMsg>(msg);
 
             }
-            catch(Exception e)
+            catch
             {
                 return null;
             }

@@ -6,7 +6,6 @@ using NAudio.Wave;
 
 public class LevelSelectionMenu : Control
 {
-    private AudioStreamPlayer _AudioPlayer;
     private BufferedWaveProvider _bufferedProvider;
     private WaveOutEvent _waveOut;
     public override void _Ready()

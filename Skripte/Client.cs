@@ -24,7 +24,7 @@ namespace Snake42
         SDPData, // wird vom Raumhost an Player 2 gesendet,damit er auch die SDP bekommt
         ICECandidate, // für WebRTC ICe Candidate austauschen
         ServerWillClosed, // wenn Server abgeschaltet wird
-        PeerToPeerConnectionEstablished, // derjenige Client welcher Roomhost ist sendet es einmalig an den Server und löscht damit auch seinen Roommate von ConnectedClients
+        StartGame, // wird von beiden RTC Tilnehmer geschickt und allen anderen als ChatMsg Weitergeleite: Spiler1 und Spiler2 haben ein Spiel gestartet
     }
 }
 public class Client : Control
@@ -37,7 +37,6 @@ public class Client : Control
     //private RichTextLabel _chatLog;
     private string _playerName;
     private int _clientId;
-    private Godot.Timer _sendTimer = new Godot.Timer();
     private List<string> _DataSendBuffer = new List<string>(); // Wenn zu viel nachrichten gleichzeitig gesendet werden wollen, wird es hier zwischengespeichert
     bool _DisconnectFromHost = false;
     public override void _Ready()
@@ -49,12 +48,6 @@ public class Client : Control
         _WSPeer.Connect("data_received", this, "ReceiveData");
 
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
-
-        // Timer stellen, da Nachrichten zu schnell gesendet werden können
-        _sendTimer.WaitTime = 1;
-        _sendTimer.OneShot=true;
-        _sendTimer.Connect("timeout",this,"SendDataFromBuffer");
-        AddChild(_sendTimer);
     }
 
     public void ConnectionClosed(bool was_clean=false)
@@ -105,13 +98,6 @@ public class Client : Control
             msg msg2 = new msg(Nachricht.name,_clientId,0,_playerName);
             SendData(JsonConvert.SerializeObject(msg2));
         }
-        /*
-        else if(Message.state== Nachricht.PeerToPeerConnectionEstablished)
-        {
-            // diese Nachricht wird nur an Clients gesendet, welche bereits eine peer to peer connection habne, der WebSocketClient kann gelöscht werden
-            StopConnection();
-            QueueFree();
-        }*/
 
         if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed || Message.state == Nachricht.checkIn)// hier weitere Bedingungen hinzufügen
         {
@@ -167,18 +153,6 @@ public class Client : Control
     {
         _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
         GD.Print("Client: Nachricht gesendet: " + Data);
-        _sendTimer.Start();
-    }
-
-    private void SendDataFromBuffer()
-    {
-        // wird aufgerufen wenn SendTimer 0 ist
-        if(_DataSendBuffer.Count !=0 )
-        {
-            //Daten nachträglich senden
-            SendData(_DataSendBuffer[0]);
-            _DataSendBuffer.RemoveAt(0);
-        }
     }
 
     public string PlayerName

@@ -13,14 +13,13 @@ namespace Snake42
     public class Raum
     {
         public int PlayerOneId;
-        public bool ReadyPlayerOne;
         public int PlayerTwoId;
-        public bool ReadyPlayerTwo;
         public string Raumname;
 
         public Raum(int PlayerOneId)
         {
             this.PlayerOneId=PlayerOneId;
+            PlayerTwoId = 0;
         }
     }
 }
@@ -33,11 +32,9 @@ public class Lobby : Control
     private Client _client;
     private Server _server;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
-    private Raum _myRoom;
     private ItemList _RaumListe;
     private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
     private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
-    private bool _RTCconnected = false; 
 
     public override void _Ready()
     {
@@ -48,8 +45,8 @@ public class Lobby : Control
         _RaumListe.Connect("item_activated", this, "JoinRoom");
 
         //Client und (Server) werden vor dem Aufruf als Nodes der Szenen hinzugefügt, daher geht folgendes
-        _client = GetNode<Client>("Client");
-        _server= GetNode<Server>("Server");
+        _client = GetNodeOrNull<Client>("Client");
+        _server= GetNodeOrNull<Server>("Server");
         // verschiedene Szenarien fordern eine unterschiedliche Gestaltung der Lobby
         //Version 1: Anwender hat Client und Server gestartet
         if(_server != null && _client != null)
@@ -66,13 +63,21 @@ public class Lobby : Control
 
         if(_client != null)//kann null sein wenn nur server gestartet wurde
         {
-            _client.Connect(nameof(Client.MSGReceived), this, "CLientReceivedMSG" );
+            _client.Connect(nameof(Client.MSGReceived), this, nameof(MSGReceived));
             _PlayerNameLabel.Text = _client.PlayerName;
             //jeder Client muss die Liste der Räume vom Server zu beginn anfordern
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
+            // hier ist der Fehler der immer am Anfang auftritt der ist nicht schlimm!
+        }
+        else
+        {
+            // der Serverbetriber soll auch alle Nachrichten in der Lobby sehen!
+            GetNode<Button>("RäumeAkt").Visible = false;
+            _client.Connect(nameof(Server.ServerInfo), this, nameof(MSGReceived));
         }
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
+
         // Signale zur Verbindungsabbruch behandeln
         WebRTCMultiplayer.Connect("peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
         WebRTCMultiplayer.Connect("server_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
@@ -99,57 +104,28 @@ public class Lobby : Control
     public override void _Process(float delta)
     {
         WebRTCMultiplayer.Poll();
-        /*
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 0)
-        {
-            // RTC Server wurde verbunden!
-            // nun Spiler 1 verbinden
-            _RTCState=1;
-            WebRTCPeer = new WebRTCPeerConnection();
-            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
-            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-            WebRTCPeer.Initialize(_iceServers);
-            WebRTCMultiplayer.AddPeer(WebRTCPeer, _myRoom.PlayerOneId);
-            
-            // CreateOffer nur wenn client==playerone
-            if(_client.id == _myRoom.PlayerOneId)
-                WebRTCPeer.CreateOffer();
-
-        }
-
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 0)
-        {
-            // Spieler1 wurde verbunden!
-            // nun Spiler 2 verbinden
-            _RTCState=2;
-            WebRTCPeer = new WebRTCPeerConnection();
-            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
-            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-            WebRTCPeer.Initialize(_iceServers);
-            WebRTCMultiplayer.AddPeer(WebRTCPeer, _myRoom.PlayerTwoId);
-            
-            // CreateOffer nur wenn client==player2
-            if(_client.id == _myRoom.PlayerOneId)
-                WebRTCPeer.CreateOffer();
-            
-        }
-
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && _RTCState == 2)
-        {
-            // Spielr2 verbunden Verbindung fertig!
-             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
-        }
-        */
-
+        
         if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState())
         {
-            GlobalVariables.Instance.WebRTCPeer = WebRTCPeer;
+            bool roomfound = false;
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
+            // Raum suchen in dem sich der Spieler noch befindet!
+            foreach(Raum room in _roomList)
+            {
+                if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
+                {
+                    // Raumeigenschaften werden vom Server gerade gebogen
+                    _client.SendData(JsonConvert.SerializeObject( new msg(Nachricht.StartGame, _client.id, 0, JsonConvert.SerializeObject(room))));
+                    roomfound = true;
+                }   
+            }
+            if(roomfound == false)
+                throw new Exception("Der Spieler will ein Spiel starten befindet sich aber in keinem Raum! Das ist unmöglich!");
+            SwitchToLevelSelectionMenu();
         }
-        
     }
 
-    private void CLientReceivedMSG(Nachricht state, string msg)
+    private void MSGReceived(Nachricht state, string msg)
     {
         if(state == Nachricht.chatMSG)
         {
@@ -180,18 +156,6 @@ public class Lobby : Control
             AddChild(ErrorPopup);
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
-        }
-        else if(state == Nachricht.checkIn)
-        {
-            // erst jetzt weiß der Client seine richtige ID und kann WebRTC aufbauen
-            // Error eee= WebRTCMultiplayer.Initialize(1,true);
-            /*
-            WebRTCPeer = new WebRTCPeerConnection();
-            WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
-            WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-            WebRTCPeer.Initialize(_iceServers);
-            */
-            // WebRTCMultiplayer.AddPeer(WebRTCPeer, _client.id);
         }
     }
 
@@ -332,11 +296,6 @@ public class Lobby : Control
         _client.SendData(JsonConvert.SerializeObject(m));
     }
 
-    private void GetWebtRTCTest(int id)
-    {
-        GetNode<Label>("Label").Text = "NAchricht von " + id +" erhalten"; 
-    }
-
     private void SwitchToLevelSelectionMenu()
     {
         //int test = CustomMultiplayer.GetRpcSenderId();
@@ -356,12 +315,6 @@ public class Lobby : Control
                 _server.Hide();
             }
         }
-        //RoomHost sendet Nachricht an Server das beide Clients sich vom Server trennen und er beide aus _ConnectedClients löschen kann
-        if(_roomList.Exists(x => x.PlayerOneId == _client.id))
-        {
-            _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.PeerToPeerConnectionEstablished,_client.id,0,Convert.ToString(FindOtherRoomMate()))));
-        }
-        GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
         _client.QueueFree();
         GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
         QueueFree();

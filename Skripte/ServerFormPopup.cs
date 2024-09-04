@@ -18,7 +18,9 @@ public class ServerFormPopup : Popup
         string port = _portInput.Text;
         if (ValidatePort(port))
         {
-            EmitSignal(nameof(Confirmed),0, int.Parse(port),"");
+            try
+            {
+                EmitSignal(nameof(Confirmed),0, int.Parse(port),"");
             QueueFree();
         }
     }
