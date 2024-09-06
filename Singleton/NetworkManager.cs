@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.CodeDom;
 using System.Runtime.InteropServices;
+using NAudio.Wave;
 
 // die Klasse wird benutzt um eine Spielrverbindung zu managen
 public class NetworkManager : Node
@@ -53,6 +54,34 @@ public class NetworkManager : Node
         AudioStream,
     }
 
+    private class AudioStreaming
+    {
+        // Diese Klasse dient dazu Audiodaten aufzuzeichen, über ein Netzwerk zu senden und bei dem anderen abzuspielen
+        private readonly EventHandler<WaveInEventArgs> _sendMethod;
+        private WaveInEvent _WaveIn;
+        private WaveOutEvent _waveOut;
+        public bool IsRecording {get; private set;}
+        public AudioStreaming(EventHandler<WaveInEventArgs> sendMethod)
+        {
+            // da es über jedes beliebige Netzwerk gesendet werden soll übergibt der Anwender eine Funktion welche die Daten konvertiert und sendet
+            _WaveIn = new WaveInEvent();
+            _WaveIn.WaveFormat = new WaveFormat(44100, 1);
+            _WaveIn.DataAvailable += sendMethod;
+        }
+
+        public void StartAudioRecording()
+        {
+            IsRecording = true;
+            _WaveIn.StartRecording();
+        }
+
+        public void StopAudioRecording()
+        {
+            IsRecording = false;
+            _WaveIn.StartRecording();
+        }
+    }
+
     // Die Klasse empfängt alle Nachrichten die über WebRTC gehen und macht auch RPCs
     private WebRTCMultiplayer _multiplayer = new WebRTCMultiplayer(); // geht auch mit WebRTC
     public static NetworkManager NetMan { get; private set; }
@@ -64,6 +93,7 @@ public class NetworkManager : Node
     public override void _Ready()
     {
         NetMan = this;
+        // Daten für das aufnehemn der Audio festlegen
     }
 
     public override void _Process(float delta)
@@ -151,5 +181,10 @@ public class NetworkManager : Node
         _multiplayer.PutPacket(message);
     }
     
+    public void StartAudioStream()
+    {
+        // Diese Methode startet den Audiostream und nimmt alle geräusche auf und sendet diese an den Gegenüber
+        // erst wenn StopAudioStream aufgerufen wird, wird die Übertragung der Audio beendet!
+    }
 
 }
