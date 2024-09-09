@@ -6,8 +6,6 @@ using NAudio.Wave;
 
 public class LevelSelectionMenu : Control
 {
-    private BufferedWaveProvider _bufferedProvider;
-    private WaveOutEvent _waveOut;
     public override void _Ready()
     {
         //Multiplayer.NetworkPeer = GlobalVariables.Instance.WebRTC;
@@ -15,12 +13,6 @@ public class LevelSelectionMenu : Control
         // Selbstegamchte Klasse für RPC aufrufen
         NetworkManager.NetMan.Init(GlobalVariables.Instance.WebRTC);
         NetworkManager.NetMan.Connect("MessageReceived", this, nameof(ReceiveMsg));
-        NetworkManager.NetMan.Connect("AudioStreamReceived", this, nameof(AudioStreamReceived));
-
-        _waveOut = new WaveOutEvent();
-        _bufferedProvider = new BufferedWaveProvider(new WaveFormat(44100, 1));
-        _waveOut.Init(_bufferedProvider);
-        _waveOut.Play();
     }
 
     public override void _Process(float delta)
@@ -95,30 +87,17 @@ public class LevelSelectionMenu : Control
         AddChild(AS as Sprite);
     }
 
-    private WaveInEvent waveIn;
     private void _on_AudioAktiv_pressed()
     {
         if(GetNode<Button>("AudioAktiv").Pressed == true)
         {
-            waveIn = new WaveInEvent();
-            waveIn.WaveFormat = new WaveFormat(44100, 1);
-            waveIn.DataAvailable += OnDataAvailable;
-            waveIn.StartRecording();
+            NetworkManager.NetMan.AudioIsRecording = true;
+            NetworkManager.NetMan.AudioIsPlaying = true;
         }
         else
         {
-            waveIn.StopRecording();
-            _waveOut.Stop();
+            NetworkManager.NetMan.AudioIsRecording = false;
+            NetworkManager.NetMan.AudioIsPlaying = false;
         }
-    }
-
-    private void OnDataAvailable(object sender, WaveInEventArgs e)
-    {
-        NetworkManager.NetMan.SendAudio(e.Buffer);
-    }
-
-    private void AudioStreamReceived(byte[] data)
-    {
-        _bufferedProvider.AddSamples(data, 0 ,data.Length);
     }
 }

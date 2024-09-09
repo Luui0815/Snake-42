@@ -10,8 +10,6 @@ public class NetworkManager : Node
 {
     [Signal]
     public delegate void MessageReceived(string msg);
-    [Signal]
-    public delegate void AudioStreamReceived(byte[] data);
 
     // Klasse welche benutzt wird um Nachrichten zu versenden, nur für NetworkManager interresant
     private class _RtcMsg
@@ -57,34 +55,91 @@ public class NetworkManager : Node
     private class AudioStreaming
     {
         // Diese Klasse dient dazu Audiodaten aufzuzeichen, über ein Netzwerk zu senden und bei dem anderen abzuspielen
-        private readonly EventHandler<WaveInEventArgs> _sendMethod;
+        private readonly Action<byte[]> _sendMethod;
         private WaveInEvent _WaveIn;
         private WaveOutEvent _waveOut;
-        public bool IsRecording {get; private set;}
-        public AudioStreaming(EventHandler<WaveInEventArgs> sendMethod)
+        private BufferedWaveProvider _bufferedProvider;
+        public bool IsRecording 
+        {
+            get
+            {
+                return IsRecording;
+            }
+            set
+            {
+                if(value == true)
+                {
+                    IsRecording = true;
+                    _WaveIn.StartRecording();
+                }
+                else
+                {
+                    IsRecording = false;
+                    _WaveIn.StopRecording();
+                }
+            }
+        } // auf true wenn Audio aufgenommen und 
+        public bool IsPlaying {get; set;} // auf true wenn Audio von anderen wiedergegeben wird, wenn auf false hört er keinen Sprachchat!
+        public AudioStreaming(Action<byte[]> sendMethod)
         {
             // da es über jedes beliebige Netzwerk gesendet werden soll übergibt der Anwender eine Funktion welche die Daten konvertiert und sendet
+            // Audioaufnahme initialisieren
             _WaveIn = new WaveInEvent();
             _WaveIn.WaveFormat = new WaveFormat(44100, 1);
-            _WaveIn.DataAvailable += sendMethod;
+            _WaveIn.DataAvailable += ConvertAudioData;
+            _sendMethod = sendMethod;
+            // Audioausgabe initialisieren
+            _waveOut = new WaveOutEvent();
+            _bufferedProvider = new BufferedWaveProvider(new WaveFormat(44100, 1));
+            _waveOut.Init(_bufferedProvider);
+            _waveOut.Play();
         }
 
-        public void StartAudioRecording()
+        private void ConvertAudioData(object sender, WaveInEventArgs e)
         {
-            IsRecording = true;
-            _WaveIn.StartRecording();
+            _sendMethod(e.Buffer);
         }
-
-        public void StopAudioRecording()
+        public Action<byte[]> GetPlayMethod()
         {
-            IsRecording = false;
-            _WaveIn.StartRecording();
+            return PlayAudioStream;
+        }
+        private void PlayAudioStream(byte[] data)
+        {
+            if (IsPlaying == true)
+                _bufferedProvider.AddSamples(data, 0 ,data.Length);
+            // nur wenn der Spieler will das er das von andren hören will hört er es auch!
         }
     }
+
+    private AudioStreaming _audioStream;
+    private Action<byte[]> _playAudioStream;
 
     // Die Klasse empfängt alle Nachrichten die über WebRTC gehen und macht auch RPCs
     private WebRTCMultiplayer _multiplayer = new WebRTCMultiplayer(); // geht auch mit WebRTC
     public static NetworkManager NetMan { get; private set; }
+    public bool AudioIsRecording
+    {
+        get
+        {
+            return AudioIsRecording;
+        }
+        set
+        {
+            _audioStream.IsRecording = value;
+        }
+    }
+
+    public bool AudioIsPlaying 
+    {
+        get
+        {
+            return AudioIsPlaying;
+        }
+        set
+        {
+            _audioStream.IsPlaying = value;
+        }
+    }
 
     public void Init(WebRTCMultiplayer multiplayer)
     {
@@ -94,6 +149,8 @@ public class NetworkManager : Node
     {
         NetMan = this;
         // Daten für das aufnehemn der Audio festlegen
+        _audioStream =  new AudioStreaming(SendAudio);
+        _playAudioStream = _audioStream.GetPlayMethod();
     }
 
     public override void _Process(float delta)
@@ -129,9 +186,7 @@ public class NetworkManager : Node
                     }
                     case _RtcMsgState.AudioStream:
                     {
-                        EmitSignal(nameof(AudioStreamReceived), data.AudioStream);
-                        // wenn Breakpoint in Übertragung während Audio Streams gesetzt ist dann kommt es hier zum Buffer überlauf
-                        // Lösung: keine Breakpoint setzen! wenn audio aktiv
+                        _playAudioStream(data.AudioStream);
                         break;
                     }
                 }
@@ -175,16 +230,8 @@ public class NetworkManager : Node
         SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.AudioStream, null, stream)).ToUTF8());
     }
 
-    
     private void SendRawMessage(byte[] message)
     {
         _multiplayer.PutPacket(message);
     }
-    
-    public void StartAudioStream()
-    {
-        // Diese Methode startet den Audiostream und nimmt alle geräusche auf und sendet diese an den Gegenüber
-        // erst wenn StopAudioStream aufgerufen wird, wird die Übertragung der Audio beendet!
-    }
-
 }
