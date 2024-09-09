@@ -62,6 +62,7 @@ public class Snake : Node2D
         {
             _otherSnake = GetParent().GetNodeOrNull<Snake>("Snake2");
         }
+        Console.WriteLine($"Schalange 1, Schalange 2: {_otherSnake}");
     }
 
     public override void _Input(InputEvent @event)
@@ -89,6 +90,7 @@ public class Snake : Node2D
     {
         _direction = _directionCache;
         //_body.AddPoint(_points[0], 0);
+        _tween.StopAll();
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -153,7 +155,8 @@ public class Snake : Node2D
                 else
                 {
                     _direction = _directionCache;
-                } 
+                    GD.Print($"{_body.Points[0].x} {_body.Points[0].y}");
+                }
             }
         }
 
@@ -185,10 +188,10 @@ public class Snake : Node2D
         {
             _eating = true;
             _fruit.RandomizePosition();
-            IncreaseSpeed();
+            //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
-            IncreaseSpeed();
+            MoveSnake();
         }
         else
         {
@@ -198,8 +201,8 @@ public class Snake : Node2D
 
     protected void IncreaseSpeed()
     {
-        //_moveDelay = Math.Max(0.06f, _moveDelay - 0.04f);
-        moveDelay *= 0.35f;
+        //moveDelay = Math.Max(0.06f, moveDelay - 0.04f);
+        moveDelay *= 0.95f;
         GD.Print(moveDelay.ToString());
     }
 
@@ -214,7 +217,7 @@ public class Snake : Node2D
             }
         }
 
-        if (_otherSnake != null)
+        if (_otherSnake != null && IsInstanceValid(_otherSnake))
         {
             if (_otherSnake.Points.Contains(_body.Points[0]))
             {

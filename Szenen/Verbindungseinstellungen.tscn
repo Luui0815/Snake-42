@@ -23,17 +23,17 @@ margin_bottom = 40.0
 script = ExtResource( 2 )
 
 [node name="Server starten" type="Button" parent="."]
-margin_left = 76.0
-margin_top = 218.0
-margin_right = 228.0
-margin_bottom = 269.0
+margin_left = 227.0
+margin_top = 217.0
+margin_right = 379.0
+margin_bottom = 268.0
 text = "Nur Server starten"
 
 [node name="Client starten" type="Button" parent="."]
-margin_left = 756.0
-margin_top = 221.0
-margin_right = 898.0
-margin_bottom = 271.0
+margin_left = 896.0
+margin_top = 220.0
+margin_right = 1038.0
+margin_bottom = 270.0
 text = "Client starten"
 
 [node name="ErrorMSGBox" type="VBoxContainer" parent="."]
@@ -73,22 +73,30 @@ margin_bottom = 24.0
 size_flags_horizontal = 3
 
 [node name="ServerundClient" type="Button" parent="."]
-margin_left = 348.0
-margin_top = 220.0
-margin_right = 589.0
-margin_bottom = 278.0
+margin_left = 489.0
+margin_top = 217.0
+margin_right = 730.0
+margin_bottom = 275.0
 text = "Server und Client starten"
 
 [node name="Button" type="Button" parent="."]
 anchor_right = 0.1
 anchor_bottom = 0.112
-margin_left = 306.0
-margin_top = 333.0
-margin_right = 536.0
-margin_bottom = 316.36
+margin_left = 439.0
+margin_top = 349.0
+margin_right = 669.0
+margin_bottom = 332.36
 text = "Peer To Peer Direktaufbau"
+
+[node name="Back" type="Button" parent="."]
+margin_left = 491.0
+margin_top = 612.0
+margin_right = 741.0
+margin_bottom = 667.0
+text = "Zurück"
 
 [connection signal="pressed" from="Server starten" to="." method="_on_Server_starten_pressed"]
 [connection signal="pressed" from="Client starten" to="." method="_on_Client_starten_pressed"]
 [connection signal="pressed" from="ServerundClient" to="." method="_on_ServerundClient_pressed"]
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="Back" to="." method="_on_Back_pressed"]

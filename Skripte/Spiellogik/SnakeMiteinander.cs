@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Linq;
-using System.Xml.Serialization;
 
 public class SnakeMiteinander : Snake
 {
@@ -10,10 +9,9 @@ public class SnakeMiteinander : Snake
 
     private Vector2 _directionCachePlayer1;
     private Vector2 _directionCachePlayer2;
-    private Vector2 _directionPlayer1;
-    private Vector2 _directionPlayer2;
-    private int _playersTurn; // 1 => Spieler1 ist am Zug, 2 => Spieler2 ist am Zug
-    
+    private Vector2 _currentDirection;
+    private bool _isPlayerOneTurn;
+
     public override void _Ready()
     {
         _fruit = GetParent().GetNode<Fruit>("Fruit");
@@ -24,83 +22,72 @@ public class SnakeMiteinander : Snake
         _face1 = GetNode<Node2D>("Face1");
         _face2 = GetNode<Node2D>("Face2");
         _tween = GetNode<Tween>("Tween");
-        _playersTurn = 1;
+
         _directionCachePlayer1 = Vector2.Right;
         _directionCachePlayer2 = Vector2.Left;
-        _isPlayerOne = true;
-        
-        _face =  _face1;
+        _currentDirection = _directionCachePlayer1;
+        _isPlayerOneTurn = true;
+
         MoveSnake();
     }
 
     public override void _Input(InputEvent @event)
     {
-        // Player1 input
-        if (Input.IsActionPressed("ui_up") && _directionPlayer1 != Vector2.Down) _directionCachePlayer1 = Vector2.Up;
-        if (Input.IsActionPressed("ui_right") && _directionPlayer1 != Vector2.Left) _directionCachePlayer1 = Vector2.Right;
-        if (Input.IsActionPressed("ui_left") && _directionPlayer1 != Vector2.Right) _directionCachePlayer1 = Vector2.Left;
-        if (Input.IsActionPressed("ui_down") && _directionPlayer1 != Vector2.Up) _directionCachePlayer1 = Vector2.Down;
-
-        // Player2 input
-        if (Input.IsActionPressed("move_right") && _directionPlayer2 != Vector2.Left) _directionCachePlayer2 = Vector2.Right;
-        if (Input.IsActionPressed("move_left") && _directionPlayer2 != Vector2.Right) _directionCachePlayer2 = Vector2.Left;
-        if (Input.IsActionPressed("move_up") && _directionPlayer2 != Vector2.Down) _directionCachePlayer2 = Vector2.Up;
-        if (Input.IsActionPressed("move_down") && _directionPlayer2 != Vector2.Up) _directionCachePlayer2 = Vector2.Down;
-        
+        if (_isPlayerOneTurn)
+        {
+            if (Input.IsActionPressed("ui_up") && _currentDirection != Vector2.Down) _directionCachePlayer1 = Vector2.Up;
+            if (Input.IsActionPressed("ui_right") && _currentDirection != Vector2.Left) _directionCachePlayer1 = Vector2.Right;
+            if (Input.IsActionPressed("ui_left") && _currentDirection != Vector2.Right) _directionCachePlayer1 = Vector2.Left;
+            if (Input.IsActionPressed("ui_down") && _currentDirection != Vector2.Up) _directionCachePlayer1 = Vector2.Down;
+        }
+        else
+        {
+            if (Input.IsActionPressed("move_up") && _currentDirection != Vector2.Down) _directionCachePlayer2 = Vector2.Up;
+            if (Input.IsActionPressed("move_right") && _currentDirection != Vector2.Left) _directionCachePlayer2 = Vector2.Right;
+            if (Input.IsActionPressed("move_left") && _currentDirection != Vector2.Right) _directionCachePlayer2 = Vector2.Left;
+            if (Input.IsActionPressed("move_down") && _currentDirection != Vector2.Up) _directionCachePlayer2 = Vector2.Down;
+        }
     }
 
     public override void MoveSnake()
     {
-        _directionPlayer1 = _directionCachePlayer1;
-        _directionPlayer2 = _directionCachePlayer2;
-        _tween.InterpolateMethod(this, "MoveTween", 0f, 100f, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
     protected override void MoveTween(float argv)
     {
-        argv /= 100;
-        Vector2 currentDirection;
-        // aktuelle Richtung in die gelaufen werden soll ermitteln
-
-        if (_playersTurn == 1)
-           currentDirection = _directionCachePlayer1;
-        else
-           currentDirection = _directionCachePlayer2;
-        
         if (_Merker == false)
         {
-            int i = 0;
-            foreach(Vector2 pos in _body.Points)
+            for (int i = 0; i < _body.Points.Count(); i++)
             {
-                Vector2 newPos,diff=Vector2.Zero;
-                if(i == 0)
-                    newPos =  _points[i] + currentDirection * new Vector2(_gridSize * argv, _gridSize * argv);
+                Vector2 newPos, diff = Vector2.Zero;
+
+                Vector2 currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+
+                if (i == 0)
+                {
+                    newPos = _points[i] + currentDirection * _gridSize * argv;
+                }
                 else
                 {
-                    if(!(_growing == true && i == _body.Points.Count() -1))
+                    if (!(_growing && i == _body.Points.Count() - 1))
                     {
-                        diff = Vector2.Zero;
-                        if(_points[i-1].x - _points[i].x != 0)
-                            diff.x = (_points[i-1].x - _points[i].x) / _gridSize;
-                        if(_points[i-1].y - _points[i].y != 0)
-                            diff.y = (_points[i-1].y - _points[i].y) / _gridSize;
-                    
-                        newPos =  _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        diff = (_points[i - 1] - _points[i]) / _gridSize;
+                        newPos = _points[i] + diff * _gridSize * argv;
                     }
                     else
                     {
-                        // letztes Körperteil darf nicht bewegt werden!
                         newPos = _body.GetPointPosition(i);
                     }
                 }
                 _body.SetPointPosition(i, newPos);
-                i++;
             }
 
-            if(_eating == true)
+            if (_eating == true)
             {
-                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
+                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
                 _growing = true;
                 _points = _body.Points;
                 _eating = false;
@@ -108,42 +95,49 @@ public class SnakeMiteinander : Snake
 
             _face1.Position = _body.Points[0];
             _face2.Position = _body.Points[_body.Points.Count() - 1];
-            
+
             _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
             _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
 
-            // wenn argv = 1 dann ist eine Schleife durch
-            if(argv == 1)
+            if (argv == 1)
             {
                 _Merker = true;
                 _points = _body.Points;
+
                 CheckFruitCollision();
 
-                if(_growing == true)
-                {
+                if (_growing == true)
                     _growing = false;
-                    // nachdem die Schlange gewachsen ist wird die Stuerung an den anderen abgegeben
-                    if(_playersTurn == 1)
-                        _playersTurn = 2;
-                    else
-                        _playersTurn = 1;
-                }
 
                 if (IsGameOver())
                 {
-                   _controller.OnGameFinished();
+                    _controller.OnGameFinished();
                 }
                 else
                 {
-                    _directionPlayer1 = _directionCachePlayer1;
-                    _directionPlayer2 = _directionCachePlayer2;
-                } 
+                    SwapControl();
+                }
             }
         }
-        if(argv != 1)
+
+        if (argv != 1)
+        {
             _Merker = false;
-        
+        }
     }
 
+    private void SwapControl()
+    {
+        _isPlayerOneTurn = !_isPlayerOneTurn;
+        Array.Reverse(_points); 
 
+        _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+
+        Vector2 temp = _face1.Position;
+        _face1.Position = _face2.Position;
+        _face2.Position = temp;
+
+        _face1.RotationDegrees = _currentDirection.AngleTo(Vector2.Right);
+        _face2.RotationDegrees = (_points[_points.Length - 2] - _points[_points.Length - 1]).AngleTo(Vector2.Left);
+    }
 }

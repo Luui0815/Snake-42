@@ -44,3 +44,13 @@ C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\bin\Debug\NAu
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\bin\Debug\NAudio.WinMM.dll
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\bin\Debug\System.Security.AccessControl.dll
 C:\Users\lukas\OneDrive\Dokumente\Godot Spiele\Snake-42\.mono\temp\bin\Debug\System.Security.Principal.Windows.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\Microsoft.Win32.Registry.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.Asio.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.Core.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.Midi.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.Wasapi.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.WinForms.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\NAudio.WinMM.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\System.Security.AccessControl.dll
+C:\Users\mar\Documents\Godot\Snake-42\.mono\temp\bin\Debug\System.Security.Principal.Windows.dll

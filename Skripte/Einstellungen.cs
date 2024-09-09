@@ -70,4 +70,8 @@ public class Einstellungen : Control
         GetTree().ChangeScene($"res://Szenen/Levels/Level{_SelectLevel.SelectedOption + 1}.tscn");
     }
 
+    private void _on_Back_pressed()
+    {
+        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+    }
 }

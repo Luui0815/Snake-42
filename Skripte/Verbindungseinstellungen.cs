@@ -108,4 +108,9 @@ public class Verbindungseinstellungen : Control
     {
         GetTree().ChangeScene("res://Szenen/PeerToPeerMenu.tscn");
     }
+
+    private void _on_Back_pressed()
+    {
+        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+    }
 }
