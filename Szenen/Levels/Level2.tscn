@@ -256,7 +256,6 @@ scale = Vector2( 0.6, 0.6 )
 process_priority = -1
 
 [node name="Snake3" parent="." instance=ExtResource( 5 )]
-position = Vector2( 59, 0 )
 
 [node name="ScoreLabels" type="ColorRect" parent="."]
 margin_left = 1088.0
@@ -279,3 +278,10 @@ margin_bottom = 160.0
 text = "Test"
 align = 1
 valign = 1
+
+[node name="Pause" type="Button" parent="."]
+margin_left = 1136.0
+margin_top = 24.0
+margin_right = 1232.0
+margin_bottom = 64.0
+text = "Pause"

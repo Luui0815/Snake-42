@@ -90,7 +90,6 @@ public class Snake : Node2D
     {
         _direction = _directionCache;
         //_body.AddPoint(_points[0], 0);
-        _tween.StopAll();
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -163,29 +162,12 @@ public class Snake : Node2D
         if(argv != 1)
             _Merker = false;
     }
-    /*
-    protected virtual void _on_Tween_tween_all_completed()
-    {
-        if(!_eating)
-            _body.RemovePoint(_points.Length);
 
-        _points = _body.Points;
-        CheckFruitCollision();
-
-        if (IsGameOver())
-        {
-            _controller.OnGameFinished();
-        }
-        else
-        {
-            MoveSnake();
-        }
-    }
-    */
     protected void CheckFruitCollision()
     {
         if (_body.Points[0] == _fruit.Position)
         {
+            _tween.StopAll();
             _eating = true;
             _fruit.RandomizePosition();
             //IncreaseSpeed();

@@ -27,8 +27,6 @@ public class SnakeMiteinander : Snake
         _directionCachePlayer2 = Vector2.Left;
         _currentDirection = _directionCachePlayer1;
         _isPlayerOneTurn = true;
-
-        MoveSnake();
     }
 
     public override void _Input(InputEvent @event)
@@ -47,11 +45,13 @@ public class SnakeMiteinander : Snake
             if (Input.IsActionPressed("move_left") && _currentDirection != Vector2.Right) _directionCachePlayer2 = Vector2.Left;
             if (Input.IsActionPressed("move_down") && _currentDirection != Vector2.Up) _directionCachePlayer2 = Vector2.Down;
         }
+
+        GD.Print($"Cache 1{_directionCachePlayer1} Cache 2{_directionCachePlayer2}\nRichtung: {_currentDirection}");
     }
 
     public override void MoveSnake()
     {
-        _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+        //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -64,30 +64,23 @@ public class SnakeMiteinander : Snake
             {
                 Vector2 newPos, diff = Vector2.Zero;
 
-                Vector2 currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+                _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
 
                 if (i == 0)
                 {
-                    newPos = _points[i] + currentDirection * _gridSize * argv;
+                    newPos = _points[i] + _currentDirection * _gridSize * argv;
                 }
                 else
                 {
-                    if (!(_growing && i == _body.Points.Count() - 1))
-                    {
-                        diff = (_points[i - 1] - _points[i]) / _gridSize;
-                        newPos = _points[i] + diff * _gridSize * argv;
-                    }
-                    else
-                    {
-                        newPos = _body.GetPointPosition(i);
-                    }
+                    diff = (_points[i - 1] - _points[i]) / _gridSize;
+                    newPos = _points[i] + diff * _gridSize * argv;
                 }
+
                 _body.SetPointPosition(i, newPos);
             }
-
             if (_eating == true)
             {
-                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
                 _growing = true;
                 _points = _body.Points;
                 _eating = false;
@@ -101,9 +94,9 @@ public class SnakeMiteinander : Snake
 
             if (argv == 1)
             {
+                _tween.StopAll();
                 _Merker = true;
                 _points = _body.Points;
-
                 CheckFruitCollision();
 
                 if (_growing == true)
@@ -113,10 +106,11 @@ public class SnakeMiteinander : Snake
                 {
                     _controller.OnGameFinished();
                 }
-                else
+                else if (_eating)
                 {
                     SwapControl();
                 }
+                MoveSnake();
             }
         }
 
@@ -129,15 +123,25 @@ public class SnakeMiteinander : Snake
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
-        Array.Reverse(_points); 
+        if (_isPlayerOneTurn) 
+        {
+            _directionCachePlayer1 = _directionCachePlayer2 * -1;
+        }
+        else
+        {
+            _directionCachePlayer2 = _directionCachePlayer1 * -1;
+        }
 
-        _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
-
-        Vector2 temp = _face1.Position;
+        Vector2 tempPosition = _face1.Position;
         _face1.Position = _face2.Position;
-        _face2.Position = temp;
+        _face2.Position = tempPosition;
 
-        _face1.RotationDegrees = _currentDirection.AngleTo(Vector2.Right);
-        _face2.RotationDegrees = (_points[_points.Length - 2] - _points[_points.Length - 1]).AngleTo(Vector2.Left);
+        Array.Reverse(_body.Points);
+        Array.Reverse(_points);
+
+        _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
+        _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
+
+        _eating = false;
     }
 }

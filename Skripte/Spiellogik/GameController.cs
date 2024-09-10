@@ -35,28 +35,28 @@ public class GameController : Node2D
 			{
 				// einfach
 				_snake1.moveDelay = _snake2.moveDelay = 0.3f;
-				_snakeTogether.moveDelay = 0.8f;
+				_snakeTogether.moveDelay = 0.4f;
                 break;
 			}
 			case 1:
 			{
 				// mittel
 				_snake1.moveDelay = _snake2.moveDelay =  0.25f;
-					_snakeTogether.moveDelay = 0.7f;
+					_snakeTogether.moveDelay = 0.35f;
                 break;
 			}
 			case 2:
 			{
 				// schwer
 				_snake1.moveDelay = _snake2.moveDelay= 0.2f;
-                    _snakeTogether.moveDelay = 0.6f;
+                    _snakeTogether.moveDelay = 0.3f;
                     break;
 			}
 			case 3:
 			{
 				// profi
 				_snake1.moveDelay = _snake2.moveDelay= 0.1f;
-                    _snakeTogether.moveDelay = 0.5f;
+                    _snakeTogether.moveDelay = 0.2f;
                     break;
 			}
 		}
@@ -235,14 +235,32 @@ public class GameController : Node2D
 		_highScoreLabel.Text = "HighScore: " + highScore.ToString();
 	}
 
-	public void OnGameFinished()
+    public override void _Input(InputEvent @event)
+    {
+        if (@event.IsActionPressed("ui_cancel"))
+        {
+			_on_Pause_pressed();
+        }
+    }
+
+    private void _on_Pause_pressed()
+	{
+        GetTree().Paused = true;
+        GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
+        AddChild(popupInstance);
+		popupInstance.SetScreenMode(true);
+    }
+
+
+    public void OnGameFinished()
 	{
 		GetTree().Paused = true;
 
 		_highScoreManager.SetHighScore(_levelName, _score);
 		UpdateHighScoreDisplay();
 
-		Control popupInstance = (Control)_gameOverScreen.Instance();
+		GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
 		AddChild(popupInstance);
-	}
+        popupInstance.SetScreenMode(false);
+    }
 }

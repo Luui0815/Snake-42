@@ -3,23 +3,53 @@ using System;
 
 public class GameOverScreen : Control
 {
+    private Label _headline;
+    private Button _restartButton;
+    private Button _backButton;
+    private bool _isGamePaused;
+
     public override void _Ready()
     {
-        GetNode<Button>("RestartLevel").Connect("pressed", this, nameof(_on_RestartLevel_pressed));
-        GetNode<Button>("Back").Connect("pressed", this, nameof(_on_Back_pressed));
+        _headline = GetNode<Label>("Headline");
+        _restartButton = GetNode<Button>("RestartLevel");
+        _restartButton.Connect("pressed", this, nameof(_on_RestartLevel_pressed));
+        _backButton = GetNode<Button>("Back");
+        _backButton.Connect("pressed", this, nameof(_on_Back_pressed));
+    }
+
+    public void SetScreenMode(bool isGamePaused)
+    {
+        _isGamePaused = isGamePaused;
+
+        if (_isGamePaused)
+        {
+            _headline.Text = "Pause";
+            _restartButton.Text = "Fortsetzen";
+        }
+        else
+        {
+            _headline.Text = "Game Over";
+            _restartButton.Text = "Neu starten";
+        }
     }
 
     private void _on_RestartLevel_pressed()
     {
-        GetTree().Paused = false;
-        GD.Print("Button gedrueckt");
-        GetTree().ReloadCurrentScene();
+        if (_isGamePaused)
+        {
+            GetTree().Paused = false;
+            QueueFree();
+        }
+        else
+        {
+            GetTree().Paused = false;
+            GetTree().ReloadCurrentScene();
+        }
     }
 
     private void _on_Back_pressed()
     {
         GetTree().Paused = false;
-        GD.Print("Button gedrueckt");
         GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
     }
 }
