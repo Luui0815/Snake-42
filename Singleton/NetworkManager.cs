@@ -224,6 +224,7 @@ public class NetworkManager : Node
                     CloseConnection();
                 }
                 // Zeit einen neuen Ping zu senden!
+                _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
                 SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, "1")).ToUTF8());
                 _PingAnswerReceived = false;
                 _LastPingTime = 0.0f;
@@ -253,17 +254,20 @@ public class NetworkManager : Node
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
+            _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
             SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))).ToUTF8());
         } 
     }
 
     public void SendMessage(string text)
     {
+        _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
         SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.CostumMsg, text)).ToUTF8());
     }
 
     public void SendAudio(byte[] stream)
     {
+        _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.UnreliableOrdered;
         SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.AudioStream, null, stream)).ToUTF8());
     }
 
