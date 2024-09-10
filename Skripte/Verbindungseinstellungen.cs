@@ -106,7 +106,7 @@ public class Verbindungseinstellungen : Control
 
     private void _on_Button_pressed()
     {
-        GetTree().ChangeScene("res://Szenen/PeerToPeerMenu.tscn");
+        GetTree().ChangeScene("res://Szenen/ManuelleRTCVerbindung.tscn");
     }
 
     private void _on_Back_pressed()

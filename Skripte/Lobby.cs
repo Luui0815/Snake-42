@@ -312,7 +312,7 @@ public class Lobby : Control
             }
         }
         _client.QueueFree();
-        GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
+        GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
         QueueFree();
     }
 

@@ -60,22 +60,23 @@ public class NetworkManager : Node
         private WaveInEvent _WaveIn;
         private WaveOutEvent _waveOut;
         private BufferedWaveProvider _bufferedProvider;
+        private bool _Recording;
         public bool IsRecording 
         {
             get
             {
-                return IsRecording;
+                return _Recording;
             }
             set
             {
                 if(value == true)
                 {
-                    IsRecording = true;
+                    _Recording = true;
                     _WaveIn.StartRecording();
                 }
                 else
                 {
-                    IsRecording = false;
+                    _Recording = false;
                     _WaveIn.StopRecording();
                 }
             }
@@ -85,8 +86,10 @@ public class NetworkManager : Node
         {
             // da es über jedes beliebige Netzwerk gesendet werden soll übergibt der Anwender eine Funktion welche die Daten konvertiert und sendet
             // Audioaufnahme initialisieren
-            _WaveIn = new WaveInEvent();
-            _WaveIn.WaveFormat = new WaveFormat(44100, 1);
+            _WaveIn = new WaveInEvent
+            {
+                WaveFormat = new WaveFormat(44100, 1)
+            };
             _WaveIn.DataAvailable += ConvertAudioData;
             _sendMethod = sendMethod;
             // Audioausgabe initialisieren
