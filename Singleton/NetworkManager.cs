@@ -50,6 +50,7 @@ public class NetworkManager : Node
         CostumMsg, // da NetworkManager nur als eine API benutzt werden soll muss, sich der Benutzer wenn er mehr NNachrichten zu unterschidlichen Zwecken 
         // versenden will eigene Nachrichtenstati ausdenken => Signal wird emittiert
         AudioStream,
+        KeepAlivePing,
     }
 
     private class AudioStreaming
@@ -115,7 +116,7 @@ public class NetworkManager : Node
     private Action<byte[]> _playAudioStream;
 
     // Die Klasse empfängt alle Nachrichten die über WebRTC gehen und macht auch RPCs
-    private WebRTCMultiplayer _multiplayer = new WebRTCMultiplayer(); // geht auch mit WebRTC
+    private WebRTCMultiplayer _multiplayer = new WebRTCMultiplayer(); 
     public static NetworkManager NetMan { get; private set; }
     public bool AudioIsRecording
     {
@@ -141,9 +142,17 @@ public class NetworkManager : Node
         }
     }
 
-    public void Init(WebRTCMultiplayer multiplayer)
+    private float _PingIntervall; // nach 1 sek wird ein KeepAlivePing gesendet um zu überprüfen ob die Verbindung noch steht
+    private float _LastPingTime;
+    private bool _multiplayerIsActive;
+    private bool _PingAnswerReceived;
+
+    public void Init(WebRTCMultiplayer multiplayer, float KeepAlivePingInterval = 1.0f)
     {
         _multiplayer = multiplayer;
+        _PingIntervall = KeepAlivePingInterval;
+        _multiplayerIsActive = true;
+        _PingAnswerReceived = true;
     }
     public override void _Ready()
     {
@@ -151,45 +160,73 @@ public class NetworkManager : Node
         // Daten für das aufnehemn der Audio festlegen
         _audioStream =  new AudioStreaming(SendAudio);
         _playAudioStream = _audioStream.GetPlayMethod();
+        _multiplayerIsActive = false;
     }
 
     public override void _Process(float delta)
     {
-        _multiplayer.Poll();
-        // nach neuen RTC nachrichten ausschau halten und diese dann KAtegoreien einorden
-        if(_multiplayer.GetAvailablePacketCount() > 0)
+        // nur sinvoll auf Nachrichten zu warten wenn der _multiplayer initialisiert wird, bzw. wenn eine richtige Vwebindung steht
+        if(_multiplayerIsActive == true)
         {
-            _RtcMsg data = _RtcMsg.ConvertTo_RtcMsg(_multiplayer.GetPacket().GetStringFromUTF8());
-            if(data != null)
+            // Auf Nachrichten hören und diese interpretieren!
+            _multiplayer.Poll();
+            // nach neuen RTC nachrichten ausschau halten und diese dann KAtegoreien einorden
+            if(_multiplayer.GetAvailablePacketCount() > 0)
             {
-                // gültige Nachricht kam an => gucken was sie bedeutet
-                switch(data.MsgState)
+                _RtcMsg data = _RtcMsg.ConvertTo_RtcMsg(_multiplayer.GetPacket().GetStringFromUTF8());
+                if(data != null)
                 {
-                    case _RtcMsgState.RPC:
+                    // gültige Nachricht kam an => gucken was sie bedeutet
+                    switch(data.MsgState)
                     {
-                        string[] msg = data.Data.Split("|"); //0 = NodePath, 1 = Method, wenn mehr = Args
-                        if (msg.Length >= 3)
-                        {           
-                            rpc(msg[0], msg[1], true, JsonConvert.DeserializeObject<object[]>(msg[2]));
-                        }
-                        else
+                        case _RtcMsgState.RPC:
                         {
-                            rpc(msg[0], msg[1], true);
+                            string[] msg = data.Data.Split("|"); //0 = NodePath, 1 = Method, wenn mehr = Args
+                            if (msg.Length >= 3)
+                            {           
+                                rpc(msg[0], msg[1], true, JsonConvert.DeserializeObject<object[]>(msg[2]));
+                            }
+                            else
+                            {
+                                rpc(msg[0], msg[1], true);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case _RtcMsgState.CostumMsg:
-                    {
-                        EmitSignal(nameof(MessageReceived), data.Data);
-                        // Der API Nuter muss sich, wenn er mehrere verschiedene Stati austauschen will drüber klar werden wie er das machen will
-                        break;
-                    }
-                    case _RtcMsgState.AudioStream:
-                    {
-                        _playAudioStream(data.AudioStream);
-                        break;
+                        case _RtcMsgState.CostumMsg:
+                        {
+                            EmitSignal(nameof(MessageReceived), data.Data);
+                            // Der API Nuter muss sich, wenn er mehrere verschiedene Stati austauschen will drüber klar werden wie er das machen will
+                            break;
+                        }
+                        case _RtcMsgState.AudioStream:
+                        {
+                            _playAudioStream(data.AudioStream);
+                            break;
+                        }
+                        case _RtcMsgState.KeepAlivePing:
+                        {
+                            _PingAnswerReceived = true;
+                            break;
+                        }
                     }
                 }
+            }
+            // Keep Alive Mechanismus:
+            _LastPingTime += delta;
+            if(_LastPingTime >= _PingIntervall)
+            {
+                // prüfen ob im vorhergehenden Intervall eine Antwort zurückkam
+                if(_PingAnswerReceived == false)
+                {
+                    // keine Antwort => Verbindungsabbruch!
+                    WebRTCDisconnect();
+                    // eigene Verbindung schließen, da nur 2 Spieler miteinander verbunden sind und es wenig sinn macht den anderen im Raum zu lassen!
+                    CloseConnection();
+                }
+                // Zeit einen neuen Ping zu senden!
+                SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, "1")).ToUTF8());
+                _PingAnswerReceived = false;
+                _LastPingTime = 0.0f;
             }
         }
     }
@@ -234,4 +271,21 @@ public class NetworkManager : Node
     {
         _multiplayer.PutPacket(message);
     }
+
+    private void WebRTCDisconnect()
+    {
+        ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+        ErrorPopup.Init("Verbindungsabbruch","Peer to Peer Verbindung ist abgebrochen");
+        ErrorPopup.Connect("confirmed", this, nameof(GlobalVariables.BackToMainMenuOrLobby));
+        GetTree().Root.AddChild(ErrorPopup);
+        ErrorPopup.PopupCentered();
+        ErrorPopup.Show();
+    }
+
+    public void CloseConnection()
+    {
+        _multiplayerIsActive = false;
+        _multiplayer.Close();
+    }
+
 }

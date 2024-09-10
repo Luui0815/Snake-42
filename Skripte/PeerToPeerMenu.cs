@@ -59,7 +59,6 @@ public class PeerToPeerMenu : Control
 
     private WebRTCData _LocalRtcData;
     private WebRTCData _RemoteRtcData;
-
     public override void _Ready()
     {
         Peer = new WebRTCPeerConnection();
@@ -72,8 +71,6 @@ public class PeerToPeerMenu : Control
         // Signale verbinden!
         Peer.Connect("session_description_created", this, nameof(SDPCreated));
         Peer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
-        MultiplayerPeer.Connect("peer_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
-        MultiplayerPeer.Connect("server_disconnected",GlobalVariables.Instance, nameof(GlobalVariables.WebRTCConnectionFailed));
     }
 
     // Schritt1: Partner A erzeugt seine SPD und ICe Kandidaten und gibt sie aus!
@@ -138,17 +135,13 @@ public class PeerToPeerMenu : Control
         if(WebRTCPeerConnection.ConnectionState.Connected == Peer.GetConnectionState())
         {
             GlobalVariables.Instance.WebRTC = MultiplayerPeer;
+            GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
+            QueueFree();
         }
     }
 
     private void _on_Button_pressed()
     {
         GetNode<Label>("RpcInfo").Text = MultiplayerPeer.GetPeers().ToString();
-    }
-
-    private void _on_weiter_pressed()
-    {
-        GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
-        QueueFree();
     }
 }

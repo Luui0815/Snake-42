@@ -1,7 +1,8 @@
 Verbindungsabbruch Handling bei WebRTc Verbindung
 Gucken wie WebExport + Android
-Spiel stürzt ab wenn Audio Stream beendet wird => gefixt, muss getestet werden
+Spiel stürzt ab wenn Audio Stream beendet wird => gefixt, muss getestet werden => lokal getestet
 Popupt PeerToPeer abgebrochen sorgt für endlosschleife
+Spielabbruch Routine bei Verbindungsabbruch!
 
 zu Testen: 
 Meldung wenn 2. Spiler RTC Verbindung starten => geht
