@@ -76,6 +76,7 @@ public partial class GlobalVariables : Node
     public int LevelDifficulty {get;set;}=0; // 0= einfach, 1= mittel, 2=schwer, 3=Profi
     public int LevelMode {get;set;}=3;//0=miteinander,1=gegeneinader,2=solo
 
+    // Für Verbindungen
     public Lobby Lobby { get; set; }
     public PackedScene ConfirmationDialog { get; set; }
 
@@ -110,7 +111,9 @@ public partial class GlobalVariables : Node
         else
         {
             GetTree().CurrentScene.QueueFree();
-            GetTree().Root.AddChild(Lobby);
+            Lobby.InitRTCConnection();
+            Lobby.Server.AddForeignClient(Lobby.Client.id, Lobby.Client.Name); // weil der Server den eigenen Lobbyclient vergisst sobald er eine RTC Verbindung hat
+            Lobby._on_RumeAkt_pressed();
             Lobby.Show();
         }
     }

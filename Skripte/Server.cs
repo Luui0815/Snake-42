@@ -341,4 +341,15 @@ public class Server : Control
         }
         catch{}
     }
+
+    public void AddForeignClient(int id, string name)
+    {
+        // Da man bei einem Verbindungsabbruch wieder zur lobby kommt nachdem man die RTC gestartet hat und den Serv weiterlaufen hat
+        // Der Server hat aber den eigenen Client bereits gelöscht, daher sendet er keiene Daten mehr an ihn, ich weiß langer Trip
+        // daher füg ihn einfach hinzu wenn du eine id hast die du nicht kennst!
+        _ConnectedClients.Add(new ConnectedClients(id, name));
+        // der Client der nie disconnected ist, sendet nachdem die Lobby wieder in den Vordergrund getreten ist den Namen nach!
+        // Wow was für eine Fehlerkette
+        // Die Methode wird von der Lobby aus ausgerufen! von GlobalVariables BAcktoMainMenuorLobby()
+    }
 }

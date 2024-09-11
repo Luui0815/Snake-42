@@ -33,8 +33,11 @@ public class Lobby : Control
     private Server _server;
     private List<Raum> _roomList; // Liste der Räume welcher der Client hat
     private ItemList _RaumListe;
-    private WebRTCPeerConnection WebRTCPeer = new WebRTCPeerConnection();
-    private WebRTCMultiplayer WebRTCMultiplayer = new WebRTCMultiplayer();
+    private WebRTCPeerConnection WebRTCPeer;
+    private WebRTCMultiplayer WebRTCMultiplayer;
+    private bool RTCConnectionEstablished;
+    public Server Server {get { return _server;}}
+    public Client Client {get { return _client;}}
 
     public override void _Ready()
     {
@@ -77,7 +80,13 @@ public class Lobby : Control
         }
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
-        
+        InitRTCConnection();
+    }
+
+    public void InitRTCConnection()
+    {
+        WebRTCPeer =  new WebRTCPeerConnection();
+        WebRTCMultiplayer = new WebRTCMultiplayer();
         WebRTCPeer.Connect("session_description_created", this, nameof(WebRTCPeerSDPCreated));
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
 
@@ -88,11 +97,18 @@ public class Lobby : Control
         // der andere in der Verbindung ist dann id2 = Spieler 2!
         WebRTCMultiplayer.Initialize(2,false); 
         WebRTCMultiplayer.AddPeer(WebRTCPeer,2);
+
+        RTCConnectionEstablished = false;
     }
 
     // ToDo: Folgende Methode geht nicht richtig, denk ich
     private void BackToVerbindungseinstellung()
     {
+        if(_server != null)
+            _server.StopServer();
+        if(_client != null)
+            _client.StopConnection();
+        QueueFree();
         GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
@@ -100,9 +116,10 @@ public class Lobby : Control
     {
         WebRTCMultiplayer.Poll();
         
-        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState())
+        if(WebRTCPeerConnection.ConnectionState.Connected == WebRTCPeer.GetConnectionState() && RTCConnectionEstablished == false)
         {
             bool roomfound = false;
+            RTCConnectionEstablished = true;
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
             // Raum suchen in dem sich der Spieler noch befindet!
             foreach(Raum room in _roomList)
@@ -234,7 +251,7 @@ public class Lobby : Control
         }
     }
 
-    private void _on_RumeAkt_pressed()
+    public void _on_RumeAkt_pressed()
     {
         //fordert Liste der Räume vom Server an
         _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.OfferRoomData,_client.id,0,"")));
@@ -296,26 +313,25 @@ public class Lobby : Control
 
     private void SwitchToLevelSelectionMenu()
     {
-        //int test = CustomMultiplayer.GetRpcSenderId();
-        if(_server != null)
+        // Wenn der Server offen gelassen werden soll, d,h, andere können sich während man selbst spielt noch auf den server verbinden und spiele starten, dann Lobby nicht löschen
+        // in allen andern Fällen weg
+
+        if(_server != null && GetNode<CheckButton>("ServerOffenLassen").Pressed == true)
         {
-            if(GetNode<CheckButton>("ServerOffenLassen").Pressed == false)
-            {
-                _server.StopServer();
-                if(GlobalVariables.Instance.Lobby != null)
-                    GlobalVariables.Instance.Lobby.QueueFree();
-            }
-            else
-            {
-                //lobalVariables.Instance.Lobby = this;
-                RemoveChild(_server);
-                GlobalVariables.Instance.AddChild(_server);
-                _server.Hide();
-            }
+            // Lobby muss mit Server erhalten werden
+            // in Lobby ist auch noch ein Client, der bleibt als einziger erhalten!, mit der Lobby!
+            GlobalVariables.Instance.Lobby = this;
+            Hide();
         }
-        _client.QueueFree();
+        else
+        {
+            if(_server != null)
+                _server.StopServer();
+            if(_client != null)
+                _client.StopConnection();
+            QueueFree();
+        }
         GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
-        QueueFree();
     }
 
     private void _on_PrintRTC_pressed()

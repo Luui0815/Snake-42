@@ -1,13 +1,5 @@
-Verbindungsabbruch Handling bei WebRTc Verbindung
 Gucken wie WebExport + Android
-Spiel stürzt ab wenn Audio Stream beendet wird => gefixt, muss getestet werden => lokal getestet
-Popupt PeerToPeer abgebrochen sorgt für endlosschleife
-Spielabbruch Routine bei Verbindungsabbruch!
 
 zu Testen: 
-Meldung wenn 2. Spiler RTC Verbindung starten => geht
-Meödung wenn 1 Spieler im Raum die Lobby verlässt => geht
-Server Info bei nur Server => geht
 Server muss Raumlisten sehen!
-Checken ob es zu Abstürzen kommt wenn kein Mikro und Lautsprecher angeschlossen ist! bei Sprachchat!
-Wenn bei RTC durc Lobby Vrbindung abbricht dann bleibt servein in global variables bestehen!
+Client bekommt manchmal nicht mit das Server weg ist bei Websockets => KeepAllive System einbauen!

@@ -87,15 +87,24 @@ public class ManuelleRTCVerbindung : Control
 
         if(Peer.CreateOffer() != Error.Ok)
         {
-            GD.Print("Fehler bei Erzeugung SDP!");
-            // Signal session_description_created => SDPCreated wird aufgerufen
+            // Fehlerpop
+            ErrorMessage("Fehler beim Verbindungsaufbau", "Es konnte keine SDP Anfrage erstellt werden.\nDie Verbindung wird zurückgesetzt!").Connect("popup_hide", this, nameof(_on_ResetConnectionData_pressed));
         }
+
     }
     private void SDPCreated(string type, string sdp)
     {
-        Peer.SetLocalDescription(type,sdp);
-        // SDP Daten WebRTCDAta speichern
-        _LocalRtcData = new WebRTCData(type, sdp);
+        if(Peer.SetLocalDescription(type,sdp) == Error.Ok)
+        {
+            // SDP Daten WebRTCDAta speichern
+            _LocalRtcData = new WebRTCData(type, sdp);
+        }
+        else
+        {
+            // Fehlerpop
+            ErrorMessage("Fehler beim Verbindungsaufbau", "Die erzeugten SDP Daten konnten nicht als lokale, also deine SDP Daten gesetzt werden\nDie Verbindung wird zurückgesetzt!").Connect("popup_hide", this, nameof(_on_ResetConnectionData_pressed));
+        }
+        
     }
 
     private void WebRTCPeerIceCandidateCreated(string media, int index, string name) 
@@ -110,35 +119,49 @@ public class ManuelleRTCVerbindung : Control
     // Schritt2: PartnerB bekommt die SDP und ICe Daten von Partner A und drückt auf speichern
     private void _on_SetRemoteData_pressed()
     {
-        if(WebRTCInitialized == false)
-        {
-            MultiplayerPeer.Initialize(2,false);
-            MultiplayerPeer.AddPeer(Peer,2);
-            WebRTCInitialized = true;
-        }
-        
-        // json.string in RTCData konvertieren
         try
         {
-            _RemoteRtcData = JsonConvert.DeserializeObject<WebRTCData>(GetNode<TextEdit>("ForeignRtcData").Text);
+            // Benutzerinagbe = schwierige Eingaben!
+            if(WebRTCInitialized == false)
+            {
+                MultiplayerPeer.Initialize(2,false);
+                MultiplayerPeer.AddPeer(Peer,2);
+                WebRTCInitialized = true;
+            }
+        
+            // json.string in RTCData konvertieren
+            try
+            {
+                _RemoteRtcData = JsonConvert.DeserializeObject<WebRTCData>(GetNode<TextEdit>("ForeignRtcData").Text);
+            }
+            catch
+            {
+                ErrorMessage("Ungültige Daten", "In den übertragenen RTC Daten liegt ein Fehler vor! Versuche es erneut!");
+                return;
+            }
+            // SDP von Partner A als remote SDp setzen
+            if(Peer.SetRemoteDescription(_RemoteRtcData.SDP_Data.Type, _RemoteRtcData.SDP_Data.SDP) != Error.Ok)
+            {
+                ErrorMessage("Fehler bei Erzeugung Remote SDP!", "In den übertragenen RTC Daten liegt ein Fehler vor!");
+                return;
+            }
+            // Signal session_description_created => SDPCreated wird aufgerufen
+
+            //ICe Kandidaten von Partner A hinzufügen
+            foreach(WebRTCData.IceCandidateData ice in _RemoteRtcData.ListIceCandidates)
+            {
+                if(Peer.AddIceCandidate(ice.Media, ice.Index, ice.Name) != Error.Ok)
+                {
+                    ErrorMessage("Fehler in den ICE Kandidaten", "In den übertragenen RTC Daten liegt ein Fehler vor!");
+                    return;
+                }
+            }
         }
         catch
         {
-            // Todo: Fehlerpop erscheinen lassen
-            GD.Print("In den übertragenen RTC Daten liegt ein Fehler vor! Versuche es erneut");
+            ErrorMessage("Ungültige Daten", "In den übertragenen RTC Daten liegt ein Fehler vor! Versuche es erneut!");
         }
-        // SDP von Partner A als remote SDp setzen
-        if(Peer.SetRemoteDescription(_RemoteRtcData.SDP_Data.Type, _RemoteRtcData.SDP_Data.SDP) != Error.Ok)
-        {
-            GD.Print("Fehler bei Erzeugung Remote SDP!");
-        }
-        // Signal session_description_created => SDPCreated wird aufgerufen
-
-        //ICe Kandidaten von Partner A hinzufügen
-        foreach(WebRTCData.IceCandidateData ice in _RemoteRtcData.ListIceCandidates)
-        {
-            Peer.AddIceCandidate(ice.Media, ice.Index, ice.Name);
-        }
+        
     }
     // ab hier werden RTCDaten von Partner B erzeugt, erst SDp dann Ice
     // Nachdem Partner B die Ice Kandidaten an Partner A übermittelt der 
@@ -173,5 +196,15 @@ public class ManuelleRTCVerbindung : Control
         GetNode<TextEdit>("ForeignRtcData").Text = "";
         GetNode<TextEdit>("SelfRtcData").Text = "";
         _Ready();
+    }
+
+    private ConfirmationDialog ErrorMessage(string titel, string description)
+    {
+        ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+        ErrorPopup.Init(titel,description);
+        GetTree().Root.AddChild(ErrorPopup);
+        ErrorPopup.PopupCentered();
+        ErrorPopup.Show();
+        return ErrorPopup;
     }
 }

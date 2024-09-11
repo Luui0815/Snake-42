@@ -72,7 +72,7 @@ public class Client : Control
     {
         StopConnection();
         QueueFree();
-        GetTree().ChangeScene("res://Szenen/Hauptmenü.tscn");
+        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
     }
 
     private void ConnectionOpened(string proto)
@@ -151,7 +151,11 @@ public class Client : Control
 
     public void SendData(string Data)
     {
-        _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
+        try
+        {
+            _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
+        }
+        catch{}
         GD.Print("Client: Nachricht gesendet: " + Data);
     }
 
@@ -167,6 +171,7 @@ public class Client : Control
     {
         _DisconnectFromHost = true;
         _WSPeer.DisconnectFromHost();
+        QueueFree();
     }
 
     public override void _Process(float delta)
