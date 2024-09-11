@@ -13,11 +13,14 @@ public class RTCTest : Control
         // Selbstegamchte Klasse für RPC aufrufen
         NetworkManager.NetMan.Init(GlobalVariables.Instance.WebRTC);
         NetworkManager.NetMan.Connect("MessageReceived", this, nameof(ReceiveMsg));
+        // Room aufbauen
+        int t = GlobalVariables.Instance.WebRTC.GetUniqueId();
     }
 
     public override void _Process(float delta)
     {
     }
+
 
     private void ReceivePacket(int id, byte[] packet )
     {

@@ -59,23 +59,32 @@ public class ManuelleRTCVerbindung : Control
 
     private WebRTCData _LocalRtcData;
     private WebRTCData _RemoteRtcData;
+    private bool WebRTCInitialized = false;
     public override void _Ready()
     {
         Peer = new WebRTCPeerConnection();
         Peer.Initialize(GlobalVariables.IceServers);
 
         MultiplayerPeer = new WebRTCMultiplayer();
-        MultiplayerPeer.Initialize(1,false);
-        MultiplayerPeer.AddPeer(Peer,1);
 
         // Signale verbinden!
         Peer.Connect("session_description_created", this, nameof(SDPCreated));
         Peer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
+
+        WebRTCInitialized = false;
     }
 
     // Schritt1: Partner A erzeugt seine SPD und ICe Kandidaten und gibt sie aus!
     private void _on_StartConnection_pressed()
     {
+        MultiplayerPeer.Initialize(1,false);
+        MultiplayerPeer.AddPeer(Peer,1);
+        WebRTCInitialized = true;
+        // Es wird zuerst WebRTcMultiplayer mit id 2 initialisiert
+        // Drückt ein Spieler aber auf SpielStarten wird er neu mit id = 1 initialisiiert
+        // d.h. derjenige welche die verbindung initialisiert hat id 1, ist dann Spieler 1
+        // der andere in der Verbindung ist dann id2 = Spieler 2!
+
         if(Peer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erzeugung SDP!");
@@ -101,7 +110,14 @@ public class ManuelleRTCVerbindung : Control
     // Schritt2: PartnerB bekommt die SDP und ICe Daten von Partner A und drückt auf speichern
     private void _on_SetRemoteData_pressed()
     {
-        // json.string in RTCData konvertiren
+        if(WebRTCInitialized == false)
+        {
+            MultiplayerPeer.Initialize(2,false);
+            MultiplayerPeer.AddPeer(Peer,2);
+            WebRTCInitialized = true;
+        }
+        
+        // json.string in RTCData konvertieren
         try
         {
             _RemoteRtcData = JsonConvert.DeserializeObject<WebRTCData>(GetNode<TextEdit>("ForeignRtcData").Text);
@@ -109,7 +125,7 @@ public class ManuelleRTCVerbindung : Control
         catch
         {
             // Todo: Fehlerpop erscheinen lassen
-            GD.Print("In den übertragenen RTC DAten liegt ein Fehler vor! Versuche es erneut");
+            GD.Print("In den übertragenen RTC Daten liegt ein Fehler vor! Versuche es erneut");
         }
         // SDP von Partner A als remote SDp setzen
         if(Peer.SetRemoteDescription(_RemoteRtcData.SDP_Data.Type, _RemoteRtcData.SDP_Data.SDP) != Error.Ok)
@@ -135,12 +151,8 @@ public class ManuelleRTCVerbindung : Control
         if(WebRTCPeerConnection.ConnectionState.Connected == Peer.GetConnectionState())
         {
             GlobalVariables.Instance.WebRTC = MultiplayerPeer;
-<<<<<<< Updated upstream:Skripte/PeerToPeerMenu.cs
-            GetTree().ChangeScene("res://Szenen/LevelSelectionMenu.tscn");
-=======
             NetworkManager.NetMan.Init(MultiplayerPeer);
             GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
->>>>>>> Stashed changes:Skripte/ManuelleRTCVerbindung.cs
             QueueFree();
         }
     }
@@ -148,5 +160,18 @@ public class ManuelleRTCVerbindung : Control
     private void _on_Button_pressed()
     {
         GetNode<Label>("RpcInfo").Text = MultiplayerPeer.GetPeers().ToString();
+    }
+
+    private void _on_Zurck_pressed()
+    {
+        GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
+        QueueFree();
+    }
+
+    private void _on_ResetConnectionData_pressed()
+    {
+        GetNode<TextEdit>("ForeignRtcData").Text = "";
+        GetNode<TextEdit>("SelfRtcData").Text = "";
+        _Ready();
     }
 }

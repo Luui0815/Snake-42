@@ -61,29 +61,40 @@ margin_bottom = 131.0
 autowrap = true
 
 [node name="Button" type="Button" parent="."]
-margin_left = 204.0
-margin_top = 25.0
-margin_right = 495.0
-margin_bottom = 142.0
+margin_left = 30.0
+margin_top = 16.0
+margin_right = 263.0
+margin_bottom = 72.0
 text = "Zeige RPC Daten"
 
 [node name="Beschreibung" type="Label" parent="."]
-margin_left = 52.0
+margin_left = 48.0
 margin_top = 519.0
-margin_right = 630.0
-margin_bottom = 703.0
+margin_right = 1257.0
+margin_bottom = 636.0
 text = "Anleitung:
-1)Spieler1 betätigt Verbindung aufbauen
-2)Daraufhin werden Daten in Deine SDP Daten und Deine ICE Daten zu sehen sein
-3)schicke diese Detn unverändert Spieler2
-4)Spieler 2 trägt die SDP DAten in SPD Daten des Mitspielers ein und drückt auf Daten des Mitspielers speichern
-5)Spieler 2 trägt die ICE Daten in ICE Daten eds Mitspielers ein und drückt auf ICE Daten Speichern
-6)Spiler2 sieht nun bei sich seine SDP und ICE DAten
-7) Diese Daten schickt er an Spieler 1
-8) Spieler 1trägt die SDP Daten in SDP DAten des Mitspeiler ein und drückt auf speichern
-9)Spieler1 trägt die ICE Daten in ICe Daten des Mitspeilers ein und drückt auf speichern
-10) im Debug: Zeige RPC Daten muss connected = True sein, dannw eiter drücken => Verbindung steht!"
+1) Partner A drückt auf Verbindung aufbauen. Im darüber befindlichem Textfeld erscheint ein Text. Kopiere diesen und schicke es Partner B
+2) Nachdem Partner B den Text von Partner A erhalten ht trägt er dies bitte in das Textfeld \"WebRTC Daten des Mitspielers und drückt auf Daten des Mitspielers speichern. Danach sollte ein Text in dem Textfeld Deine WebRTC Daten erscheinen. Partner B kopiert diesen und schickt ihn Partner A
+3) Nachdem Partner A die Daten con B erhalten hat trägt er sie in WebRTCDaten des Mitspielers ein und drückt auf Daten des Mitspielers speichern
+4) Nach einer kurzen Zeit sollte sich das Fenstr wechseln. Ist dies nicht der Fall ist etwas schief gelaufen. Um von vorne zu starten drücken beide bitte auf Verbindungsdaten zurücksetzen!"
+autowrap = true
+
+[node name="Zurück" type="Button" parent="."]
+margin_left = 1033.0
+margin_top = 646.0
+margin_right = 1264.0
+margin_bottom = 706.0
+text = "Zurück"
+
+[node name="ResetConnectionData" type="Button" parent="."]
+margin_left = 30.0
+margin_top = 88.0
+margin_right = 265.0
+margin_bottom = 145.0
+text = "Verbindungsdaten zurücksetzen"
 
 [connection signal="pressed" from="StartConnection" to="." method="_on_StartConnection_pressed"]
 [connection signal="pressed" from="SetRemoteData" to="." method="_on_SetRemoteData_pressed"]
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="Zurück" to="." method="_on_Zurck_pressed"]
+[connection signal="pressed" from="ResetConnectionData" to="." method="_on_ResetConnectionData_pressed"]

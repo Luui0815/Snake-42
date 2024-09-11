@@ -9,3 +9,5 @@ Meldung wenn 2. Spiler RTC Verbindung starten => geht
 Meödung wenn 1 Spieler im Raum die Lobby verlässt => geht
 Server Info bei nur Server => geht
 Server muss Raumlisten sehen!
+Checken ob es zu Abstürzen kommt wenn kein Mikro und Lautsprecher angeschlossen ist! bei Sprachchat!
+Wenn bei RTC durc Lobby Vrbindung abbricht dann bleibt servein in global variables bestehen!

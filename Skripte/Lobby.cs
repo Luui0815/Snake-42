@@ -82,18 +82,17 @@ public class Lobby : Control
         WebRTCPeer.Connect("ice_candidate_created", this, nameof(WebRTCPeerIceCandidateCreated));
 
         WebRTCPeer.Initialize(GlobalVariables.IceServers);
-        WebRTCMultiplayer.Initialize(1,false); // Verbindung wird mit id = 1 gestartet, da nur 2 spieler und nur 1 Verbindung benötigt wird!
-        WebRTCMultiplayer.AddPeer(WebRTCPeer,1);
+        // Es wird zuerst WebRTcMultiplayer mit id 2 initialisiert
+        // Drückt ein Spieler aber auf SpielStarten wird er neu mit id = 1 initialisiiert
+        // d.h. derjenige welche die verbindung initialisiert hat id 1, ist dann Spieler 1
+        // der andere in der Verbindung ist dann id2 = Spieler 2!
+        WebRTCMultiplayer.Initialize(2,false); 
+        WebRTCMultiplayer.AddPeer(WebRTCPeer,2);
     }
 
     // ToDo: Folgende Methode geht nicht richtig, denk ich
     private void BackToVerbindungseinstellung()
     {
-        if(_server != null)
-            _server.StopServer();
-        if(_client != null)
-            _client.StopConnection();
-        QueueFree();
         GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
@@ -255,6 +254,9 @@ public class Lobby : Control
 
     private void _on_SpielStarten_pressed()
     {
+        WebRTCMultiplayer.Initialize(1,false); // Verbindung wird mit id = 1 gestartet, da nur 2 spieler und nur 1 Verbindung benötigt wird!
+        WebRTCMultiplayer.AddPeer(WebRTCPeer,1);
+
         if(WebRTCPeer.CreateOffer() != Error.Ok)
         {
             GD.Print("Fehler bei Erstellung SPD");

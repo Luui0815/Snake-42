@@ -10,6 +10,8 @@ public class NetworkManager : Node
 {
     [Signal]
     public delegate void MessageReceived(string msg);
+    [Signal]
+    public delegate void AudioError();
 
     // Klasse welche benutzt wird um Nachrichten zu versenden, nur für NetworkManager interresant
     private class _RtcMsg
@@ -129,7 +131,16 @@ public class NetworkManager : Node
         }
         set
         {
-            _audioStream.IsRecording = value;
+            // wenn es kein Mikro am PC kommt, kommt es hier zum Absturz!
+            try
+            {
+                _audioStream.IsRecording = value;
+            }
+            catch
+            {
+                ErrorMessage("Mikrofon","Es wurde kein Mikrofon gefunden!");
+                EmitSignal(nameof(AudioError));
+            }
         }
     }
 
@@ -141,7 +152,15 @@ public class NetworkManager : Node
         }
         set
         {
-            _audioStream.IsPlaying = value;
+            try
+            {
+                _audioStream.IsPlaying = value;
+            }
+            catch
+            {
+                ErrorMessage("Lautsprecher","Es wurde kein Lautsprecher gefunden!");
+                EmitSignal(nameof(AudioError));
+            }
         }
     }
 
@@ -149,6 +168,7 @@ public class NetworkManager : Node
     private float _LastPingTime;
     private bool _multiplayerIsActive;
     private bool _PingAnswerReceived;
+    private int _CyclesWithoutPing = 0; // wenn mehr als 5 Zyklen kein Ping empfangen wird ist es als Verbindungsabbruch zu werten!
 
     public void Init(WebRTCMultiplayer multiplayer, float KeepAlivePingInterval = 1.0f)
     {
@@ -209,6 +229,7 @@ public class NetworkManager : Node
                         case _RtcMsgState.KeepAlivePing:
                         {
                             _PingAnswerReceived = true;
+                            _CyclesWithoutPing = 0;
                             break;
                         }
                     }
@@ -221,10 +242,14 @@ public class NetworkManager : Node
                 // prüfen ob im vorhergehenden Intervall eine Antwort zurückkam
                 if(_PingAnswerReceived == false)
                 {
-                    // keine Antwort => Verbindungsabbruch!
-                    WebRTCDisconnect();
-                    // eigene Verbindung schließen, da nur 2 Spieler miteinander verbunden sind und es wenig sinn macht den anderen im Raum zu lassen!
-                    CloseConnection();
+                    _CyclesWithoutPing += 1;
+                    if(_CyclesWithoutPing > 5)
+                    {
+                        // keine Antwort => Verbindungsabbruch!
+                        ErrorMessage("Verbindungsabbruch", "Die Peer To Peer Verbindung wurde abgebrochen.").Connect("popup_hide", GlobalVariables.Instance, nameof(GlobalVariables.Instance.BackToMainMenuOrLobby));
+                        // eigene Verbindung schließen, da nur 2 Spieler miteinander verbunden sind und es wenig sinn macht den anderen im Raum zu lassen!
+                        CloseConnection();
+                    }
                 }
                 // Zeit einen neuen Ping zu senden!
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
@@ -279,14 +304,14 @@ public class NetworkManager : Node
         _multiplayer.PutPacket(message);
     }
 
-    private void WebRTCDisconnect()
+    private ConfirmationDialog ErrorMessage(string titel, string description)
     {
         ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
-        ErrorPopup.Init("Verbindungsabbruch","Peer to Peer Verbindung ist abgebrochen");
-        ErrorPopup.Connect("confirmed", this, nameof(GlobalVariables.BackToMainMenuOrLobby));
+        ErrorPopup.Init(titel,description);
         GetTree().Root.AddChild(ErrorPopup);
         ErrorPopup.PopupCentered();
         ErrorPopup.Show();
+        return ErrorPopup;
     }
 
     public void CloseConnection()
@@ -294,5 +319,4 @@ public class NetworkManager : Node
         _multiplayerIsActive = false;
         _multiplayer.Close();
     }
-
 }
