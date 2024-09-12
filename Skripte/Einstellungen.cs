@@ -117,9 +117,10 @@ public class Einstellungen : Control
         _SelectLevel.Disable(true);
         _SelectMode.Disable(true);
         // anderen Spieler sagen das er hinne machen soll! => mit rpc!
-        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false);
+        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false, _SelectDifficulty.SelectedOption, _SelectLevel.SelectedOption, _SelectMode.SelectedOption);
         // damit sagt man dem anderen gleichzeitig das man bereit ist
         // im RPC aufruf merkt man dann ob beide bereit sind und trifft die Auswahl!
+        // der Gegenüber muss dafür aber die Auswahl von dir kennen daher sende deien Auswahl mit! Auch wenn nur einer sie auswertet!
     }
 
     private void _on_Back_pressed()
@@ -141,14 +142,71 @@ public class Einstellungen : Control
         GetNode<OptionSelection>(OptionSelectionName).EnableOtherPlayerSelection(index);
     }
     // remote RPC
-    private void SayOtherPlayerIsReady()
+    private void SayOtherPlayerIsReady(int DifficultIndex, int LevelIndex, int ModeIndex)
     {
         GetNode<Label>("InfoBereit").Text = "Der andere Spieler wartet!";
         _OtherPlayerIsReady = true;
         if(_IamReady == true)
         {
+            int DifficultDecision;
+            int LevelDecision;
+            int ModeDecision;
+            Random r = new Random();
             // Derjenige welcher zuerst bereit war merkt hier das beide bereit sind
             // er trifft bei Unstimmigkeiten für beide die Entscheidungen!
+            // dafür vergleicht er seine mit die des anderen!
+            // Schwierigkeitsentscheidung:---------------------------------------
+            if(DifficultIndex == _SelectDifficulty.SelectedOption)
+            {
+                DifficultDecision = DifficultIndex;
+            }
+            else
+            {
+                // Zufall
+                if(r.Next(0,1) == 0)
+                {
+                    DifficultDecision = DifficultIndex;
+                }
+                else
+                {
+                    DifficultDecision = _SelectDifficulty.SelectedOption;
+                }
+            }
+            // Levelentscheidung:-------------------------------------------------
+            if(LevelIndex == _SelectLevel.SelectedOption)
+            {
+                LevelDecision = LevelIndex;
+            }
+            else
+            {
+                // Zufall
+                if(r.Next(0,1) == 0)
+                {
+                    LevelDecision = LevelIndex;
+                }
+                else
+                {
+                    DifficultDecision = _SelectLevel.SelectedOption;
+                }
+            }
+            // Modeentscheidung:-------------------------------------------------
+            if(ModeIndex == _SelectMode.SelectedOption)
+            {
+                ModeDecision = ModeIndex;
+            }
+            else
+            {
+                // Zufall
+                if(r.Next(0,1) == 0)
+                {
+                    ModeDecision = ModeIndex;
+                }
+                else
+                {
+                    ModeDecision = _SelectMode.SelectedOption;
+                }
+            }
+            // Jetzte bei beiden das Spiel starten!
         }
     }
 }
