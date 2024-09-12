@@ -6,6 +6,9 @@ public class Einstellungen : Control
     private OptionSelection _SelectDifficulty;
     private OptionSelection _SelectLevel;
     private OptionSelection _SelectMode;
+    //für online:
+    private bool _OtherPlayerIsReady;
+    private bool _IamReady;
 
     public override void _Ready()
     {
@@ -91,13 +94,32 @@ public class Einstellungen : Control
             _SelectMode.EnableOtherPlayerSelection(0); // da der gegenüber nur seine Auswahl schickt wenn er was ändert muss
             // sein Ausgangszustand so abbgebildet werden, das ist auch deiner!
         }
+
+        _OtherPlayerIsReady = false;
+        _IamReady = false;
     }
 
     private void _on_Start_pressed()
     {
         GlobalVariables.Instance.LevelDifficulty = _SelectDifficulty.SelectedOption;
         GlobalVariables.Instance.LevelMode = _SelectMode.SelectedOption;
-        GetTree().ChangeScene($"res://Szenen/Levels/Level{_SelectLevel.SelectedOption + 1}.tscn");
+        if(GlobalVariables.Instance.OnlineGame == false)
+        {
+            GetTree().ChangeScene($"res://Szenen/Levels/Level{_SelectLevel.SelectedOption + 1}.tscn");
+            return;
+        }
+        // wenn online:
+        _IamReady = true;
+        // warten auf anderen Spieler, er muss auch bereit sein! => diesem Spiler mitteilen das er warten muss, anderm Spieler sagen das man wartet!
+        GetNode<Label>("InfoBereit").Text = "Warten auf anderen Spieler!";
+        // evtl. Input, also Änderungen verbieten
+        _SelectDifficulty.Disable(true);
+        _SelectLevel.Disable(true);
+        _SelectMode.Disable(true);
+        // anderen Spieler sagen das er hinne machen soll! => mit rpc!
+        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false);
+        // damit sagt man dem anderen gleichzeitig das man bereit ist
+        // im RPC aufruf merkt man dann ob beide bereit sind und trifft die Auswahl!
     }
 
     private void _on_Back_pressed()
@@ -112,9 +134,21 @@ public class Einstellungen : Control
         // alternativ: 3 mal das gleiche für die 3 unterschiedlichen Option Selection menus
         NetworkManager.NetMan.rpc(GetPath(),nameof(ChangeSelectionOnOtherPlayer), false, false, OptionSelectionName, index); // remote rpc, da 2.false
     }
+    // remote RPC
     private void ChangeSelectionOnOtherPlayer(string OptionSelectionName, int index)
     {
         // da es ein remote rpc (das 2. false) ist, wird auf der senderseite diese Methode nicht ausgeführt nur auf der anderen!
         GetNode<OptionSelection>(OptionSelectionName).EnableOtherPlayerSelection(index);
+    }
+    // remote RPC
+    private void SayOtherPlayerIsReady()
+    {
+        GetNode<Label>("InfoBereit").Text = "Der andere Spieler wartet!";
+        _OtherPlayerIsReady = true;
+        if(_IamReady == true)
+        {
+            // Derjenige welcher zuerst bereit war merkt hier das beide bereit sind
+            // er trifft bei Unstimmigkeiten für beide die Entscheidungen!
+        }
     }
 }

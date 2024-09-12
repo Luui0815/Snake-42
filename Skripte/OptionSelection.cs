@@ -161,4 +161,12 @@ public class OptionSelection : Control
                 cb.SetOtherPlayerSelection(false);
         }
     }
+
+    public void Disable(bool disable)
+    {
+        foreach(CustomCheckBox cb in _CheckBoxes)
+        {
+            cb.Disabled = disable;
+        }
+    }
 }

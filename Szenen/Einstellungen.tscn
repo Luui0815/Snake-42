@@ -63,5 +63,11 @@ margin_top = 216.0
 margin_right = 1075.0
 margin_bottom = 491.0
 
+[node name="InfoBereit" type="Label" parent="."]
+margin_left = 989.0
+margin_top = 649.0
+margin_right = 1180.0
+margin_bottom = 697.0
+
 [connection signal="pressed" from="Start" to="." method="_on_Start_pressed"]
 [connection signal="pressed" from="Back" to="." method="_on_Back_pressed"]
