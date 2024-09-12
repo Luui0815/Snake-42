@@ -26,6 +26,13 @@ public class Einstellungen : Control
         originalSelectDifficulty.QueueFree();
         AddChild(_SelectDifficulty);
 
+        // Signal hinzufügen bei Online Multiplayer
+        if(GlobalVariables.Instance.OnlineGame == true)
+        {
+            _SelectDifficulty.Connect(nameof(OptionSelection.SelectionChanged), this, nameof(ChangeOnlineSelection), new Godot.Collections.Array{"SelectDifficulty"});
+            _SelectDifficulty.EnableOtherPlayerSelection(0); // da der gegenüber nur seine Auswahl schickt wenn er was ändert muss
+            // sein Ausgangszustand so abbgebildet werden, das ist auch deiner!
+        }
 
         //Für SelectLevel-------------------------------------------------------------------------
         // Suche den ursprünglichen Node
@@ -44,13 +51,28 @@ public class Einstellungen : Control
         originalSelectLevel.QueueFree();
         AddChild(_SelectLevel);
 
+        // Signal hinzufügen bei Online Multiplayer
+        if(GlobalVariables.Instance.OnlineGame == true)
+        {
+            _SelectLevel.Connect(nameof(OptionSelection.SelectionChanged), this, nameof(ChangeOnlineSelection), new Godot.Collections.Array{"SelectLevel"});
+            _SelectLevel.EnableOtherPlayerSelection(0); // da der gegenüber nur seine Auswahl schickt wenn er was ändert muss
+            // sein Ausgangszustand so abbgebildet werden, das ist auch deiner!
+        }
 
         //Für SelectMode-------------------------------------------------------------------------
         // Suche den ursprünglichen Node
         CheckBox originalSelectMode = GetNode<CheckBox>("SelectMode");
 
         // Erstelle eine neue Instanz von OptionSelection
-        _SelectMode = new OptionSelection(3, new string[] { "Miteinander", "Gegeneiander", "Einzelspieler"}, 2);
+        // im OnlineMultiplayer gibt es keinen Einzelspieler!
+        if(GlobalVariables.Instance.OnlineGame == true)
+        {
+            _SelectMode = new OptionSelection(2, new string[] { "Miteinander", "Gegeneiander"});
+        }
+        else
+        {
+            _SelectMode = new OptionSelection(3, new string[] { "Miteinander", "Gegeneiander", "Einzelspieler"}, 2);
+        }
         _SelectMode.Name = originalSelectMode.Name; // macht es einfacher
 
 
@@ -61,6 +83,14 @@ public class Einstellungen : Control
         RemoveChild(originalSelectMode);
         originalSelectMode.QueueFree();
         AddChild(_SelectMode);
+
+        // Signal hinzufügen bei Online Multiplayer
+        if(GlobalVariables.Instance.OnlineGame == true)
+        {
+            _SelectMode.Connect(nameof(OptionSelection.SelectionChanged), this, nameof(ChangeOnlineSelection), new Godot.Collections.Array{"SelectMode"});
+            _SelectMode.EnableOtherPlayerSelection(0); // da der gegenüber nur seine Auswahl schickt wenn er was ändert muss
+            // sein Ausgangszustand so abbgebildet werden, das ist auch deiner!
+        }
     }
 
     private void _on_Start_pressed()
@@ -73,5 +103,18 @@ public class Einstellungen : Control
     private void _on_Back_pressed()
     {
         GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+    }
+
+    // nur für Online Multiplayer!
+    private void ChangeOnlineSelection(int index, string OptionSelectionName)
+    {
+        // da für alle 3 OPtion selection das geleiche und die Objekte auf der anderen Seute eine andere sind, die Namen aber diesselben kann man es so am einfachsten machen
+        // alternativ: 3 mal das gleiche für die 3 unterschiedlichen Option Selection menus
+        NetworkManager.NetMan.rpc(GetPath(),nameof(ChangeSelectionOnOtherPlayer), false, false, OptionSelectionName, index); // remote rpc, da 2.false
+    }
+    private void ChangeSelectionOnOtherPlayer(string OptionSelectionName, int index)
+    {
+        // da es ein remote rpc (das 2. false) ist, wird auf der senderseite diese Methode nicht ausgeführt nur auf der anderen!
+        GetNode<OptionSelection>(OptionSelectionName).EnableOtherPlayerSelection(index);
     }
 }

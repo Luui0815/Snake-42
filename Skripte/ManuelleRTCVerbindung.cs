@@ -174,8 +174,9 @@ public class ManuelleRTCVerbindung : Control
         if(WebRTCPeerConnection.ConnectionState.Connected == Peer.GetConnectionState())
         {
             GlobalVariables.Instance.WebRTC = MultiplayerPeer;
+            GlobalVariables.Instance.OnlineGame = true;
             NetworkManager.NetMan.Init(MultiplayerPeer);
-            GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
+            GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
             QueueFree();
         }
     }

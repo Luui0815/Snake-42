@@ -6,6 +6,7 @@ public class Hauptmenü : Control
 	public void _on_Einzelspieler_pressed()
 	{
 		GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
+		GlobalVariables.Instance.OnlineGame = false;
 	}
 
 	public void _on_Verbindung_erstellen_pressed()

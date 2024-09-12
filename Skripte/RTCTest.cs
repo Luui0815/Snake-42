@@ -56,7 +56,7 @@ public class RTCTest : Control
 
     private void _on_RPCTest3_pressed()
     {
-        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc3),false,GetNode<TextEdit>("fürTest2").Text.ToInt());
+        NetworkManager.NetMan.rpc(GetPath(),nameof(TestRpc3),false, true, GetNode<TextEdit>("fürTest2").Text.ToInt());
     }
 
     private void _on_RPCTest4_pressed()
@@ -65,7 +65,7 @@ public class RTCTest : Control
         S.Position = new Vector2(1056,607);
         S.Texture =  ResourceLoader.Load<Texture>("res://.import/icon.png-ec880de02d5dab0aa15458af9d6c53ed.stex");
 
-        NetworkManager.NetMan.rpc(GetPath(), nameof(TestRpc4),false,S);
+        NetworkManager.NetMan.rpc(GetPath(), nameof(TestRpc4),false);
     }
     
     private void TestRpc1()

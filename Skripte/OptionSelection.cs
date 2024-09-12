@@ -3,21 +3,60 @@ using System;
 
 public class OptionSelection : Control
 {
+    [Signal]
+    public delegate void SelectionChanged(int index);
     private class CustomCheckBox : CheckBox
     {
         [Signal]
         public delegate void CheckBoxPressed(int index);
-
+        public Sprite OtherPlayerCross;
         public int Index { get; set; } = -1;
+        private bool isLocked;
+
+        public new bool Pressed
+        {
+            get
+            {
+                return base.Pressed;
+            }
+            set
+            {
+                // man muss isLocked zurücksetzten!
+                if(value == false)
+                    isLocked = false;
+                base.Pressed = value;
+            }
+        }
 
         public override void _Toggled(bool buttonPressed)
         {
+            // Falls die Checkbox bereits angehakt ist, wird das Umschalten verhindert
+            if (isLocked)
+            {
+                // Checkbox-Zustand beibehalten
+                Pressed = true;
+                return;
+            }
+
             base._Toggled(buttonPressed);
+
+            // Wenn die Checkbox aktiviert wird, sperren wir sie und senden das Signal
             if (buttonPressed)
             {
+                isLocked = true;
                 EmitSignal(nameof(CheckBoxPressed), Index);
             }
-    }
+        }
+        public void SetOtherPlayerSelection(bool selected)
+        {
+            if (OtherPlayerCross != null)  // Sicherstellen, dass das Sprite existiert
+            {
+                if (selected)
+                    OtherPlayerCross.Show();  // Sprite anzeigen
+                else
+                    OtherPlayerCross.Hide();  // Sprite verstecken
+            }
+        }
     }
 
 
@@ -39,8 +78,11 @@ public class OptionSelection : Control
     public readonly int Height; 
     [Export]
     public readonly int Width; 
+    [Export]
+    public readonly string OtherPlayerSelectionCrossPath = "res://Assets/EinstellungenMultiplayerKreuz.png";
 
     private CustomCheckBox[] _CheckBoxes;
+    private Sprite OtherPlayerSelection;
 
     public OptionSelection (int _OptionNumbers, string[] _CheckboxesText, int _PreselectedOption = 0, int _DistanceRight = 10, int _DistanceLeft = 10, int _DistanceTop = 10, int _DistanceButtom = 10, int _Height = 50, int _Width = 100) 
     {
@@ -71,6 +113,22 @@ public class OptionSelection : Control
             _CheckBoxes[i].Text = _CheckboxesText[i];
             _CheckBoxes[i].Index = i;
             _CheckBoxes[i].Connect("CheckBoxPressed", this, nameof(CBPressed));
+            // Sprite für MultiplayerSelection setzen---------------------------------------------------------------------------------------
+            _CheckBoxes[i].OtherPlayerCross = new Sprite();
+            _CheckBoxes[i].OtherPlayerCross.Texture = (Texture)ResourceLoader.Load(OtherPlayerSelectionCrossPath);
+            // Größe des Sprites anpassen (z.B. mit einer festen Skalierung oder relativ zur Checkbox-Größe)
+            _CheckBoxes[i].OtherPlayerCross.Scale = new Vector2(0.3f * (size.y / _CheckBoxes[i].OtherPlayerCross.Texture.GetSize().x), // größe anpassen!
+                                                                0.3f * (size.y / _CheckBoxes[i].OtherPlayerCross.Texture.GetSize().y));
+            // Position rechtsbündig in der Checkbox setzen
+            float crossWidth = _CheckBoxes[i].OtherPlayerCross.Texture.GetSize().x * _CheckBoxes[i].OtherPlayerCross.Scale.x;
+            float crossHeight = _CheckBoxes[i].OtherPlayerCross.Texture.GetSize().y * _CheckBoxes[i].OtherPlayerCross.Scale.y;
+            // Berechne die Position, sodass das Sprite rechtsbündig ist
+            _CheckBoxes[i].OtherPlayerCross.Position = new Vector2((Pos.x + size.x) - crossWidth, 15); // 15 bestimmt wie weit unten das Kreuz ist
+            // Das Sprite darf nicht zentriert sein, damit die Position korrekt ist
+            _CheckBoxes[i].OtherPlayerCross.Centered = false;
+            _CheckBoxes[i].AddChild(_CheckBoxes[i].OtherPlayerCross);
+            _CheckBoxes[i].OtherPlayerCross.Hide();
+            // ENDE-------------------------------------------------------------------------------------------------------------------------
             Pos.y += size.y +SpaceBetween.y;
             AddChild(_CheckBoxes[i]);
         }
@@ -89,6 +147,18 @@ public class OptionSelection : Control
             else
                 cb.Pressed = true;
         }
+        EmitSignal(nameof(SelectionChanged), index);
     }
-
+    // nur für Multiplayer:
+    public void EnableOtherPlayerSelection(int CheckboxIndex)
+    {
+        // bei allen Checkboxen den Hacken entfernen außer bei dem mit dem Index
+        foreach(CustomCheckBox cb in _CheckBoxes)
+        {
+            if(cb.Index == CheckboxIndex)
+                cb.SetOtherPlayerSelection(true);
+            else
+                cb.SetOtherPlayerSelection(false);
+        }
+    }
 }
