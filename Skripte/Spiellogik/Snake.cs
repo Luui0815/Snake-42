@@ -163,7 +163,7 @@ public class Snake : Node2D
             _Merker = false;
     }
 
-    protected void CheckFruitCollision()
+    protected virtual void CheckFruitCollision()
     {
         if (_body.Points[0] == _fruit.Position)
         {
@@ -174,10 +174,6 @@ public class Snake : Node2D
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
             MoveSnake();
-        }
-        else
-        {
-            //_eating = false;
         }
     }
 
