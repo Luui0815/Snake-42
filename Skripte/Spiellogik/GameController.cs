@@ -28,7 +28,7 @@ public class GameController : Node2D
         _snake2 = GetNode<Snake>("Snake2");
 		_snakeTogether = GetNode<SnakeMiteinander>("Snake3");
 
-		// folgendes BITTE NICHT durch eine Formel ersetzen, da mn es so feiner einstellen kann!
+		// folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
 		switch(GlobalVariables.Instance.LevelDifficulty)
 		{
 			case 0:
