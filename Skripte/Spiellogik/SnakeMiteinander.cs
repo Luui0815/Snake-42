@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Linq;
 
 public class SnakeMiteinander : Snake
@@ -58,27 +57,34 @@ public class SnakeMiteinander : Snake
 
     protected override void MoveTween(float argv)
     {
-        if (_Merker == false)
+        if (!_Merker)
         {
-            for (int i = 0; i < _body.Points.Count(); i++)
+            _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+
+            int headIndex = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
+            int direction = _isPlayerOneTurn ? 1 : -1;
+
+            for (int i = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
+                 _isPlayerOneTurn ? i < _body.Points.Count() : i >= 0;
+                 i += direction)
             {
-                Vector2 newPos, diff = Vector2.Zero;
+                Vector2 newPos;
 
-                _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
-
-                if (i == 0)
+                if (i == headIndex)
                 {
                     newPos = _points[i] + _currentDirection * _gridSize * argv;
                 }
                 else
                 {
-                    diff = (_points[i - 1] - _points[i]) / _gridSize;
+                    int prevIndex = i - direction;  
+                    Vector2 diff = (_points[prevIndex] - _points[i]) / _gridSize;
                     newPos = _points[i] + diff * _gridSize * argv;
                 }
 
                 _body.SetPointPosition(i, newPos);
             }
-            if (_eating == true)
+
+            if (_eating)
             {
                 _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
                 _growing = true;
@@ -96,10 +102,11 @@ public class SnakeMiteinander : Snake
             {
                 _tween.StopAll();
                 _Merker = true;
-                _points = _body.Points;
-                CheckFruitCollision();
+                _points = _body.Points; 
 
-                if (_growing == true)
+                CheckFruitCollision();  
+
+                if (_growing)
                     _growing = false;
 
                 if (IsGameOver())
@@ -110,6 +117,7 @@ public class SnakeMiteinander : Snake
                 {
                     SwapControl();
                 }
+
                 MoveSnake();
             }
         }
@@ -118,6 +126,31 @@ public class SnakeMiteinander : Snake
         {
             _Merker = false;
         }
+    }
+
+
+    protected override void CheckFruitCollision()
+    {
+        if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count()-1] == _fruit.Position)
+        {
+            _tween.StopAll();
+            _eating = true;
+            _fruit.RandomizePosition();
+            //IncreaseSpeed();
+            _controller.UpdateScore();
+            GD.Print($"{Name} hat Frucht gefressen!");
+            MoveSnake();
+        }
+    }
+
+    private Vector2[]SetPoints(Vector2[] points)
+    {
+        Vector2[] newPoints = new Vector2[points.Length];
+        for(int i=0;i<points.Length; i++)
+        {
+            newPoints[i] = points[i];
+        }
+        return newPoints;
     }
 
     private void SwapControl()
@@ -132,12 +165,12 @@ public class SnakeMiteinander : Snake
             _directionCachePlayer2 = _directionCachePlayer1 * -1;
         }
 
-        Vector2 tempPosition = _face1.Position;
-        _face1.Position = _face2.Position;
-        _face2.Position = tempPosition;
+        //Vector2 tempPosition = _face1.Position;
+        //_face1.Position = _face2.Position;
+        //_face2.Position = tempPosition;
 
-        Array.Reverse(_body.Points);
-        Array.Reverse(_points);
+        ////Array.Reverse(_body.Points);
+        //Array.Reverse(_points);
 
         _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
         _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
