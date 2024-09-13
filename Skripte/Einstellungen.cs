@@ -97,6 +97,13 @@ public class Einstellungen : Control
 
         _OtherPlayerIsReady = false;
         _IamReady = false;
+        if(GlobalVariables.Instance.OnlineGame == false)
+        {
+            GetNode<Label>("LabelName").Hide();
+            GetNode<TextEdit>("PlayerName").Hide();
+        }
+        // wenn ein Name schon vorhanden ist den Voreintragen!
+        GetNode<TextEdit>("PlayerName").Text = GlobalVariables.Instance.Room.MyName;
     }
 
     private void _on_Start_pressed()
@@ -147,6 +154,7 @@ public class Einstellungen : Control
             // über RPC sagen das man nicht mehr bereit ist
             NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsNotReay), false, false);
             _IamReady = false;
+            GetNode<Label>("InfoBereit").Text = "";
             ChangePlayerInputPossibility(false);
         }
     }
@@ -198,7 +206,7 @@ public class Einstellungen : Control
             else
             {
                 // Zufall
-                if(r.Next(0,1) == 0)
+                if(r.Next(0,2) == 0)
                 {
                     DifficultDecision = DifficultIndex;
                 }
@@ -215,7 +223,7 @@ public class Einstellungen : Control
             else
             {
                 // Zufall
-                if(r.Next(0,1) == 0)
+                if(r.Next(0,2) == 0)
                 {
                     LevelDecision = LevelIndex;
                 }
@@ -232,7 +240,7 @@ public class Einstellungen : Control
             else
             {
                 // Zufall
-                if(r.Next(0,1) == 0)
+                if(r.Next(0,2) == 0)
                 {
                     ModeDecision = ModeIndex;
                 }
@@ -248,7 +256,7 @@ public class Einstellungen : Control
             NetworkManager.NetMan.rpc(GetPath(), nameof(SetRoomPlayer), false, false, PlayerName, GetNode<TextEdit>("PlayerName").Text, false);
             SetRoomPlayer(GetNode<TextEdit>("PlayerName").Text, PlayerName, true);
             // Entscheidungen setzten!
-            NetworkManager.NetMan.rpc(GetPath(), nameof(SetDecisions), false, true, PlayerName, DifficultDecision, ModeDecision);
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetDecisions), false, true, DifficultDecision, ModeDecision);
             // endlich das Spiel starten!
             NetworkManager.NetMan.rpc(GetPath(), nameof(StartGame), false, true, LevelDecision);
         }
