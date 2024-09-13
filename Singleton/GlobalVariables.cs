@@ -24,7 +24,7 @@ public partial class GlobalVariables : Node
     public PackedScene ConfirmationDialog { get; set; }
 
     public WebRTCMultiplayer WebRTC {get; set; } 
-    public RTCRoom Room;
+    public RTCRoom Room = new RTCRoom();
     public static string MyPlayerName;
 
     static public readonly Dictionary IceServers = new Dictionary 
