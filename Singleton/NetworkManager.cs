@@ -279,7 +279,9 @@ public class NetworkManager : Node
 
         // dann Nachricht an den anderen senden, dieser soll ihn auch machen!
         // wenn remote, hat der andere ihn schon ausgeführt!
-        if(remoterpc == false)
+        // nur rpc an anderen senden wenn es eine echte Verbindung gibt, d.h. Init() aufgerufen wurde
+        // wenn nicht mache den rpc nur lokal
+        if(remoterpc == false && _multiplayerIsActive == true)
         {
             var settings = new JsonSerializerSettings
             {

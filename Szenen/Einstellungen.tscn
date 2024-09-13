@@ -69,5 +69,18 @@ margin_top = 649.0
 margin_right = 1180.0
 margin_bottom = 697.0
 
+[node name="LabelName" type="Label" parent="."]
+margin_left = 380.0
+margin_top = 589.0
+margin_right = 456.0
+margin_bottom = 622.0
+text = "Dein Name :"
+
+[node name="PlayerName" type="TextEdit" parent="."]
+margin_left = 469.0
+margin_top = 583.0
+margin_right = 755.0
+margin_bottom = 616.0
+
 [connection signal="pressed" from="Start" to="." method="_on_Start_pressed"]
 [connection signal="pressed" from="Back" to="." method="_on_Back_pressed"]

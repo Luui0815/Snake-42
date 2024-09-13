@@ -113,19 +113,48 @@ public class Einstellungen : Control
         // warten auf anderen Spieler, er muss auch bereit sein! => diesem Spiler mitteilen das er warten muss, anderm Spieler sagen das man wartet!
         GetNode<Label>("InfoBereit").Text = "Warten auf anderen Spieler!";
         // evtl. Input, also Änderungen verbieten
-        _SelectDifficulty.Disable(true);
-        _SelectLevel.Disable(true);
-        _SelectMode.Disable(true);
+        ChangePlayerInputPossibility(true);
         // anderen Spieler sagen das er hinne machen soll! => mit rpc!
-        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false, _SelectDifficulty.SelectedOption, _SelectLevel.SelectedOption, _SelectMode.SelectedOption);
+        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false, _SelectDifficulty.SelectedOption, _SelectLevel.SelectedOption, _SelectMode.SelectedOption, GetNode<TextEdit>("PlayerName").Text);
         // damit sagt man dem anderen gleichzeitig das man bereit ist
         // im RPC aufruf merkt man dann ob beide bereit sind und trifft die Auswahl!
         // der Gegenüber muss dafür aber die Auswahl von dir kennen daher sende deien Auswahl mit! Auch wenn nur einer sie auswertet!
     }
 
+    private void ChangePlayerInputPossibility(bool disable)
+    {
+        _SelectDifficulty.Disable(disable);
+        _SelectLevel.Disable(disable);
+        _SelectMode.Disable(disable);
+        GetNode<TextEdit>("PlayerName").Readonly = disable;
+    }
+
     private void _on_Back_pressed()
     {
-        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+        if(_IamReady == false)
+        {
+            if(GlobalVariables.Instance.OnlineGame == false)
+            {
+                GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+                return;
+            }
+            // Wenn Online Game muss man Verbindung schließen!
+            // Wenn man ne Lobby hat dann die Lobby öffnen!
+            ErrorMessage("Bestätigung", "Wenn du auf Ok drückst wird die Verbindung zum anderen Spieler unterbrochen!\nWillst du es nicht klicke auf das Kreuz!").Connect("confirmed", this, nameof(ConfirmConnectionClose));
+        }
+        else
+        {
+            // über RPC sagen das man nicht mehr bereit ist
+            NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsNotReay), false, false);
+            _IamReady = false;
+            ChangePlayerInputPossibility(false);
+        }
+    }
+
+    private void ConfirmConnectionClose()
+    {
+        GlobalVariables.Instance.BackToMainMenuOrLobby();
+        NetworkManager.NetMan.CloseConnection();
     }
 
     // nur für Online Multiplayer!
@@ -142,7 +171,13 @@ public class Einstellungen : Control
         GetNode<OptionSelection>(OptionSelectionName).EnableOtherPlayerSelection(index);
     }
     // remote RPC
-    private void SayOtherPlayerIsReady(int DifficultIndex, int LevelIndex, int ModeIndex)
+    private void SayOtherPlayerIsNotReay()
+    {
+        _OtherPlayerIsReady = false;
+        GetNode<Label>("InfoBereit").Text = "";
+    }
+    // remote RPC
+    private void SayOtherPlayerIsReady(int DifficultIndex, int LevelIndex, int ModeIndex, string PlayerName)
     {
         GetNode<Label>("InfoBereit").Text = "Der andere Spieler wartet!";
         _OtherPlayerIsReady = true;
@@ -186,7 +221,7 @@ public class Einstellungen : Control
                 }
                 else
                 {
-                    DifficultDecision = _SelectLevel.SelectedOption;
+                    LevelDecision = _SelectLevel.SelectedOption;
                 }
             }
             // Modeentscheidung:-------------------------------------------------
@@ -207,6 +242,42 @@ public class Einstellungen : Control
                 }
             }
             // Jetzte bei beiden das Spiel starten!
+            // RTC raum beim anderen setzen!
+            // GlobalVariable, also die getroffenen Entscheidungen beim anderen setzten
+            // danach umgedreht das bei dir
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetRoomPlayer), false, false, PlayerName, GetNode<TextEdit>("PlayerName").Text, false);
+            SetRoomPlayer(GetNode<TextEdit>("PlayerName").Text, PlayerName, true);
+            // Entscheidungen setzten!
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetDecisions), false, true, PlayerName, DifficultDecision, ModeDecision);
+            // endlich das Spiel starten!
+            NetworkManager.NetMan.rpc(GetPath(), nameof(StartGame), false, true, LevelDecision);
         }
+    }
+    // remote rpc
+    private void SetRoomPlayer(string MyName, string MatesName, bool IsPlayerOne)
+    {
+        GlobalVariables.Instance.Room.MyName = MyName;
+        GlobalVariables.Instance.Room.MatesName = MatesName;
+        GlobalVariables.Instance.Room.IamPlayerOne = IsPlayerOne;
+    }
+    // rpc bei beiden
+    private void SetDecisions(int DifficultDecision, int ModeDecision)
+    {
+        GlobalVariables.Instance.LevelDifficulty = DifficultDecision;
+        GlobalVariables.Instance.LevelMode = ModeDecision;
+    }
+    //rpc bei beiden
+    private void StartGame(int Level)
+    {
+        GetTree().ChangeScene($"res://Szenen/Levels/Level{Level + 1}.tscn");
+    }
+    private ConfirmationDialog ErrorMessage(string titel, string description)
+    {
+        ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+        ErrorPopup.Init(titel,description);
+        GetTree().Root.AddChild(ErrorPopup);
+        ErrorPopup.PopupCentered();
+        ErrorPopup.Show();
+        return ErrorPopup;
     }
 }

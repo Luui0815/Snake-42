@@ -1,5 +1,5 @@
 Gucken wie WebExport + Android
 
-zu Testen: 
 Server muss Raumlisten sehen!
 Client bekommt manchmal nicht mit das Server weg ist bei Websockets => KeepAllive System einbauen!
+Das ConformationDialog Fenster wird nie gelöscht sondern immer neu erzeugt! => irgendwann besteht das Spiel aus Confirmation Popups!
