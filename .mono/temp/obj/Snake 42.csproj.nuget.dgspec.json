@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj": {}
+    "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj": {}
   },
   "projects": {
-    "c:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj": {
+    "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
+        "projectUniqueName": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
         "projectName": "Snake 42",
-        "projectPath": "c:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
+        "projectPath": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\Snake 42.csproj",
         "packagesPath": "C:\\Users\\LUG\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\.mono\\temp\\obj\\",
+        "outputPath": "C:\\Users\\LUG\\Documents\\GitHub\\Snake-42\\.mono\\temp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
