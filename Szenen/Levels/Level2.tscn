@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Szenen/Game Elements/Fruit.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=3]
+[ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=3]
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
 [ext_resource path="res://Szenen/Game Elements/SnakeMiteinander.tscn" type="PackedScene" id=5]
 
@@ -280,8 +280,11 @@ align = 1
 valign = 1
 
 [node name="Pause" type="Button" parent="."]
+visible = false
 margin_left = 1136.0
 margin_top = 24.0
 margin_right = 1232.0
 margin_bottom = 64.0
 text = "Pause"
+
+[connection signal="pressed" from="Pause" to="." method="_on_Pause_pressed"]

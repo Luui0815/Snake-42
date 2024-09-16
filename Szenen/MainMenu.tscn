@@ -1,6 +1,20 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Skripte/Hauptmenü.cs" type="Script" id=1]
+[ext_resource path="res://Assets/Fonts/SnakeCustomFont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=3]
+
+[sub_resource type="DynamicFont" id=1]
+size = 28
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.321569, 0.705882, 0.25098, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0, 0, 0, 1 )
 
 [node name="Hauptmenü" type="Control"]
 anchor_right = 1.0
@@ -16,6 +30,7 @@ margin_left = 651.24
 margin_top = 194.96
 margin_right = 651.752
 margin_bottom = 195.16
+custom_fonts/font = ExtResource( 2 )
 text = "Mehrspieler"
 
 [node name="Einzelspieler" type="Button" parent="."]
@@ -27,14 +42,21 @@ margin_left = 251.24
 margin_top = 194.96
 margin_right = 251.752
 margin_bottom = 195.16
+custom_fonts/font = ExtResource( 2 )
 text = "Einzelspieler"
+icon_align = 1
 
-[node name="Label" type="Label" parent="."]
-margin_left = 436.0
-margin_top = 173.0
-margin_right = 816.0
-margin_bottom = 187.0
-text = "Das wunderbare und einzigartige Snake42 - Snake fo(u)r two"
+[node name="Headline" type="Label" parent="."]
+margin_left = 279.0
+margin_top = 137.0
+margin_right = 1007.0
+margin_bottom = 198.0
+custom_fonts/font = SubResource( 1 )
+custom_styles/normal = SubResource( 2 )
+text = "Snake42 -  Snake  fo(u)r  two"
+align = 1
+valign = 1
+percent_visible = -0.0454545
 
 [connection signal="pressed" from="Verbindung erstellen" to="." method="_on_Verbindung_erstellen_pressed"]
 [connection signal="pressed" from="Einzelspieler" to="." method="_on_Einzelspieler_pressed"]

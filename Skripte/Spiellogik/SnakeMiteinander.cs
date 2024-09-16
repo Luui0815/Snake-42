@@ -5,6 +5,7 @@ public class SnakeMiteinander : Snake
 {
     private Node2D _face1;
     private Node2D _face2;
+    private AudioStreamPlayer2D _audioPlayer;
 
     private Vector2 _directionCachePlayer1;
     private Vector2 _directionCachePlayer2;
@@ -15,7 +16,7 @@ public class SnakeMiteinander : Snake
     {
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _controller = GetParent<GameController>();
-
+        _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");
         _body = GetNode<Line2D>("Body");
         _points = _body.Points;
         _face1 = GetNode<Node2D>("Face1");
@@ -164,13 +165,6 @@ public class SnakeMiteinander : Snake
         {
             _directionCachePlayer2 = _directionCachePlayer1 * -1;
         }
-
-        //Vector2 tempPosition = _face1.Position;
-        //_face1.Position = _face2.Position;
-        //_face2.Position = tempPosition;
-
-        ////Array.Reverse(_body.Points);
-        //Array.Reverse(_points);
 
         _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
         _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));

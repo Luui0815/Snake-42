@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Spieler2Pfeil.png-7a900592a79c9f6f4f195f033d8831e3.stex"
+path="res://.import/.jpg-41d7874ea8e6701b3a292ccb2df31e09.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Spieler2Pfeil.png"
-dest_files=[ "res://.import/Spieler2Pfeil.png-7a900592a79c9f6f4f195f033d8831e3.stex" ]
+source_file="res://Assets/UI Assets/.jpg"
+dest_files=[ "res://.import/.jpg-41d7874ea8e6701b3a292ccb2df31e09.stex" ]
 
 [params]
 

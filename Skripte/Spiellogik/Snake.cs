@@ -8,6 +8,7 @@ public class Snake : Node2D
 {
     private Vector2 _direction = Vector2.Right;
     private Vector2 _directionCache;
+    protected AudioStreamPlayer2D _audioPlayer;
     protected Vector2[] _points;
     protected Line2D _body;
     protected Node2D _face;
@@ -29,7 +30,7 @@ public class Snake : Node2D
     {
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _controller = GetParent<GameController>();
-
+        _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");
         _body = GetNode<Line2D>("Body");
         _points = _body.Points;
         _face = GetNode<Node2D>("Face");
@@ -169,6 +170,7 @@ public class Snake : Node2D
         {
             _tween.StopAll();
             _eating = true;
+            _audioPlayer.Play();
             _fruit.RandomizePosition();
             //IncreaseSpeed();
             _controller.UpdateScore();

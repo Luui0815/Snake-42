@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Fruit+.png-e87bedb64b2ab51135983fb5ab9769e2.stex"
+path="res://.import/Solaria_Demo_Tiles-transformed.png-c8e0bd202697db6889d8aa906fbf6a1a.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Fruit+.png"
-dest_files=[ "res://.import/Fruit+.png-e87bedb64b2ab51135983fb5ab9769e2.stex" ]
+source_file="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png"
+dest_files=[ "res://.import/Solaria_Demo_Tiles-transformed.png-c8e0bd202697db6889d8aa906fbf6a1a.stex" ]
 
 [params]
 

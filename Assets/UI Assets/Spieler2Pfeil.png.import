@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Solaria_Demo_Tiles-transformed.png-221d971e802634eff1c120f7118abfe3.stex"
+path="res://.import/Spieler2Pfeil.png-41a04a0e2d88be57f9687419e9757ae7.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Solaria_Demo_Tiles-transformed.png"
-dest_files=[ "res://.import/Solaria_Demo_Tiles-transformed.png-221d971e802634eff1c120f7118abfe3.stex" ]
+source_file="res://Assets/UI Assets/Spieler2Pfeil.png"
+dest_files=[ "res://.import/Spieler2Pfeil.png-41a04a0e2d88be57f9687419e9757ae7.stex" ]
 
 [params]
 
