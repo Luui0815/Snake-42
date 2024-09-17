@@ -19,7 +19,7 @@ public class Einstellungen : Control
         // Erstelle eine neue Instanz von OptionSelection
         _SelectDifficulty = new OptionSelection(4, new string[] { "Leicht", "Mittel", "Schwer", "Profi" });
         _SelectDifficulty.Name = originalSelectDifficulty.Name; // macht es einfacher
-
+        _SelectDifficulty.AddColorOverride("Color1", new Color(255, 255 ,255));
 
         // Setze die Position von _SelectDifficulty auf die Position des ursprünglichen Nodes
         _SelectDifficulty.RectPosition = originalSelectDifficulty.RectPosition;
@@ -44,7 +44,7 @@ public class Einstellungen : Control
         // Erstelle eine neue Instanz von OptionSelection
         _SelectLevel = new OptionSelection(3, new string[] { "Level 1", "Level 2", "Level 3"});
         _SelectLevel.Name = originalSelectLevel.Name; // macht es einfacher
-
+        _SelectLevel.AddColorOverride("Color1", new Color(255, 255, 255));
 
         // Setze die Position von _SelectDifficulty auf die Position des ursprünglichen Nodes
         _SelectLevel.RectPosition = originalSelectLevel.RectPosition;
@@ -77,7 +77,7 @@ public class Einstellungen : Control
             _SelectMode = new OptionSelection(3, new string[] { "Miteinander", "Gegeneiander", "Einzelspieler"}, 2);
         }
         _SelectMode.Name = originalSelectMode.Name; // macht es einfacher
-
+        _SelectMode.AddColorOverride("Color1", new Color(255, 255, 255));
 
         // Setze die Position von _SelectDifficulty auf die Position des ursprünglichen Nodes
         _SelectMode.RectPosition = originalSelectMode.RectPosition;

@@ -192,7 +192,7 @@ public class Snake : Node2D
         {
             if (_body.Points[0] == obstacle.RectGlobalPosition)
             {
-                GD.Print($"Game Over fuer {Name}. hat ein Hindernis getroffen!");
+                _controller.LoseMessage = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
                 return true;
             }
         }
@@ -203,12 +203,12 @@ public class Snake : Node2D
             {
                 if (_body.Points[0] == _otherSnake.Points[0])
                 {
-                    GD.Print($"Unentschieden. {Name} und {_otherSnake.Name} sind kollidiert.");
+                    _controller.LoseMessage = ($"Unentschieden.\n{Name} und {_otherSnake.Name} sind kollidiert.");
                     return true;
                 }
                 else
                 {
-                    GD.Print($"Game Over fuer {Name}. Ist mit {_otherSnake.Name} kollidiert!");
+                    _controller.LoseMessage = ($"Game Over fuer {Name}.\nIst mit {_otherSnake.Name} kollidiert!");
                     return true;
                 }
 

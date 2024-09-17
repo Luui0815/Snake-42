@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Skripte/ManuelleRTCVerbindung.cs" type="Script" id=1]
+[ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=2]
+
+[sub_resource type="DynamicFont" id=1]
+size = 13
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 13
+font_data = ExtResource( 2 )
 
 [node name="ManuelleRTCVerbindung" type="Control"]
 anchor_right = 1.0
@@ -65,6 +74,7 @@ margin_left = 30.0
 margin_top = 16.0
 margin_right = 263.0
 margin_bottom = 72.0
+custom_fonts/font = SubResource( 1 )
 text = "Zeige RPC Daten"
 
 [node name="Beschreibung" type="Label" parent="."]
@@ -73,10 +83,10 @@ margin_top = 519.0
 margin_right = 1257.0
 margin_bottom = 636.0
 text = "Anleitung:
-1) Partner A drückt auf Verbindung aufbauen. Im darüber befindlichem Textfeld erscheint ein Text. Kopiere diesen und schicke es Partner B
-2) Nachdem Partner B den Text von Partner A erhalten ht trägt er dies bitte in das Textfeld \"WebRTC Daten des Mitspielers und drückt auf Daten des Mitspielers speichern. Danach sollte ein Text in dem Textfeld Deine WebRTC Daten erscheinen. Partner B kopiert diesen und schickt ihn Partner A
-3) Nachdem Partner A die Daten con B erhalten hat trägt er sie in WebRTCDaten des Mitspielers ein und drückt auf Daten des Mitspielers speichern
-4) Nach einer kurzen Zeit sollte sich das Fenstr wechseln. Ist dies nicht der Fall ist etwas schief gelaufen. Um von vorne zu starten drücken beide bitte auf Verbindungsdaten zurücksetzen!"
+1) Partner A drückt auf \"Verbindung aufbauen\". Im darüber befindlichem Textfeld erscheint ein Text. Kopiere diesen und schicke ihn Partner B.
+2) Nachdem Partner B den Text von Partner A erhalten hat, fügt er diesen bitte in das Textfeld \"WebRTC Daten des Mitspielers\" ein und drückt auf \"Daten des Mitspielers speichern\".   Danach sollte ein Text in dem Textfeld \"Deine WebRTC Daten\" erscheinen. Partner B kopiert diesen und schickt ihn Partner A.
+3) Nachdem Partner A die Daten von B erhalten hat, trägt er sie in \"WebRTCDaten des Mitspielers\" ein und drückt auf \"Daten des Mitspielers speichern\"
+4) Nach einer kurzen Zeit sollte sich das Fenster wechseln. Ist dies nicht der Fall, ist etwas schief gelaufen. Um von vorne zu starten, drücken beide bitte auf \"Verbindungsdaten zurücksetzen\"!"
 autowrap = true
 
 [node name="Zurück" type="Button" parent="."]
@@ -91,6 +101,7 @@ margin_left = 30.0
 margin_top = 88.0
 margin_right = 265.0
 margin_bottom = 145.0
+custom_fonts/font = SubResource( 2 )
 text = "Verbindungsdaten zurücksetzen"
 
 [connection signal="pressed" from="StartConnection" to="." method="_on_StartConnection_pressed"]

@@ -19,7 +19,8 @@ public class GameController : Node2D
 	string _levelName;
 	private List<ColorRect> _obstacles = new List<ColorRect>();
 
-	public int[,] GameField { get { return _gameField; } }
+    public string LoseMessage { get; set; }
+    public int[,] GameField { get { return _gameField; } }
 	public List<ColorRect> Obstacles{ get{return _obstacles; } }
 
 	public override void _Ready()
@@ -248,7 +249,7 @@ public class GameController : Node2D
         GetTree().Paused = true;
         GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
         AddChild(popupInstance);
-		popupInstance.SetScreenMode(true);
+		popupInstance.SetScreenMode(true, "");
     }
 
 
@@ -261,6 +262,6 @@ public class GameController : Node2D
 
 		GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
 		AddChild(popupInstance);
-        popupInstance.SetScreenMode(false);
+        popupInstance.SetScreenMode(false, LoseMessage);
     }
 }
