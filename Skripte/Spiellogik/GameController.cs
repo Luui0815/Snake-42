@@ -35,7 +35,7 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 0.3f;
+				_snake1.moveDelay = _snake2.moveDelay = 1f; // auf 0.3 stellen, zum nicht mehr debuggen
 				_snakeTogether.moveDelay = 0.4f;
                 break;
 			}
@@ -76,10 +76,35 @@ public class GameController : Node2D
 			{
 				//Gegeneinander
 				_snakeTogether.QueueFree();
-				_snake1.SetPlayerSettings(true);
-				_snake2.SetPlayerSettings(false);
-				_snake1.MoveSnake();
-				_snake2.MoveSnake();
+				
+				// Offline
+				if(GlobalVariables.Instance.OnlineGame == false)
+				{
+					_snake1.SetOfflinePlayerSettings(true);
+					_snake2.SetOfflinePlayerSettings(false);
+					_snake1.MoveSnake();
+					_snake2.MoveSnake();
+				}
+				// Online
+				else
+				{
+					// Spieler 1
+					if(GlobalVariables.Instance.Room.IamPlayerOne == true)
+					{
+						_snake1.SetOnlinePlayerSettings(true, true, _snake2);
+						_snake2.SetOnlinePlayerSettings(true, false, _snake1);
+						// Nur Spieler 1 bewegt schlangen, Spieler 2 bekommt sie nur angezeigt!
+						_snake1.MoveSnake();
+						_snake2.MoveSnake();
+					}
+					// Spieler 2
+					else
+					{
+						_snake1.SetOnlinePlayerSettings(false, true, _snake2);
+						_snake2.SetOnlinePlayerSettings(false, false, _snake1);
+					}	
+				}
+
 				break;
 			}
 			case 2:
@@ -87,7 +112,7 @@ public class GameController : Node2D
 				//Einzelspieler
 				_snake2.QueueFree();
 				_snakeTogether.QueueFree();
-                _snake1.SetPlayerSettings(true);
+                _snake1.SetOfflinePlayerSettings(true);
                 _snake1.MoveSnake();
 				break;
 			}

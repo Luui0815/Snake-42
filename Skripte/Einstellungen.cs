@@ -122,7 +122,7 @@ public class Einstellungen : Control
         // evtl. Input, also Änderungen verbieten
         ChangePlayerInputPossibility(true);
         // anderen Spieler sagen das er hinne machen soll! => mit rpc!
-        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false, _SelectDifficulty.SelectedOption, _SelectLevel.SelectedOption, _SelectMode.SelectedOption, GetNode<TextEdit>("PlayerName").Text);
+        NetworkManager.NetMan.rpc(GetPath(),nameof(SayOtherPlayerIsReady), false, false, true, _SelectDifficulty.SelectedOption, _SelectLevel.SelectedOption, _SelectMode.SelectedOption, GetNode<TextEdit>("PlayerName").Text);
         // damit sagt man dem anderen gleichzeitig das man bereit ist
         // im RPC aufruf merkt man dann ob beide bereit sind und trifft die Auswahl!
         // der Gegenüber muss dafür aber die Auswahl von dir kennen daher sende deien Auswahl mit! Auch wenn nur einer sie auswertet!
@@ -170,7 +170,7 @@ public class Einstellungen : Control
     {
         // da für alle 3 OPtion selection das geleiche und die Objekte auf der anderen Seute eine andere sind, die Namen aber diesselben kann man es so am einfachsten machen
         // alternativ: 3 mal das gleiche für die 3 unterschiedlichen Option Selection menus
-        NetworkManager.NetMan.rpc(GetPath(),nameof(ChangeSelectionOnOtherPlayer), false, false, OptionSelectionName, index); // remote rpc, da 2.false
+        NetworkManager.NetMan.rpc(GetPath(),nameof(ChangeSelectionOnOtherPlayer), false, false, true, OptionSelectionName, index); // remote rpc, da 2.false
     }
     // remote RPC
     private void ChangeSelectionOnOtherPlayer(string OptionSelectionName, int index)
@@ -253,12 +253,12 @@ public class Einstellungen : Control
             // RTC raum beim anderen setzen!
             // GlobalVariable, also die getroffenen Entscheidungen beim anderen setzten
             // danach umgedreht das bei dir
-            NetworkManager.NetMan.rpc(GetPath(), nameof(SetRoomPlayer), false, false, PlayerName, GetNode<TextEdit>("PlayerName").Text, false);
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetRoomPlayer), false, false, true, PlayerName, GetNode<TextEdit>("PlayerName").Text, false);
             SetRoomPlayer(GetNode<TextEdit>("PlayerName").Text, PlayerName, true);
             // Entscheidungen setzten!
-            NetworkManager.NetMan.rpc(GetPath(), nameof(SetDecisions), false, true, DifficultDecision, ModeDecision);
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetDecisions), false, true, true, DifficultDecision, ModeDecision);
             // endlich das Spiel starten!
-            NetworkManager.NetMan.rpc(GetPath(), nameof(StartGame), false, true, LevelDecision);
+            NetworkManager.NetMan.rpc(GetPath(), nameof(StartGame), false, true, true, LevelDecision);
         }
     }
     // remote rpc

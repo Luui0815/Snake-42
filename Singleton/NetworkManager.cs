@@ -207,7 +207,8 @@ public class NetworkManager : Node
                             string[] msg = data.Data.Split("|"); //0 = NodePath, 1 = Method, wenn mehr = Args
                             if (msg.Length >= 3)
                             {           
-                                rpc(msg[0], msg[1], true, true, JsonConvert.DeserializeObject<object[]>(msg[2]));
+                                // egal ob relaible oder nicht, wird eh nicht versendet, da schon angekommener rpc vom gegenüber
+                                rpc(msg[0], msg[1], true, true, true, JsonConvert.DeserializeObject<object[]>(msg[2]));
                             }
                             else
                             {
@@ -259,7 +260,7 @@ public class NetworkManager : Node
             }
         }
     }
-    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, params object[] Args)
+    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool relaible = true, params object[] Args)
     {
         // remoterpc wird benutzt wenn man den rpc vom anderen empfangen hat
         // der der ihn auslöst setzt in standartmäßig auf false
@@ -273,7 +274,7 @@ public class NetworkManager : Node
             }
             catch(Exception e)
             {
-                throw new Exception("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
+                // Juckt? throw new Exception("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
             }
         }
 
@@ -287,7 +288,11 @@ public class NetworkManager : Node
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
+            if(relaible == true)
+                _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
+            else
+                _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.UnreliableOrdered;
+            
             SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))).ToUTF8());
         } 
     }
