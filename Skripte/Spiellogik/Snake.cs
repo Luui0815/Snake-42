@@ -305,7 +305,7 @@ public class Snake : Node2D
                 if (IsGameOver())
                 {
                     if(GlobalVariables.Instance.OnlineGame)
-                        NetworkManager.NetMan.Rpc(_controller.GetPath(), nameof(_controller.OnGameFinished));
+                        NetworkManager.NetMan.rpc(_controller.GetPath(), nameof(_controller.OnGameFinished));
                     else
                         _controller.OnGameFinished();
                 }
