@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Lobby-Time(chosic.com).mp3-24367b48f42bfdfbf1b3c63d406b226d.mp3str"
+
+[deps]
+
+source_file="res://Assets/Sounds/Lobby-Time(chosic.com).mp3"
+dest_files=[ "res://.import/Lobby-Time(chosic.com).mp3-24367b48f42bfdfbf1b3c63d406b226d.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

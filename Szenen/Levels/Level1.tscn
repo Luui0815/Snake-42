@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=1]
 [ext_resource path="res://Szenen/Game Elements/SnakeMiteinander.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
 [ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=6]
+[ext_resource path="res://Assets/Sounds/Pixel-Peeker-Polka-faster(chosic.com).mp3" type="AudioStream" id=7]
 
 [sub_resource type="ConvexPolygonShape2D" id=7]
 points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
@@ -239,6 +240,14 @@ font_data = ExtResource( 6 )
 size = 12
 font_data = ExtResource( 6 )
 
+[sub_resource type="DynamicFont" id=8]
+size = 10
+font_data = ExtResource( 6 )
+
+[sub_resource type="DynamicFont" id=9]
+size = 10
+font_data = ExtResource( 6 )
+
 [node name="Level1" type="Node2D"]
 script = ExtResource( 4 )
 
@@ -268,9 +277,9 @@ process_priority = -1
 [node name="Snake3" parent="." instance=ExtResource( 2 )]
 
 [node name="ScoreLabels" type="ColorRect" parent="."]
-margin_left = 1088.0
+margin_left = 1072.0
 margin_top = 96.0
-margin_right = 1280.0
+margin_right = 1264.0
 margin_bottom = 256.0
 color = Color( 0.294118, 0.266667, 0.266667, 1 )
 
@@ -291,12 +300,25 @@ text = "Test"
 align = 1
 valign = 1
 
-[node name="Pause" type="Button" parent="."]
-visible = false
-margin_left = 1136.0
-margin_top = 24.0
-margin_right = 1232.0
-margin_bottom = 64.0
-text = "Pause"
+[node name="ToggleVoiceSound" type="Button" parent="."]
+margin_left = 1061.0
+margin_top = 288.0
+margin_right = 1140.0
+margin_bottom = 348.0
+custom_fonts/font = SubResource( 8 )
+text = "Ton aus"
 
-[connection signal="pressed" from="Pause" to="." method="_on_Pause_pressed"]
+[node name="ToggleMicrophone" type="Button" parent="."]
+margin_left = 1152.0
+margin_top = 288.0
+margin_right = 1275.0
+margin_bottom = 348.0
+custom_fonts/font = SubResource( 9 )
+text = "Mikrofon aus"
+
+[node name="MainTheme" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )
+volume_db = -10.0
+
+[connection signal="pressed" from="ToggleVoiceSound" to="." method="_on_ToggleVoiceSound_pressed"]
+[connection signal="pressed" from="ToggleMicrophone" to="." method="_on_ToggleMicrophone_pressed"]

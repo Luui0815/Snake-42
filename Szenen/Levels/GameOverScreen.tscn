@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Skripte/GameOverScreen.cs" type="Script" id=1]
 [ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=2]
+[ext_resource path="res://Skripte/VolumeSlider.cs" type="Script" id=3]
 
 [sub_resource type="DynamicFont" id=1]
 size = 23
@@ -22,6 +23,13 @@ font_data = ExtResource( 2 )
 size = 12
 extra_spacing_bottom = 1
 font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=6]
+size = 15
+font_data = ExtResource( 2 )
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0.301961, 0.286275, 0.286275, 1 )
 
 [node name="GameOverScreen" type="Control"]
 pause_mode = 2
@@ -75,3 +83,20 @@ margin_bottom = 204.0
 custom_fonts/font = SubResource( 5 )
 align = 1
 valign = 1
+
+[node name="VolumeLabel" type="Label" parent="."]
+margin_left = 248.0
+margin_top = 292.0
+margin_right = 396.0
+margin_bottom = 317.0
+custom_fonts/font = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
+text = "Lautstärke"
+align = 1
+valign = 1
+
+[node name="VolumeSlider" type="HSlider" parent="VolumeLabel"]
+margin_top = 8.0
+margin_right = 150.0
+margin_bottom = 74.0
+script = ExtResource( 3 )

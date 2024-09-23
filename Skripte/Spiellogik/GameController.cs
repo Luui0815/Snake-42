@@ -12,6 +12,8 @@ public class GameController : Node2D
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
 	private Label _highScoreLabel, _scoreLabel;
+	private Button _playSoundButton, _playVoiceButton;
+	private AudioStreamPlayer2D _audioPlayer;
 
 	private int _cellSize = 32;
 	private int _score = 0;
@@ -35,7 +37,7 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 1f; // auf 0.3 stellen, zum nicht mehr debuggen
+				_snake1.moveDelay = _snake2.moveDelay = 0.3f; // auf 0.3 stellen, zum nicht mehr debuggen
 				_snakeTogether.moveDelay = 0.4f;
                 break;
 			}
@@ -125,12 +127,23 @@ public class GameController : Node2D
 		_scoreLabel = GetNode<Label>("ScoreLabels/Score");
 		_scoreLabel.Text = "Punktestand: " + _score;
 
-		_levelName = GetTree().CurrentScene.Name;
+		_playSoundButton = GetNode<Button>("ToggleVoiceSound");
+		_playVoiceButton = GetNode<Button>("ToggleMicrophone");
+		if (!GlobalVariables.Instance.OnlineGame)
+		{
+			_playSoundButton.Hide();
+			_playVoiceButton.Hide();
+		}
+
+        _levelName = GetTree().CurrentScene.Name;
 		CreateGameField();
 
 		_fruit.RandomizePosition();
 		UpdateHighScoreDisplay();
 
+		_audioPlayer = GetNode<AudioStreamPlayer2D>("MainTheme");
+		_audioPlayer.Play();
+		_audioPlayer.PauseMode = PauseModeEnum.Process;
     }
 
 	private void CreateGameField()
@@ -269,6 +282,24 @@ public class GameController : Node2D
         }
     }
 
+	private void _on_ToggleVoiceSound_pressed()
+	{
+		if (_playSoundButton.Pressed == true)
+			NetworkManager.NetMan.AudioIsPlaying = false;
+		else
+			NetworkManager.NetMan.AudioIsPlaying = true;
+        _playSoundButton.Text = NetworkManager.NetMan.AudioIsPlaying ? "Ton aus" : "Ton an";
+    }
+
+    private void _on_ToggleMicrophone_pressed()
+	{
+        if (_playVoiceButton.Pressed == true)
+            NetworkManager.NetMan.AudioIsRecording = false;
+        else
+            NetworkManager.NetMan.AudioIsRecording = true;
+        _playVoiceButton.Text = NetworkManager.NetMan.AudioIsPlaying ? "Mikrofon aus" : "Mikrofon an";
+    }
+
     private void _on_Pause_pressed()
 	{
         GetTree().Paused = true;
@@ -281,6 +312,7 @@ public class GameController : Node2D
     public void OnGameFinished()
 	{
 		GetTree().Paused = true;
+		_audioPlayer.Stop();
 
 		_highScoreManager.SetHighScore(_levelName, _score);
 		UpdateHighScoreDisplay();

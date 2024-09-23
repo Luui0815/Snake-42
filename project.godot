@@ -17,6 +17,10 @@ boot_splash/bg_color=Color( 0.0666667, 0.231373, 0.870588, 1 )
 config/icon="res://Assets/icon.png"
 config/windows_native_icon="res://Assets/Snakeicon.ico"
 
+[audio]
+
+volume=46.0
+
 [autoload]
 
 GlobalVariables="*res://Singleton/GlobalVariables.cs"

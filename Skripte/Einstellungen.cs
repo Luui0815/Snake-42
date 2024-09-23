@@ -6,6 +6,7 @@ public class Einstellungen : Control
     private OptionSelection _SelectDifficulty;
     private OptionSelection _SelectLevel;
     private OptionSelection _SelectMode;
+    private AudioStreamPlayer2D _audioplayer;
     //für online:
     private bool _OtherPlayerIsReady;
     private bool _IamReady;
@@ -104,6 +105,10 @@ public class Einstellungen : Control
         }
         // wenn ein Name schon vorhanden ist den Voreintragen!
         GetNode<TextEdit>("PlayerName").Text = GlobalVariables.Instance.Room.MyName;
+
+        //Audioplayer abspielen
+        _audioplayer = GetNode<AudioStreamPlayer2D>("LobbyTheme");
+        _audioplayer.Play();
     }
 
     private void _on_Start_pressed()

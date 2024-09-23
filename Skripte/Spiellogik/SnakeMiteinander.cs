@@ -134,6 +134,7 @@ public class SnakeMiteinander : Snake
     {
         if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count()-1] == _fruit.Position)
         {
+            _audioPlayer.Play();
             _tween.StopAll();
             _eating = true;
             _fruit.RandomizePosition();
@@ -142,6 +143,53 @@ public class SnakeMiteinander : Snake
             GD.Print($"{Name} hat Frucht gefressen!");
             MoveSnake();
         }
+    }
+
+    protected override bool IsGameOver()
+    {
+        foreach (var obstacle in _controller.Obstacles)
+        {
+            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle.RectGlobalPosition)
+            {
+                _controller.LoseMessage = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
+                return true;
+            }
+        }
+
+        if (_otherSnake != null && IsInstanceValid(_otherSnake))
+        {
+            if (_otherSnake.Points.Contains(_body.Points[0]))
+            {
+                if (_body.Points[0] == _otherSnake.Points[0])
+                {
+                    _controller.LoseMessage = ($"Unentschieden.\n{Name} und {_otherSnake.Name} sind kollidiert.");
+                    return true;
+                }
+                else
+                {
+                    _controller.LoseMessage = ($"Game Over fuer {Name}.\nIst mit {_otherSnake.Name} kollidiert!");
+                    return true;
+                }
+
+            }
+        }
+
+        if (_points.Length >= 3)
+        {
+            int startIndex = _isPlayerOneTurn ? 1 : _points.Length - 2; 
+            int endIndex = _isPlayerOneTurn ? _points.Length : 0;
+            int step = _isPlayerOneTurn ? 1 : -1; 
+
+            for (int i = startIndex; (step == 1 ? i < endIndex : i >= endIndex); i += step)
+            {
+                if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == _points[i])
+                {
+                    GD.Print($"Game Over fuer {Name}. Hat sich selbst gefressen!");
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Vector2[]SetPoints(Vector2[] points)

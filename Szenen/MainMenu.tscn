@@ -1,8 +1,10 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Skripte/Hauptmenü.cs" type="Script" id=1]
+[ext_resource path="res://Assets/Sounds/Pixel-Peeker-Polka-faster(chosic.com).mp3" type="AudioStream" id=2]
 [ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=3]
 [ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=4]
+[ext_resource path="res://Skripte/VolumeSlider.cs" type="Script" id=5]
 
 [sub_resource type="DynamicFont" id=9]
 font_data = ExtResource( 3 )
@@ -249,6 +251,24 @@ points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
 4/shapes = [  ]
 4/z_index = 0
 
+[sub_resource type="DynamicFont" id=11]
+size = 9
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxFlat" id=12]
+bg_color = Color( 0, 0, 0, 0.784314 )
+
+[sub_resource type="DynamicFont" id=13]
+size = 13
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=14]
+size = 15
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxFlat" id=15]
+bg_color = Color( 0.301961, 0.286275, 0.286275, 1 )
+
 [node name="Hauptmenü" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -264,7 +284,7 @@ margin_top = 194.96
 margin_right = 651.752
 margin_bottom = 195.16
 custom_fonts/font = SubResource( 9 )
-text = "Mehrspieler"
+text = "Online spielen"
 
 [node name="Einzelspieler" type="Button" parent="."]
 anchor_left = 0.042
@@ -276,7 +296,7 @@ margin_top = 194.96
 margin_right = 251.752
 margin_bottom = 195.16
 custom_fonts/font = SubResource( 10 )
-text = "Einzelspieler"
+text = "Lokal spielen"
 icon_align = 1
 
 [node name="Headline" type="Label" parent="."]
@@ -304,5 +324,58 @@ cell_size = Vector2( 32, 32 )
 format = 1
 tile_data = PoolIntArray( 196615, 0, 0, 196617, 0, 0, 196634, 3, 0, 262155, 2, 0, 262158, 3, 0, 262161, 2, 0, 262166, 0, 0, 327704, 1, 0, 327706, 2, 0, 327712, 2, 0, 393225, 1, 0, 393229, 0, 0, 393233, 3, 0, 393234, 2, 0, 458782, 0, 0, 524301, 3, 0, 524312, 1, 0, 589831, 2, 0, 589844, 2, 0, 655371, 2, 0, 655377, 3, 0, 655386, 3, 0, 720917, 3, 0, 720926, 0, 0, 786450, 0, 0, 786458, 0, 0, 786462, 2, 0, 851978, 1, 0, 917532, 3, 0, 983048, 2, 0, 983061, 0, 0, 1048590, 2, 0, 1048601, 3, 0, 1048605, 2, 0, 1048607, 0, 0, 1114129, 3, 0, 1114135, 2, 0, 1179670, 0, 0, 1179678, 3, 0, 1245197, 0, 0 )
 
+[node name="CreditsLabel" type="Label" parent="."]
+visible = false
+margin_left = 221.0
+margin_top = 96.0
+margin_right = 1055.0
+margin_bottom = 639.0
+custom_fonts/font = SubResource( 11 )
+custom_styles/normal = SubResource( 12 )
+text = "Pixel Peeker Polka – faster by Kevin MacLeod | https://incompetech.com/
+Music promoted by https://www.chosic.com/free-music/all/
+Creative Commons CC BY 3.0
+https://creativecommons.org/licenses/by/3.0/
+ 
+Lobby Time by Kevin MacLeod | https://incompetech.com/
+Music promoted by https://www.chosic.com/free-music/all/
+Creative Commons Creative Commons: By Attribution 3.0 License
+http://creativecommons.org/licenses/by/3.0/
+ 
+Fruit+ by SciGho: https://ninjikin.itch.io/fruit
+CC-BY 4.0
+
+World of Solaria: FREE Demo by Jamie Brownhill: https://jamiebrownhill.itch.io/solaria-demo"
+
+[node name="MainTheme" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 2 )
+volume_db = -10.0
+
+[node name="CreditsButton" type="Button" parent="."]
+margin_left = 1089.0
+margin_top = 147.0
+margin_right = 1200.0
+margin_bottom = 194.0
+custom_fonts/font = SubResource( 13 )
+text = "Credits"
+
+[node name="VolumeLabel" type="Label" parent="."]
+margin_left = 1071.0
+margin_top = 219.0
+margin_right = 1219.0
+margin_bottom = 244.0
+custom_fonts/font = SubResource( 14 )
+custom_styles/normal = SubResource( 15 )
+text = "Lautstärke"
+align = 1
+valign = 1
+
+[node name="VolumeSlider" type="HSlider" parent="VolumeLabel"]
+margin_top = 8.0
+margin_right = 150.0
+margin_bottom = 74.0
+script = ExtResource( 5 )
+
 [connection signal="pressed" from="Verbindung erstellen" to="." method="_on_Verbindung_erstellen_pressed"]
 [connection signal="pressed" from="Einzelspieler" to="." method="_on_Einzelspieler_pressed"]
+[connection signal="pressed" from="CreditsButton" to="." method="_on_CreditsButton_pressed"]

@@ -162,7 +162,6 @@ public class Snake : Node2D
     public virtual void MoveSnake()
     {
         _direction = _directionCache;
-        //_body.AddPoint(_points[0], 0);
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
@@ -236,7 +235,6 @@ public class Snake : Node2D
                     _growing = false;
 
                 _direction = _directionCache;
-                GD.Print($"{_body.Points[0].x} {_body.Points[0].y}");
             }
         }
 
@@ -312,7 +310,6 @@ public class Snake : Node2D
                 else
                 {
                     _direction = _directionCache;
-                    GD.Print($"{_body.Points[0].x} {_body.Points[0].y}");
                 }
             }
         }
@@ -346,7 +343,7 @@ public class Snake : Node2D
         GD.Print(moveDelay.ToString());
     }
 
-    protected bool IsGameOver()
+    protected virtual bool IsGameOver()
     {
         foreach (var obstacle in _controller.Obstacles)
         {

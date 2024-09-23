@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Szenen/Game Elements/Fruit.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
 [ext_resource path="res://Szenen/Game Elements/SnakeMiteinander.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=6]
+[ext_resource path="res://Assets/Sounds/Pixel-Peeker-Polka-faster(chosic.com).mp3" type="AudioStream" id=7]
 
 [sub_resource type="ConvexPolygonShape2D" id=4]
 points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
@@ -239,6 +240,14 @@ font_data = ExtResource( 6 )
 size = 12
 font_data = ExtResource( 6 )
 
+[sub_resource type="DynamicFont" id=9]
+size = 10
+font_data = ExtResource( 6 )
+
+[sub_resource type="DynamicFont" id=10]
+size = 10
+font_data = ExtResource( 6 )
+
 [node name="Level3" type="Node2D"]
 script = ExtResource( 4 )
 
@@ -297,5 +306,25 @@ margin_top = 24.0
 margin_right = 1232.0
 margin_bottom = 64.0
 text = "Pause"
+
+[node name="ToggleVoiceSound" type="Button" parent="."]
+margin_left = 1061.0
+margin_top = 288.0
+margin_right = 1140.0
+margin_bottom = 348.0
+custom_fonts/font = SubResource( 9 )
+text = "Ton aus"
+
+[node name="ToggleMicrophone" type="Button" parent="."]
+margin_left = 1152.0
+margin_top = 288.0
+margin_right = 1275.0
+margin_bottom = 348.0
+custom_fonts/font = SubResource( 10 )
+text = "Mikrofon aus"
+
+[node name="MainTheme" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )
+volume_db = -10.0
 
 [connection signal="pressed" from="Pause" to="." method="_on_Pause_pressed"]
