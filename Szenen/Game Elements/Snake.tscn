@@ -24,6 +24,7 @@ end_cap_mode = 2
 
 [node name="Tween" type="Tween" parent="."]
 repeat = true
+playback_process_mode = 0
 playback/repeat = true
 
 [node name="Face" type="Node2D" parent="."]

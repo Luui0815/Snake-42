@@ -19,7 +19,7 @@ config/windows_native_icon="res://Assets/Snakeicon.ico"
 
 [audio]
 
-volume=46.0
+volume=0.0
 
 [autoload]
 
@@ -97,6 +97,11 @@ move_up={
 [mono]
 
 project/assembly_name="Snake 42"
+
+[network]
+
+limits/packet_peer_stream/max_buffer_po2=32
+limits/webrtc/max_channel_in_buffer_kb=500000
 
 [physics]
 

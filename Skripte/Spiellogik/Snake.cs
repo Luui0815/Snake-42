@@ -179,7 +179,6 @@ public class Snake : Node2D
                 // Man hat das Problem das die Positionen der Schlangen bei beiden Spielern auseinander gehen, da argv nicht bei jedem genau uzr gleichen zeit
                 // die gleichen Werte haben, daher muss man ingewissen Abständen den Cleint wieder mit dem Server synchronisieren!!! => Wie? Kein blassen Schimemr
                 MoveTween(argv);
-
             }
             else
             {
@@ -198,6 +197,7 @@ public class Snake : Node2D
     {
         if(_Merker == false)
         {
+            //_Interpolate = false;
             int i = 0;
             foreach(Vector2 pos in _body.Points)
             {
@@ -256,26 +256,39 @@ public class Snake : Node2D
         }
     }
 
-    private void SynchClient(string Xjson, string Yjson)
-    {
-        /*
-        // Byte Array in in Array wandeln
-        int[] x = new int[XByte.Length / sizeof(int)];
-        Buffer.BlockCopy(XByte, 0, x, 0, XByte.Length);
+private bool _Interpolate;
 
-        int[] y = new int[YByte.Length / sizeof(int)];
-        Buffer.BlockCopy(YByte, 0, y, 0, YByte.Length);
-        */
-        int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
-        int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
-        // Positionen der Schlangen vom Server werden als Array an diese Methode gegeben
-        // Diese Methode wird nur vom Server aufgerufen und vom Client bearbeitet!
-        for(int i  = 0; i < x.Count(); i++)
-        {
-            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
-            _points = _body.Points;
-        }
+private void SynchClient(string Xjson, string Yjson)
+{
+
+    int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
+    int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
+
+
+    for (int i = 0; i < x.Length; i++)
+    {
+        _points[i] = new Vector2(x[i], y[i]);
     }
+    _Interpolate = true;
+    
+}
+
+public override void _Process(float delta)
+{
+    if(_Interpolate == true)
+    {
+        for (int i = 0; i < _body.Points.Length; i++)
+        {
+            _body.SetPointPosition(i, _body.Points[i].LinearInterpolate(_points[i], 0.01f));// war 0.001f
+        }
+        if(Convert.ToInt32(_body.Points[0].x) == Convert.ToInt32(_points[0].x) && Convert.ToInt32(_body.Points[0].y) == Convert.ToInt32(_points[0].y))
+            _Interpolate = false;
+    }
+    
+
+
+}
+
 
     protected virtual void MoveTween(float argv)
     {
