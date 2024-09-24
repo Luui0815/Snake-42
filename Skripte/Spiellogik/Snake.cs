@@ -170,18 +170,28 @@ public class Snake : Node2D
 
     public virtual void RPCTween(float argv)
     {
-        // Wenn Server mache MoveTween
-        // Wenn Client mache ClientMoveTween
-        if(_isServer == true)
+        if(GlobalVariables.Instance.OnlineGame == true)
         {
-            MoveTween(argv);
-            // if(argv == 1)
-                // NetworkManager.NetMan.rpc(GetPath(), nameof(UpdateClientVars), false, false, false, _growing, _eating);
+            // Wenn Server mache MoveTween
+            // Wenn Client mache ClientMoveTween
+            if(_isServer == true)
+            {
+                // Man hat das Problem das die Positionen der Schlangen bei beiden Spielern auseinander gehen, da argv nicht bei jedem genau uzr gleichen zeit
+                // die gleichen Werte haben, daher muss man ingewissen Abständen den Cleint wieder mit dem Server synchronisieren!!! => Wie? Kein blassen Schimemr
+                MoveTween(argv);
+
+            }
+            else
+            {
+                ClientMoveTween(argv);
+            }
         }
         else
         {
-            ClientMoveTween(argv);
+            MoveTween(argv);
         }
+
+
     }
 
     protected virtual void ClientMoveTween(float argv)
@@ -243,6 +253,27 @@ public class Snake : Node2D
         if(argv != 1)
         {
             _Merker = false;
+        }
+    }
+
+    private void SynchClient(string Xjson, string Yjson)
+    {
+        /*
+        // Byte Array in in Array wandeln
+        int[] x = new int[XByte.Length / sizeof(int)];
+        Buffer.BlockCopy(XByte, 0, x, 0, XByte.Length);
+
+        int[] y = new int[YByte.Length / sizeof(int)];
+        Buffer.BlockCopy(YByte, 0, y, 0, YByte.Length);
+        */
+        int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
+        int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
+        // Positionen der Schlangen vom Server werden als Array an diese Methode gegeben
+        // Diese Methode wird nur vom Server aufgerufen und vom Client bearbeitet!
+        for(int i  = 0; i < x.Count(); i++)
+        {
+            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
+            _points = _body.Points;
         }
     }
 
@@ -310,6 +341,25 @@ public class Snake : Node2D
                 {
                     _direction = _directionCache;
                 }
+
+                                // Clientstand wieder mit Serverstand synchronisieren, jetzt sollten alle Pos. int sein
+                int[] x = new int[_body.Points.Count()];
+                int[] y = new int[_body.Points.Count()];
+                for(int j = 0; j < _body.Points.Count(); j++)
+                {
+                    x[j] = Convert.ToInt32(_body.Points[j].x);
+                    y[j] = Convert.ToInt32(_body.Points[j].y);
+                }
+
+                // int Array in Byte Array wandeln, da Json zu langsam wäre
+                /*
+                byte[] Xbyte = new byte[x.Length * sizeof(int)];
+                Buffer.BlockCopy(x, 0, Xbyte, 0, Xbyte.Length);
+
+                byte[] Ybyte = new byte[y.Length * sizeof(int)];
+                Buffer.BlockCopy(y, 0, Ybyte, 0, Ybyte.Length);
+                */
+                NetworkManager.NetMan.rpc(GetPath(), nameof(SynchClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
             }
         }
 
