@@ -28,7 +28,16 @@ public class Fruit : Node2D
         _player.Play(animationName);
     }
 
-    public void RandomizePosition()
+    public void SetNewPosition(Vector2 newPos)
+    {
+        Position = newPos;
+    }
+    public void SetNewPosition(float x, float y)
+    {
+        Position = new Vector2(x, y);
+    }
+
+    public Vector2 RandomizePosition()
     {
         Vector2 position;
         Random random = new Random();
@@ -39,8 +48,8 @@ public class Fruit : Node2D
         }
         while (IsPositionOccupied(position));
 
-        Position = position + new Vector2(16,16);
         GD.Print("Frucht Position: " + position);
+        return position + new Vector2(16,16);
     }
 
     private Vector2 GetRandomPos(Random random)

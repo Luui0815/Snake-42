@@ -4,6 +4,7 @@ using System;
 using System.CodeDom;
 using System.Runtime.InteropServices;
 using NAudio.Wave;
+using System.Collections.Generic;
 
 // die Klasse wird benutzt um eine Spielrverbindung zu managen
 public class NetworkManager : Node
@@ -260,6 +261,10 @@ public class NetworkManager : Node
             }
         }
     }
+
+    private List<_RtcMsg> RPCPuffer = new List<_RtcMsg>();
+     private List<Exception> RPCFehler= new List<Exception>();
+
     public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool relaible = true, params object[] Args)
     {
         // remoterpc wird benutzt wenn man den rpc vom anderen empfangen hat
@@ -274,6 +279,7 @@ public class NetworkManager : Node
             }
             catch(Exception e)
             {
+                RPCFehler.Add(e);
                 // Juckt? throw new Exception("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
             }
         }
@@ -293,7 +299,9 @@ public class NetworkManager : Node
             else
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.UnreliableOrdered;
             
-            SendRawMessage(_RtcMsg.ConvertToJson(new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings))).ToUTF8());
+            _RtcMsg msg = new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings));
+            RPCPuffer.Add(msg);
+            SendRawMessage(_RtcMsg.ConvertToJson(msg).ToUTF8());
         } 
     }
 

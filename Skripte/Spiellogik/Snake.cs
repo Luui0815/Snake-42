@@ -144,7 +144,9 @@ public class Snake : Node2D
                         //if(_isSnake1 == false)
                         //{
                             // Aus irgendeinem Grund kann Vector2 nicht gewnadelt werden!
-                            NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
+                            // Nur diejenige Schlange sendet Richtungsänderung welche der Spiler auch wirklich steuert!
+                            if((_isServer && _isSnake1) || (!_isServer && !_isSnake1))
+                                NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
                         //}
                     //}
                 }
@@ -170,20 +172,20 @@ public class Snake : Node2D
     {
         // Wenn Server mache MoveTween
         // Wenn Client mache ClientMoveTween
-        MoveTween(argv);
-        NetworkManager.NetMan.rpc(GetPath(), nameof(UpdateClientVars), false, false, false, _growing, _eating);
-        NetworkManager.NetMan.rpc(GetPath(), nameof(ClientMoveTween), false, false, false, Convert.ToInt32(argv * 1000));
+        if(_isServer == true)
+        {
+            MoveTween(argv);
+            // if(argv == 1)
+                // NetworkManager.NetMan.rpc(GetPath(), nameof(UpdateClientVars), false, false, false, _growing, _eating);
+        }
+        else
+        {
+            ClientMoveTween(argv);
+        }
     }
 
-    protected virtual void UpdateClientVars(bool growing, bool eating)
+    protected virtual void ClientMoveTween(float argv)
     {
-        _growing = growing;
-        _eating = eating;
-    }
-
-    protected virtual void ClientMoveTween(int argi)
-    {
-        float argv = (float)argi / 1000f;
         if(_Merker == false)
         {
             int i = 0;
@@ -292,10 +294,7 @@ public class Snake : Node2D
             {
                 _Merker = true;
                 _points = _body.Points;
-                if(GlobalVariables.Instance.OnlineGame)
-                    NetworkManager.NetMan.rpc(GetPath(), nameof(CheckFruitCollision));
-                else
-                    CheckFruitCollision();
+                CheckFruitCollision();
 
                 if(_growing == true)
                     _growing = false;
@@ -326,14 +325,31 @@ public class Snake : Node2D
     {
         if (_body.Points[0] == _fruit.Position)
         {
-            _tween.StopAll();
             _eating = true;
             _audioPlayer.Play();
-            _fruit.RandomizePosition();
             //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
+
+            if(GlobalVariables.Instance.OnlineGame == false)
+		        _fruit.SetNewPosition(_fruit.RandomizePosition());
+            else
+            {
+                Vector2 newPos = _fruit.RandomizePosition();
+                NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x , newPos.y);
+                // Jetzte dem Client sagen das eine Frucht gegeseen wurde!
+                NetworkManager.NetMan.rpc(GetPath(), nameof(SetEatingOnOtherPlayer), false, false, true);
+            }
         }
+    }
+
+    protected virtual void SetEatingOnOtherPlayer()
+    {
+        _eating = true;
+        _audioPlayer.Play();
+        //IncreaseSpeed();
+        _controller.UpdateScore();
+        GD.Print($"{Name} hat Frucht gefressen!");
     }
 
     protected void IncreaseSpeed()

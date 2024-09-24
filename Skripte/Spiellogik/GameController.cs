@@ -37,7 +37,7 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 0.3f; // auf 0.3 stellen, zum nicht mehr debuggen
+				_snake1.moveDelay = _snake2.moveDelay = 1.1f; // auf 0.3 stellen, zum nicht mehr debuggen
 				_snakeTogether.moveDelay = 0.4f;
                 break;
 			}
@@ -95,9 +95,6 @@ public class GameController : Node2D
 					{
 						_snake1.SetOnlinePlayerSettings(true, true, _snake2);
 						_snake2.SetOnlinePlayerSettings(true, false, _snake1);
-						// Nur Spieler 1 bewegt schlangen, Spieler 2 bekommt sie nur angezeigt!
-						_snake1.MoveSnake();
-						_snake2.MoveSnake();
 					}
 					// Spieler 2
 					else
@@ -105,6 +102,8 @@ public class GameController : Node2D
 						_snake1.SetOnlinePlayerSettings(false, true, _snake2);
 						_snake2.SetOnlinePlayerSettings(false, false, _snake1);
 					}	
+					_snake1.MoveSnake();
+					_snake2.MoveSnake();
 				}
 
 				break;
@@ -138,7 +137,17 @@ public class GameController : Node2D
         _levelName = GetTree().CurrentScene.Name;
 		CreateGameField();
 
-		_fruit.RandomizePosition();
+		if(GlobalVariables.Instance.OnlineGame == false)
+			_fruit.SetNewPosition(_fruit.RandomizePosition());
+		else
+		{
+			Vector2 newPos = _fruit.RandomizePosition();
+			// Nur Spieler1 erzeugt bei beiden die Frucht!
+			if(GlobalVariables.Instance.Room.IamPlayerOne == true)
+			{
+				NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x , newPos.y);
+			}
+		}
 		UpdateHighScoreDisplay();
 
 		_audioPlayer = GetNode<AudioStreamPlayer2D>("MainTheme");
