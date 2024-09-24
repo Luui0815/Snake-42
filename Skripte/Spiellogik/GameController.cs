@@ -101,9 +101,10 @@ public class GameController : Node2D
 					{
 						_snake1.SetOnlinePlayerSettings(false, true, _snake2);
 						_snake2.SetOnlinePlayerSettings(false, false, _snake1);
+						// Der 2.Spieler startet beide Schlangen da er langsamer ist
+						NetworkManager.NetMan.rpc(_snake1.GetPath(), nameof(_snake1.MoveSnake));
+						NetworkManager.NetMan.rpc(_snake2.GetPath(), nameof(_snake2.MoveSnake));
 					}	
-					_snake1.MoveSnake();
-					_snake2.MoveSnake();
 				}
 
 				break;
