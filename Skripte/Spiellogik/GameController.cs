@@ -30,9 +30,21 @@ public class GameController : Node2D
 		_snake1 = GetNode<Snake>("Snake1");
         _snake2 = GetNode<Snake>("Snake2");
 		_snakeTogether = GetNode<SnakeMiteinander>("Snake3");
+   //     if (GlobalVariables.Instance.OnlineGame == true)
+   //     {
+			//// Online Spielmodus
+			//_snake1.SetScript(GD.Load("res://Skripte/Spiellogik/OnlineSnake.cs"));
+   //         _snake2.SetScript(GD.Load("res://Skripte/Spiellogik/OnlineSnake.cs"));
+   //     }
+   //     else
+   //     {
+   //         // Offline Spielmodus
+   //         _snake1.SetScript(GD.Load("res://Skripte/Spiellogik/OfflineSnake.cs"));
+   //         _snake2.SetScript(GD.Load("res://Skripte/Spiellogik/OfflineSnake.cs"));
+   //     }
 
-		// folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
-		switch(GlobalVariables.Instance.LevelDifficulty)
+        // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
+        switch (GlobalVariables.Instance.LevelDifficulty)
 		{
 			case 0:
 			{
