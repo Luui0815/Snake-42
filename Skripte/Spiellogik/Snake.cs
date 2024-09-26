@@ -70,7 +70,7 @@ public class Snake : Node2D
         Console.WriteLine($"Schalange 1, Schalange 2: {_otherSnake}");
     }
 
-    public void SetOnlinePlayerSettings(bool isServer, bool isSnake1, Snake otherSnake)
+    public virtual void SetOnlinePlayerSettings(bool isServer, bool isSnake1, Snake otherSnake)
     {
         // Server hat beide Schlangen, steuert aktiv aber nur die 1.
         // Bei jeder Bewegungsänderung sendet er es an den 2.Spieler

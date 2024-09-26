@@ -29,6 +29,15 @@ public class SnakeMiteinander : Snake
         _isPlayerOneTurn = true;
     }
 
+    public void SetOnlinePlayerSettings(bool isServer)
+    {
+        // Server hat beide Schlangen, steuert aktiv aber nur die 1.
+        // Bei jeder Bewegungsänderung sendet er es an den 2.Spieler
+        // Der 2. Spieler sendet nur Richtungsänderungen an den Server(Spieler 1!)
+        _isServer = isServer;
+        _isPlayerOneTurn = true;
+    }
+
     public override void _Input(InputEvent @event)
     {
         if (_isPlayerOneTurn)
