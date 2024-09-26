@@ -108,7 +108,10 @@ public class Lobby : Control
             _server.StopServer();
         if(_client != null)
             _client.StopConnection();
+        Hide();
         QueueFree();
+        while(_server != null && _client!=null)
+        {}
         GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
@@ -203,33 +206,47 @@ public class Lobby : Control
         bool ClientInRaum = false;
         foreach(Raum room in _roomList)
         {
-            _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 && room.PlayerOneId != _client.id ? "       Beitretbar": ""));
-            if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
+            // Wenn Client da dann alles ok
+            // Wenn nur Server da, dann etwas anders anzeigen!
+            if(_client != null)
             {
-                ClientInRaum = true;
-            }
+                _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler" + (room.PlayerTwoId == 0 && room.PlayerOneId != _client.id ? "       Beitretbar": ""));
+                if(room.PlayerOneId == _client.id || room.PlayerTwoId == _client.id)
+                {
+                    ClientInRaum = true;
+                }
 
-            //wenn RAum voll ist kann Host das Spiel starten
-            if(room.PlayerOneId == _client.id && room.PlayerTwoId != 0)
-            {
-                GetNode<Button>("SpielStarten").Disabled = false;
+                //wenn RAum voll ist kann Host das Spiel starten
+                if(room.PlayerOneId == _client.id && room.PlayerTwoId != 0)
+                {
+                    GetNode<Button>("SpielStarten").Disabled = false;
+                }
+                else
+                {
+                    GetNode<Button>("SpielStarten").Disabled = true;
+                }
             }
             else
             {
-                GetNode<Button>("SpielStarten").Disabled = true;
+                // spezille Ansicht für nur Server
+                _RaumListe.AddItem(room.Raumname + "      " + (room.PlayerTwoId == 0 ? 1 : 2) + "/2 Spieler");
             }
         }
 
-        if(ClientInRaum)
+        // folgendes nur Interresant wenn Client
+        if(_client != null)
         {
-            //Spieler ist ebereits in einem raum
-            GetNode<Button>("RaumErstellen").Disabled = true;
-            GetNode<Button>("RaumVerlassen").Disabled = false;
-        }
-        else
-        {
-            GetNode<Button>("RaumErstellen").Disabled = false;
-            GetNode<Button>("RaumVerlassen").Disabled = true;
+            if(ClientInRaum)
+            {
+                //Spieler ist ebereits in einem raum
+                GetNode<Button>("RaumErstellen").Disabled = true;
+                GetNode<Button>("RaumVerlassen").Disabled = false;
+            }
+            else
+            {
+                GetNode<Button>("RaumErstellen").Disabled = false;
+                GetNode<Button>("RaumVerlassen").Disabled = true;
+            }
         }
     }
 
