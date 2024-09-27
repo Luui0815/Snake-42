@@ -13,7 +13,7 @@ public abstract class BaseSnake : Node2D
     protected Tween _tween;
     protected Fruit _fruit;
     protected GameController _controller;
-    protected Snake _otherSnake;
+    protected BaseSnake _otherSnake;
 
     protected int _gridSize = 32;
     public float moveDelay;
@@ -36,6 +36,8 @@ public abstract class BaseSnake : Node2D
 
         _directionCache = _direction;
     }
+
+    public abstract void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake);
 
     public override void _Input(InputEvent @event)
     {

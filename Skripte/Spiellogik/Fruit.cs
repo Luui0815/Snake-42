@@ -6,16 +6,16 @@ using System.Xml.Linq;
 
 public class Fruit : Node2D
 {
-    private Snake _snake1;
-    private Snake _snake2;
+    private BaseSnake _snake1;
+    private BaseSnake _snake2;
     private GameController _controller;
     private AnimationPlayer _player;
     private int _cellSize = 32;
 
     public override void _Ready()
     {
-        _snake1 = GetParent().GetNode<Snake>("Snake1");
-        _snake2 = GetParent().GetNodeOrNull<Snake>("Snake2");
+        _snake1 = GetParent().GetNode<BaseSnake>("Snake1");
+        _snake2 = GetParent().GetNodeOrNull<BaseSnake>("Snake2");
 
         _controller = GetParent<GameController>();
         _player = GetChild(0).GetNode<AnimationPlayer>("AnimationPlayer");

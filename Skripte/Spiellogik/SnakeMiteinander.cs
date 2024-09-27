@@ -5,7 +5,6 @@ public class SnakeMiteinander : Snake
 {
     private Node2D _face1;
     private Node2D _face2;
-    private AudioStreamPlayer2D _audioPlayer;
 
     private Vector2 _directionCachePlayer1;
     private Vector2 _directionCachePlayer2;
