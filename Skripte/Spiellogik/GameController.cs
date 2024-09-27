@@ -29,7 +29,7 @@ public class GameController : Node2D
 	{
 		if (GlobalVariables.Instance.OnlineGame)
 		{
-            PackedScene onlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/GameElements/OnlineSnake.tscn");
+            PackedScene onlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineSnake.tscn");
 
             _snake1 = onlineSnakeScene.Instance() as OnlineSnake;
             AddChild(_snake1);
@@ -38,7 +38,7 @@ public class GameController : Node2D
         }
 		else if (!GlobalVariables.Instance.OnlineGame)
 		{
-            PackedScene offlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/GameElements/OfflineSnake.tscn");
+            PackedScene offlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineSnake.tscn");
 
             _snake1 = offlineSnakeScene.Instance() as OfflineSnake;
             AddChild(_snake1);

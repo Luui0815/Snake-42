@@ -89,9 +89,9 @@ public class OnlineSnake : BaseSnake
                 //else
                 //{
                 // Wenn er Spiler 2 ist sollen seine Einagben an Spielr 1 geschickt werden!
-                // da er 2 Schlangen hat, wuerde die Richtungseingabe 2 mal gesendet, daher nur Richtungs‰nderungen 
-                // senden die von Schlange 2 kommen => dann stimmt der rpc Pfad gleich beim Spiler 1 ¸berein!
-                // mit folgendem rpc call wird der directioncache von Spiler1 von Schlange 2 durch Spieler2 Schlange 2 ge‰ndert
+                // da er 2 Schlangen hat, wuerde die Richtungseingabe 2 mal gesendet, daher nur Richtungs√Ñnderungen 
+                // senden die von Schlange 2 kommen => dann stimmt der rpc Pfad gleich beim Spiler 1 √ºberein!
+                // mit folgendem rpc call wird der directioncache von Spiler1 von Schlange 2 durch Spieler2 Schlange 2 ge√§ndert
                 //if(_isSnake1 == false)
                 //{
                 // Aus irgendeinem Grund kann Vector2 nicht gewnadelt werden!
@@ -204,7 +204,7 @@ public class OnlineSnake : BaseSnake
                     y[j] = Convert.ToInt32(_body.Points[j].y);
                 }
 
-                // int Array in Byte Array wandeln, da Json zu langsam w‰re
+                // int Array in Byte Array wandeln, da Json zu langsam w√§re
                 /*
                 byte[] Xbyte = new byte[x.Length * sizeof(int)];
                 Buffer.BlockCopy(x, 0, Xbyte, 0, Xbyte.Length);
