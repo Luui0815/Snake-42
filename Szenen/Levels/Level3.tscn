@@ -4,7 +4,7 @@
 [ext_resource path="res://Szenen/Game Elements/Snake.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=3]
 [ext_resource path="res://Skripte/Spiellogik/GameController.cs" type="Script" id=4]
-[ext_resource path="res://Szenen/Game Elements/SnakeMiteinander.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Szenen/Game Elements/OfflineMultiplayerSnake.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Assets/Fonts/RoSpritendoSemiboldBeta-vmVwZ.otf" type="DynamicFontData" id=6]
 [ext_resource path="res://Assets/Sounds/Pixel-Peeker-Polka-faster(chosic.com).mp3" type="AudioStream" id=7]
 

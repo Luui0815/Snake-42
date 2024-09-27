@@ -8,7 +8,7 @@ public class GameController : Node2D
 	private HighScoreManager _highScoreManager;
 	private BaseSnake _snake1;
 	private BaseSnake _snake2;
-	private SnakeMiteinander _snakeTogether;
+	private BaseSnake _multiplayerSnake;
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
 	private Label _highScoreLabel, _scoreLabel;
@@ -30,25 +30,32 @@ public class GameController : Node2D
 		if (GlobalVariables.Instance.OnlineGame)
 		{
             PackedScene onlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineSnake.tscn");
-
             _snake1 = onlineSnakeScene.Instance() as OnlineSnake;
             AddChild(_snake1);
             _snake2 = onlineSnakeScene.Instance() as OnlineSnake;
             AddChild(_snake2);
+
+			PackedScene onlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineMultiplayerSnake.tscn");
+			_multiplayerSnake = onlineMultiplayerSnakeScene.Instance() as OnlineMultiplayerSnake;
+			AddChild(_multiplayerSnake);
         }
 		else if (!GlobalVariables.Instance.OnlineGame)
 		{
             PackedScene offlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineSnake.tscn");
-
             _snake1 = offlineSnakeScene.Instance() as OfflineSnake;
             AddChild(_snake1);
             _snake2 = offlineSnakeScene.Instance() as OfflineSnake;
             AddChild(_snake2);
+
+            PackedScene offlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineMultiplayerSnake.tscn");
+            _multiplayerSnake = offlineMultiplayerSnakeScene.Instance() as OfflineMultiplayerSnake;
+            AddChild(_multiplayerSnake);
         }
 		_snake1.Name = "Snake1";
 		_snake2.Name = "Snake2";
+		_multiplayerSnake.Name = "Snake3";
 
-        _snakeTogether = GetNode<SnakeMiteinander>("Snake3");
+        _multiplayerSnake = GetNode<OfflineMultiplayerSnake>("Snake3");
 
         // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
         switch (GlobalVariables.Instance.LevelDifficulty)
@@ -56,29 +63,29 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 1.1f; // auf 0.3 stellen, zum nicht mehr debuggen
-				_snakeTogether.moveDelay = 0.4f;
+				_snake1.moveDelay = _snake2.moveDelay = 0.3f; // auf 0.3 stellen, zum nicht mehr debuggen
+				_multiplayerSnake.moveDelay = 0.4f;
                 break;
 			}
 			case 1:
 			{
 				// mittel
 				_snake1.moveDelay = _snake2.moveDelay =  0.25f;
-					_snakeTogether.moveDelay = 0.35f;
+					_multiplayerSnake.moveDelay = 0.35f;
                 break;
 			}
 			case 2:
 			{
 				// schwer
 				_snake1.moveDelay = _snake2.moveDelay= 0.2f;
-                    _snakeTogether.moveDelay = 0.3f;
+                    _multiplayerSnake.moveDelay = 0.3f;
                     break;
 			}
 			case 3:
 			{
 				// profi
 				_snake1.moveDelay = _snake2.moveDelay= 0.1f;
-                    _snakeTogether.moveDelay = 0.2f;
+                    _multiplayerSnake.moveDelay = 0.2f;
                     break;
 			}
 		}
@@ -90,13 +97,13 @@ public class GameController : Node2D
 				// Miteinander
 				_snake1.QueueFree();
 				_snake2.QueueFree();
-				_snakeTogether.MoveSnake();
+				_multiplayerSnake.MoveSnake();
 				break;
 			}
 			case 1:
 			{
 				//Gegeneinander
-				_snakeTogether.QueueFree();
+				_multiplayerSnake.QueueFree();
 				
 				// Offline
 				if(GlobalVariables.Instance.OnlineGame == false)
@@ -132,13 +139,14 @@ public class GameController : Node2D
 			{
 				//Einzelspieler
 				_snake2.QueueFree();
-				_snakeTogether.QueueFree();
+				_multiplayerSnake.QueueFree();
                 _snake1.SetPlayerSettings(false, true, null);
                 _snake1.MoveSnake();
 				break;
 			}
 		}
         _fruit = GetNode<Fruit>("Fruit");
+		_fruit.Init();
 		_highScoreManager = new HighScoreManager();
 		_gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
 

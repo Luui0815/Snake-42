@@ -7,8 +7,6 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected bool _isServer;
-    protected bool _isSnake1;
 
     public override void _Ready()
     {

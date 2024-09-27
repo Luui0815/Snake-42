@@ -1,7 +1,8 @@
 using Godot;
+using System;
 using System.Linq;
 
-public class SnakeMiteinander : Snake
+public class OnlineMultiplayerSnake : BaseSnake
 {
     private Node2D _face1;
     private Node2D _face2;
@@ -28,11 +29,11 @@ public class SnakeMiteinander : Snake
         _isPlayerOneTurn = true;
     }
 
-    public void SetOnlinePlayerSettings(bool isServer)
+    public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
     {
         // Server hat beide Schlangen, steuert aktiv aber nur die 1.
-        // Bei jeder Bewegungsänderung sendet er es an den 2.Spieler
-        // Der 2. Spieler sendet nur Richtungsänderungen an den Server(Spieler 1!)
+        // Bei jeder Bewegungsaenderung sendet er es an den 2.Spieler
+        // Der 2. Spieler sendet nur Richtungsaenderungen an den Server(Spieler 1!)
         _isServer = isServer;
         _isPlayerOneTurn = true;
     }
@@ -85,7 +86,7 @@ public class SnakeMiteinander : Snake
                 }
                 else
                 {
-                    int prevIndex = i - direction;  
+                    int prevIndex = i - direction;
                     Vector2 diff = (_points[prevIndex] - _points[i]) / _gridSize;
                     newPos = _points[i] + diff * _gridSize * argv;
                 }
@@ -111,9 +112,9 @@ public class SnakeMiteinander : Snake
             {
                 _tween.StopAll();
                 _Merker = true;
-                _points = _body.Points; 
+                _points = _body.Points;
 
-                CheckFruitCollision();  
+                CheckFruitCollision();
 
                 if (_growing)
                     _growing = false;
@@ -140,7 +141,7 @@ public class SnakeMiteinander : Snake
 
     protected override void CheckFruitCollision()
     {
-        if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count()-1] == _fruit.Position)
+        if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == _fruit.Position)
         {
             _audioPlayer.Play();
             _tween.StopAll();
@@ -184,9 +185,9 @@ public class SnakeMiteinander : Snake
 
         if (_points.Length >= 3)
         {
-            int startIndex = _isPlayerOneTurn ? 1 : _points.Length - 2; 
+            int startIndex = _isPlayerOneTurn ? 1 : _points.Length - 2;
             int endIndex = _isPlayerOneTurn ? _points.Length : 0;
-            int step = _isPlayerOneTurn ? 1 : -1; 
+            int step = _isPlayerOneTurn ? 1 : -1;
 
             for (int i = startIndex; (step == 1 ? i < endIndex : i >= endIndex); i += step)
             {
@@ -200,10 +201,10 @@ public class SnakeMiteinander : Snake
         return false;
     }
 
-    private Vector2[]SetPoints(Vector2[] points)
+    private Vector2[] SetPoints(Vector2[] points)
     {
         Vector2[] newPoints = new Vector2[points.Length];
-        for(int i=0;i<points.Length; i++)
+        for (int i = 0; i < points.Length; i++)
         {
             newPoints[i] = points[i];
         }
@@ -213,7 +214,7 @@ public class SnakeMiteinander : Snake
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
-        if (_isPlayerOneTurn) 
+        if (_isPlayerOneTurn)
         {
             _directionCachePlayer1 = _directionCachePlayer2 * -1;
         }

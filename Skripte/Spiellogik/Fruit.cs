@@ -8,14 +8,16 @@ public class Fruit : Node2D
 {
     private BaseSnake _snake1;
     private BaseSnake _snake2;
+    private BaseSnake _snake3;
     private GameController _controller;
     private AnimationPlayer _player;
     private int _cellSize = 32;
-
-    public override void _Ready()
+    public void Init()
     {
+        GD.Print("Frucht initialisierung");
         _snake1 = GetParent().GetNode<BaseSnake>("Snake1");
         _snake2 = GetParent().GetNodeOrNull<BaseSnake>("Snake2");
+        _snake3 = GetParent().GetNodeOrNull<BaseSnake>("Snake3");
 
         _controller = GetParent<GameController>();
         _player = GetChild(0).GetNode<AnimationPlayer>("AnimationPlayer");
@@ -84,6 +86,11 @@ public class Fruit : Node2D
         }
 
         if (_snake2 != null && _snake2.Points.Contains(position))
+        {
+            return true;
+        }        
+
+        if (_snake3 != null && _snake3.Points.Contains(position))
         {
             return true;
         }

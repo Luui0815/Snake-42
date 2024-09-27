@@ -22,6 +22,9 @@ public abstract class BaseSnake : Node2D
     protected bool _isPlayerOne;
     protected bool _Merker = false;
 
+    protected bool _isServer;
+    protected bool _isSnake1;
+
     public Vector2[] Points { get { return _points; } }
 
     public override void _Ready()
