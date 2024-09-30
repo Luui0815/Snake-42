@@ -11,14 +11,14 @@ public class OfflineSnake : BaseSnake
         base._Ready();
     }
 
-    public void SetOfflinePlayerSettings(bool isPlayerOne, Snake otherSnake = null)
+    public override void SetPlayerSettings(bool isServer, bool isPlayerOne, BaseSnake otherSnake = null)
     {
         _isPlayerOne = isPlayerOne;
-        Snake s = null;
+        BaseSnake s = null;
         if (!isPlayerOne)
         {
             if (GetParent() != null)
-                s = GetParent().GetNodeOrNull<Snake>("Snake1");
+                s = GetParent().GetNodeOrNull<BaseSnake>("Snake1");
             if (s != null)
                 _otherSnake = s;
             else
@@ -33,7 +33,7 @@ public class OfflineSnake : BaseSnake
         }
         else
         {
-            _otherSnake = GetParent().GetNodeOrNull<Snake>("Snake2");
+            _otherSnake = GetParent().GetNodeOrNull<BaseSnake>("Snake2");
         }
     }
 }

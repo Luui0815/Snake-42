@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 public class GameController : Node2D
 {
 	private HighScoreManager _highScoreManager;
-	private Snake _snake1;
-	private Snake _snake2;
-	private SnakeMiteinander _snakeTogether;
+	private BaseSnake _snake1;
+	private BaseSnake _snake2;
+	private BaseSnake _multiplayerSnake;
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
 	private Label _highScoreLabel, _scoreLabel;
@@ -27,21 +27,35 @@ public class GameController : Node2D
 
 	public override void _Ready()
 	{
-		_snake1 = GetNode<Snake>("Snake1");
-        _snake2 = GetNode<Snake>("Snake2");
-		_snakeTogether = GetNode<SnakeMiteinander>("Snake3");
-   //     if (GlobalVariables.Instance.OnlineGame == true)
-   //     {
-			//// Online Spielmodus
-			//_snake1.SetScript(GD.Load("res://Skripte/Spiellogik/OnlineSnake.cs"));
-   //         _snake2.SetScript(GD.Load("res://Skripte/Spiellogik/OnlineSnake.cs"));
-   //     }
-   //     else
-   //     {
-   //         // Offline Spielmodus
-   //         _snake1.SetScript(GD.Load("res://Skripte/Spiellogik/OfflineSnake.cs"));
-   //         _snake2.SetScript(GD.Load("res://Skripte/Spiellogik/OfflineSnake.cs"));
-   //     }
+		if (GlobalVariables.Instance.OnlineGame)
+		{
+            PackedScene onlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineSnake.tscn");
+            _snake1 = onlineSnakeScene.Instance() as OnlineSnake;
+            AddChild(_snake1);
+            _snake2 = onlineSnakeScene.Instance() as OnlineSnake;
+            AddChild(_snake2);
+
+			PackedScene onlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineMultiplayerSnake.tscn");
+			_multiplayerSnake = onlineMultiplayerSnakeScene.Instance() as OnlineMultiplayerSnake;
+			AddChild(_multiplayerSnake);
+        }
+		else if (!GlobalVariables.Instance.OnlineGame)
+		{
+            PackedScene offlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineSnake.tscn");
+            _snake1 = offlineSnakeScene.Instance() as OfflineSnake;
+            AddChild(_snake1);
+            _snake2 = offlineSnakeScene.Instance() as OfflineSnake;
+            AddChild(_snake2);
+
+            PackedScene offlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineMultiplayerSnake.tscn");
+            _multiplayerSnake = offlineMultiplayerSnakeScene.Instance() as OfflineMultiplayerSnake;
+            AddChild(_multiplayerSnake);
+        }
+		_snake1.Name = "Snake1";
+		_snake2.Name = "Snake2";
+		_multiplayerSnake.Name = "Snake3";
+
+        _multiplayerSnake = GetNode<OfflineMultiplayerSnake>("Snake3");
 
         // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
         switch (GlobalVariables.Instance.LevelDifficulty)
@@ -49,29 +63,29 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 1.1f; // auf 0.3 stellen, zum nicht mehr debuggen
-				_snakeTogether.moveDelay = 0.4f;
+				_snake1.moveDelay = _snake2.moveDelay = 0.3f; // auf 0.3 stellen, zum nicht mehr debuggen
+				_multiplayerSnake.moveDelay = 0.4f;
                 break;
 			}
 			case 1:
 			{
 				// mittel
-				_snake1.moveDelay = _snake2.moveDelay =  0.25f;
-					_snakeTogether.moveDelay = 0.35f;
+				_snake1.moveDelay = _snake2.moveDelay =  0.2f;
+					_multiplayerSnake.moveDelay = 0.35f;
                 break;
 			}
 			case 2:
 			{
 				// schwer
-				_snake1.moveDelay = _snake2.moveDelay= 0.2f;
-                    _snakeTogether.moveDelay = 0.3f;
+				_snake1.moveDelay = _snake2.moveDelay= 0.15f;
+                    _multiplayerSnake.moveDelay = 0.3f;
                     break;
 			}
 			case 3:
 			{
 				// profi
-				_snake1.moveDelay = _snake2.moveDelay= 0.1f;
-                    _snakeTogether.moveDelay = 0.2f;
+				_snake1.moveDelay = _snake2.moveDelay= 0.09f;
+                    _multiplayerSnake.moveDelay = 0.2f;
                     break;
 			}
 		}
@@ -83,19 +97,19 @@ public class GameController : Node2D
 				// Miteinander
 				_snake1.QueueFree();
 				_snake2.QueueFree();
-				_snakeTogether.MoveSnake();
+				_multiplayerSnake.MoveSnake();
 				break;
 			}
 			case 1:
 			{
 				//Gegeneinander
-				_snakeTogether.QueueFree();
+				_multiplayerSnake.QueueFree();
 				
 				// Offline
 				if(GlobalVariables.Instance.OnlineGame == false)
 				{
-					_snake1.SetOfflinePlayerSettings(true);
-					_snake2.SetOfflinePlayerSettings(false);
+					_snake1.SetPlayerSettings(false, true, _snake2);
+					_snake2.SetPlayerSettings(false, false, _snake2);
 					_snake1.MoveSnake();
 					_snake2.MoveSnake();
 				}
@@ -105,14 +119,14 @@ public class GameController : Node2D
 					// Spieler 1
 					if(GlobalVariables.Instance.Room.IamPlayerOne == true)
 					{
-						_snake1.SetOnlinePlayerSettings(true, true, _snake2);
-						_snake2.SetOnlinePlayerSettings(true, false, _snake1);
+						_snake1.SetPlayerSettings(true, true, _snake2);
+						_snake2.SetPlayerSettings(true, false, _snake1);
 					}
 					// Spieler 2
 					else
 					{
-						_snake1.SetOnlinePlayerSettings(false, true, _snake2);
-						_snake2.SetOnlinePlayerSettings(false, false, _snake1);
+						_snake1.SetPlayerSettings(false, true, _snake2);
+						_snake2.SetPlayerSettings(false, false, _snake1);
 						// Der 2.Spieler startet beide Schlangen da er langsamer ist
 						NetworkManager.NetMan.rpc(_snake1.GetPath(), nameof(_snake1.MoveSnake));
 						NetworkManager.NetMan.rpc(_snake2.GetPath(), nameof(_snake2.MoveSnake));
@@ -125,13 +139,14 @@ public class GameController : Node2D
 			{
 				//Einzelspieler
 				_snake2.QueueFree();
-				_snakeTogether.QueueFree();
-                _snake1.SetOfflinePlayerSettings(true);
+				_multiplayerSnake.QueueFree();
+                _snake1.SetPlayerSettings(false, true, null);
                 _snake1.MoveSnake();
 				break;
 			}
 		}
         _fruit = GetNode<Fruit>("Fruit");
+		_fruit.Init();
 		_highScoreManager = new HighScoreManager();
 		_gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
 

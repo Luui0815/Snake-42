@@ -13,7 +13,7 @@ public abstract class BaseSnake : Node2D
     protected Tween _tween;
     protected Fruit _fruit;
     protected GameController _controller;
-    protected Snake _otherSnake;
+    protected BaseSnake _otherSnake;
 
     protected int _gridSize = 32;
     public float moveDelay;
@@ -21,6 +21,9 @@ public abstract class BaseSnake : Node2D
     protected bool _growing = false;
     protected bool _isPlayerOne;
     protected bool _Merker = false;
+
+    protected bool _isServer;
+    protected bool _isSnake1;
 
     public Vector2[] Points { get { return _points; } }
 
@@ -36,6 +39,8 @@ public abstract class BaseSnake : Node2D
 
         _directionCache = _direction;
     }
+
+    public abstract void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake);
 
     public override void _Input(InputEvent @event)
     {
@@ -141,7 +146,7 @@ public abstract class BaseSnake : Node2D
             _tween.StopAll();
             _audioPlayer.Play();
             _eating = true;
-            _fruit.RandomizePosition();
+            _fruit.SetNewPosition(_fruit.RandomizePosition());            
             //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");

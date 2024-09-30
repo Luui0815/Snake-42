@@ -7,8 +7,6 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected bool _isServer;
-    protected bool _isSnake1;
 
     public override void _Ready()
     {
@@ -28,11 +26,11 @@ public class OnlineSnake : BaseSnake
         }
     }
 
-    public void SetOnlinePlayerSettings(bool isServer, bool isSnake1, Snake otherSnake)
+    public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
     {
         // Server hat beide Schlangen, steuert aktiv aber nur die 1.
-        // Bei jeder Bewegungsänderung sendet er es an den 2.Spieler
-        // Der 2. Spieler sendet nur Richtungsänderungen an den Server(Spieler 1!)
+        // Bei jeder Bewegungsaenderung sendet er es an den 2.Spieler
+        // Der 2. Spieler sendet nur Richtungsaenderungen an den Server(Spieler 1!)
         _isServer = isServer;
 
         if (isSnake1 == false)
@@ -75,7 +73,7 @@ public class OnlineSnake : BaseSnake
                 if (Input.IsActionPressed("move_down") && _direction != Vector2.Up) direction = Vector2.Down;
             }
             // es wird auf alle Inputs reagiert
-            // nur wenn direction != 0,0 wurde der richtige gedrückt!
+            // nur wenn direction != 0,0 wurde der richtige gedrueckt!
 
 
             // online
@@ -89,13 +87,13 @@ public class OnlineSnake : BaseSnake
                 //else
                 //{
                 // Wenn er Spiler 2 ist sollen seine Einagben an Spielr 1 geschickt werden!
-                // da er 2 Schlangen hat, würde die Richtungseingabe 2 mal gesendet, daher nur Richtungsänderungen 
-                // senden die von Schlange 2 kommen => dann stimmt der rpc Pfad gleich beim Spiler 1 überein!
-                // mit folgendem rpc call wird der directioncache von Spiler1 von Schlange 2 durch Spieler2 Schlange 2 geändert
+                // da er 2 Schlangen hat, wuerde die Richtungseingabe 2 mal gesendet, daher nur RichtungsÃ„nderungen 
+                // senden die von Schlange 2 kommen => dann stimmt der rpc Pfad gleich beim Spiler 1 Ã¼berein!
+                // mit folgendem rpc call wird der directioncache von Spiler1 von Schlange 2 durch Spieler2 Schlange 2 geÃ¤ndert
                 //if(_isSnake1 == false)
                 //{
                 // Aus irgendeinem Grund kann Vector2 nicht gewnadelt werden!
-                // Nur diejenige Schlange sendet Richtungsänderung welche der Spiler auch wirklich steuert!
+                // Nur diejenige Schlange sendet Richtungsaenderung welche der Spiler auch wirklich steuert!
                 if ((_isServer && _isSnake1) || (!_isServer && !_isSnake1))
                     NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
                 //}
@@ -124,7 +122,7 @@ public class OnlineSnake : BaseSnake
         if (_isServer == true)
         {
             // Man hat das Problem das die Positionen der Schlangen bei beiden Spielern auseinander gehen, da argv nicht bei jedem genau uzr gleichen zeit
-            // die gleichen Werte haben, daher muss man ingewissen Abständen den Cleint wieder mit dem Server synchronisieren!!! => Wie? Kein blassen Schimemr
+            // die gleichen Werte haben, daher muss man ingewissen Abstaenden den Cleint wieder mit dem Server synchronisieren!!! => Wie? Kein blassen Schimemr
             MoveTween(argv);
         }
         else
@@ -157,7 +155,7 @@ public class OnlineSnake : BaseSnake
                     }
                     else
                     {
-                        // letztes Körperteil darf nicht bewegt werden!
+                        // letztes Koerperteil darf nicht bewegt werden!
                         newPos = _body.GetPointPosition(i);
                     }
                 }
@@ -204,7 +202,7 @@ public class OnlineSnake : BaseSnake
                     y[j] = Convert.ToInt32(_body.Points[j].y);
                 }
 
-                // int Array in Byte Array wandeln, da Json zu langsam wäre
+                // int Array in Byte Array wandeln, da Json zu langsam wÃ¤re
                 /*
                 byte[] Xbyte = new byte[x.Length * sizeof(int)];
                 Buffer.BlockCopy(x, 0, Xbyte, 0, Xbyte.Length);
@@ -247,7 +245,7 @@ public class OnlineSnake : BaseSnake
                     }
                     else
                     {
-                        // letztes Körperteil darf nicht bewegt werden!
+                        // letztes Koerperteil darf nicht bewegt werden!
                         newPos = _body.GetPointPosition(i);
                     }
                 }

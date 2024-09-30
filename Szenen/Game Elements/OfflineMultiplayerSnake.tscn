@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://Skripte/Spiellogik/SnakeMiteinander.cs" type="Script" id=1]
+[ext_resource path="res://Skripte/Spiellogik/OfflineMultiplayerSnake.cs" type="Script" id=1]
 [ext_resource path="res://Assets/Snake Assets/Eye-modified.png" type="Texture" id=2]
 [ext_resource path="res://Assets/Snake Assets/OPN0220.jpg" type="Texture" id=3]
 [ext_resource path="res://Assets/Sounds/Eating sound effect.wav" type="AudioStream" id=4]
