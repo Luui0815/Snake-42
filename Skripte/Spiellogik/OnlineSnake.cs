@@ -12,17 +12,19 @@ public class OnlineSnake : BaseSnake
     {
         base._Ready();
     }
-
+    private float timeduration = 0f;
     public override void _Process(float delta)
     {
-        if (_Interpolate == true)
+        timeduration += delta;
+        if (_Interpolate == true || true)
         {
+            timeduration = 0f;
             for (int i = 0; i < _body.Points.Length; i++)
             {
                 _body.SetPointPosition(i, _body.Points[i].LinearInterpolate(_points[i], 0.01f));// war 0.001f
             }
             if (Convert.ToInt32(_body.Points[0].x) == Convert.ToInt32(_points[0].x) && Convert.ToInt32(_body.Points[0].y) == Convert.ToInt32(_points[0].y))
-                _Interpolate = false;
+                ;//_Interpolate = false;
         }
     }
 
@@ -159,7 +161,8 @@ public class OnlineSnake : BaseSnake
                         newPos = _body.GetPointPosition(i);
                     }
                 }
-                _body.SetPointPosition(i, newPos);
+                //_body.SetPointPosition(i, newPos);
+                _points[i] = newPos;
                 i++;
             }
 
@@ -249,7 +252,8 @@ public class OnlineSnake : BaseSnake
                         newPos = _body.GetPointPosition(i);
                     }
                 }
-                _body.SetPointPosition(i, newPos);
+                //_body.SetPointPosition(i, newPos);
+                _points[i] = newPos;
                 i++;
             }
 

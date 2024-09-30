@@ -37,6 +37,7 @@ public class GameController : Node2D
 
 			PackedScene onlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineMultiplayerSnake.tscn");
 			_multiplayerSnake = onlineMultiplayerSnakeScene.Instance() as OnlineMultiplayerSnake;
+			// _multiplayerSnake.Name = "Snake3";
 			AddChild(_multiplayerSnake);
         }
 		else if (!GlobalVariables.Instance.OnlineGame)
@@ -49,13 +50,14 @@ public class GameController : Node2D
 
             PackedScene offlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineMultiplayerSnake.tscn");
             _multiplayerSnake = offlineMultiplayerSnakeScene.Instance() as OfflineMultiplayerSnake;
+			// _multiplayerSnake.Name = "Snake3";
             AddChild(_multiplayerSnake);
         }
 		_snake1.Name = "Snake1";
 		_snake2.Name = "Snake2";
 		_multiplayerSnake.Name = "Snake3";
 
-        _multiplayerSnake = GetNode<OfflineMultiplayerSnake>("Snake3");
+        _multiplayerSnake = GetNode<OnlineMultiplayerSnake>("Snake3");
 
         // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
         switch (GlobalVariables.Instance.LevelDifficulty)
