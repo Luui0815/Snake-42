@@ -146,7 +146,7 @@ public abstract class BaseSnake : Node2D
             _tween.StopAll();
             _audioPlayer.Play();
             _eating = true;
-            _fruit.RandomizePosition();
+            _fruit.SetNewPosition(_fruit.RandomizePosition());            
             //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");

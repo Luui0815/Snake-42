@@ -70,21 +70,21 @@ public class GameController : Node2D
 			case 1:
 			{
 				// mittel
-				_snake1.moveDelay = _snake2.moveDelay =  0.25f;
+				_snake1.moveDelay = _snake2.moveDelay =  0.2f;
 					_multiplayerSnake.moveDelay = 0.35f;
                 break;
 			}
 			case 2:
 			{
 				// schwer
-				_snake1.moveDelay = _snake2.moveDelay= 0.2f;
+				_snake1.moveDelay = _snake2.moveDelay= 0.15f;
                     _multiplayerSnake.moveDelay = 0.3f;
                     break;
 			}
 			case 3:
 			{
 				// profi
-				_snake1.moveDelay = _snake2.moveDelay= 0.1f;
+				_snake1.moveDelay = _snake2.moveDelay= 0.09f;
                     _multiplayerSnake.moveDelay = 0.2f;
                     break;
 			}

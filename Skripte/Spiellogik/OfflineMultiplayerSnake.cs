@@ -146,7 +146,7 @@ public class OfflineMultiplayerSnake : BaseSnake
             _audioPlayer.Play();
             _tween.StopAll();
             _eating = true;
-            _fruit.RandomizePosition();
+            _fruit.SetNewPosition(_fruit.RandomizePosition());
             //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
