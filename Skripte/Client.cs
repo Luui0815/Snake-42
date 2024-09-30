@@ -23,7 +23,8 @@ namespace Snake42
         RoomLeft,// wen Client Raum verlässt, kann dazu führen das Raum gelöscht wird
         SDPData, // wird vom Raumhost an Player 2 gesendet,damit er auch die SDP bekommt
         ICECandidate, // für WebRTC ICe Candidate austauschen
-
+        ServerWillClosed, // wenn Server abgeschaltet wird
+        StartGame, // wird von beiden RTC Tilnehmer geschickt und allen anderen als ChatMsg Weitergeleite: Spiler1 und Spiler2 haben ein Spiel gestartet
     }
 }
 public class Client : Control
@@ -36,40 +37,51 @@ public class Client : Control
     //private RichTextLabel _chatLog;
     private string _playerName;
     private int _clientId;
-    private Godot.Timer _sendTimer = new Godot.Timer();
     private List<string> _DataSendBuffer = new List<string>(); // Wenn zu viel nachrichten gleichzeitig gesendet werden wollen, wird es hier zwischengespeichert
+    bool _DisconnectFromHost = false;
     public override void _Ready()
     {
         //Signale mit Methoden verknüpfen
-        _WSPeer.Connect("connection_closed",this,"ConnectionClosed");
-        _WSPeer.Connect("connection_error", this, "ConnectionClosed");
-        _WSPeer.Connect("connection_established", this, "ConnectionOpened");
+        _WSPeer.Connect("connection_closed",this,nameof(ConnectionClosed));
+        _WSPeer.Connect("connection_error", this, nameof(ConnectionClosed));
+        _WSPeer.Connect("connection_established", this, nameof(ConnectionOpened));
         _WSPeer.Connect("data_received", this, "ReceiveData");
 
         _clientFormPopup = (PackedScene)ResourceLoader.Load("res://Szenen/ClientFormPopup.tscn");
-        // FOLGENDES MUSS IN VERBINDUNGSEINSTELLUNGEN VERLGET WREDEN; SIEHE AUCH SERVER
-        //_chatLog = GetParent().GetNode<RichTextLabel>("ErrorMSGBox/ErrorLog");
-
-        // Timer stellen, da Nachrichten zu schnell gesendet werden können
-        _sendTimer.WaitTime = 1;
-        _sendTimer.OneShot=true;
-        _sendTimer.Connect("timeout",this,"SendDataFromBuffer");
-        AddChild(_sendTimer);
     }
 
     public void ConnectionClosed(bool was_clean=false)
     {
         GD.Print("Client: Verbindung geschlossen. Geplant: " + was_clean);
-        //_chatLog.Text += "Client: Verbindung geschlossen. Geplant: " + was_clean + "\n";
+        // nur wenn die Verbindung unerwartet abreist Meldung geben
+        if(was_clean == false && _DisconnectFromHost == false)
+        {
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindungsabbruch","Verbindung zum Server wurde verloren");
+            // Signal verbinden, welches den Anwender auf das Hauptmenü zurückführt
+            ErrorPopup.Connect("confirmed", this, nameof(BackToMainMenu));
+            //Noch ein Signal hinzufügen wenn auf das Kreuz gedrückt wird
+            //ErrorPopup.Connect("confirmed", this, nameof(BackToMainMenu))
+            GetTree().Root.AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
+        }
     }
 
-    public void ConnectionOpened(string proto)
+    private void BackToMainMenu()
+    {
+        StopConnection();
+        QueueFree();
+        GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
+    }
+
+    private void ConnectionOpened(string proto)
     {
         GD.Print("Client: Verbunden durch Protokoll: " + proto + "\n--------------------------------------------------");
         //_chatLog.Text += "Client: Verbunden durch Protokoll: " + proto + "\n";
     }
 
-    public void ReceiveData()
+    private void ReceiveData()
     {
         string recievedMessage = ConvertDataToString(_WSPeer.GetPeer(1).GetPacket());        
         string chatMessage = "Client: " + recievedMessage +"\n";
@@ -87,7 +99,7 @@ public class Client : Control
             SendData(JsonConvert.SerializeObject(msg2));
         }
 
-        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed || Message.state == Nachricht.checkIn)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }
@@ -96,11 +108,6 @@ public class Client : Control
     private String ConvertDataToString(byte[] packet)
     {
         return Encoding.UTF8.GetString(packet);
-    }
-
-    public void _on_Client_starten_pressed()
-    {
-        ShowClientPopup();
     }
 
     public string playerName
@@ -114,92 +121,42 @@ public class Client : Control
         get{ return _clientId; }
     }
 
-    private void ShowClientPopup()
-    {
-        Popup popupInstance = (Popup)_clientFormPopup.Instance();
-        GetTree().Root.AddChild(popupInstance);
-        popupInstance.PopupCentered();
-        LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
-        LineEdit ipInput = popupInstance.GetNode<LineEdit>("IpInput");
-        LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
-        portInput.Text = "8915";
-        ipInput.Text = "127.0.0.1";
-        playername.Text = "Test1";
-
-
-        popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );
-
-    }
-
     public void OnPopupConfirmed(string ip, int port, string playerName)
     {
         GD.Print("Portnummer: " + port);
         GD.Print("IP-Adresse: " + ip);
         ConnectToServer("ws://" + ip + ":" + port.ToString());
         _playerName=playerName;
-
-        // ToDo: vereinfachen, kommt bei Verbindungseinstellungen nochmal 
-        PackedScene lobby = (PackedScene)ResourceLoader.Load("res://Szenen/Lobby.tscn");
-        Lobby lobbyInstance = (Lobby)lobby.Instance();
-        Verbindungseinstellungen vb = (Verbindungseinstellungen)GetParent();
-        vb.RemoveChild(this);
-        lobbyInstance.AddChild(this);
-        vb.GetTree().Root.AddChild(lobbyInstance);
-
-        vb.QueueFree();
     }
 
-    public void ConnectToServer(String ip)
+    public Error ConnectToServer(String ip)
     {
-        Error error = _WSPeer.ConnectToUrl(ip);
-        if(error == Error.Ok)
+        if(_WSPeer.ConnectToUrl(ip) == Error.Ok)
         {
             GD.Print("Client: Client gestartet \n--------------------------------------------------");
-            //_chatLog.Text += "Client: Client gestartet \n";
+            return Error.Ok;
         }
         else
         {
-            GD.Print("Client: Fehler beim verbinden: " + error.ToString());
-            //_chatLog.Text += "Client: Fehler beim verbinden: " + error.ToString() + "\n";
+            GD.Print("Client: Fehler beim verbinden: ");
+            ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+            ErrorPopup.Init("Verbindungsfehler","Der Client kann sich nicht auf die Adresse/URL " + ip + " verbinden");
+            GetTree().Root.AddChild(ErrorPopup);
+            ErrorPopup.PopupCentered();
+            ErrorPopup.Show();
+            return Error.Failed;
         }
     }
 
 
     public void SendData(string Data)
     {
-        // Prüfen ob die Nachricht gültiges Json Format hat
-        JSONParseResult JsonParseFehler = JSON.Parse(Data);
-
-        if(_sendTimer.TimeLeft==0)
+        try
         {
-            if(JsonParseFehler.ErrorString=="")
-            {
-                _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
-                GD.Print("Client: Nachricht gesendet: " + Data);
-                _sendTimer.Start();
-
-            }
-            else
-                GD.Print("Client: Nachricht ist kein Json Dokument");
+            _WSPeer.GetPeer(1).PutPacket(Data.ToString().ToUTF8());
         }
-        else
-        {
-            // Zu viele daten auf einmal, in Wartebuffer schreiben
-            _DataSendBuffer.Add(Data);
-            //Geht nicht, Client wartet bis der Timer 0 ist, Server kommt solang nicht zum Zug
-            // bessert sich wenn man alles in ein Skript packt denk ich
-        }
-    }
-
-    private void SendDataFromBuffer()
-    {
-        // wird aufgerufen wenn SendTimer 0 ist
-        if(_DataSendBuffer.Count !=0 )
-        {
-            //Daten nachträglich senden
-            SendData(_DataSendBuffer[0]);
-            _DataSendBuffer.RemoveAt(0);
-        }
+        catch{}
+        GD.Print("Client: Nachricht gesendet: " + Data);
     }
 
     public string PlayerName
@@ -212,7 +169,9 @@ public class Client : Control
 
     public void StopConnection()
     {
+        _DisconnectFromHost = true;
         _WSPeer.DisconnectFromHost();
+        QueueFree();
     }
 
     public override void _Process(float delta)

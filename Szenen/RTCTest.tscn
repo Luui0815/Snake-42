@@ -1,0 +1,104 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Skripte/RTCTest.cs" type="Script" id=1]
+
+[node name="RTCTest" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 330, 272 )
+script = ExtResource( 1 )
+
+[node name="Label" type="Label" parent="."]
+margin_right = 173.0
+margin_bottom = 40.0
+text = "empfangene Nachricht:"
+
+[node name="EmpfangeneNachricht" type="Label" parent="."]
+margin_left = 156.0
+margin_top = 1.0
+margin_right = 367.0
+margin_bottom = 87.0
+
+[node name="Senden" type="Button" parent="."]
+margin_left = 1023.0
+margin_top = 6.0
+margin_right = 1269.0
+margin_bottom = 69.0
+text = "Nachricht senden"
+
+[node name="SendendeNachricht" type="TextEdit" parent="."]
+margin_left = 983.0
+margin_top = 78.0
+margin_right = 1251.0
+margin_bottom = 118.0
+
+[node name="RPCTestButton" type="Button" parent="."]
+margin_left = 24.0
+margin_top = 538.0
+margin_right = 239.0
+margin_bottom = 665.0
+text = "TestRPC1"
+
+[node name="RPCTest" type="Label" parent="."]
+margin_left = 270.0
+margin_top = 213.0
+margin_right = 647.0
+margin_bottom = 674.0
+text = "1"
+
+[node name="PeerInfo" type="TextEdit" parent="."]
+anchor_right = 0.016
+anchor_bottom = 0.056
+margin_left = 853.0
+margin_top = 194.0
+margin_right = 1206.52
+margin_bottom = 459.68
+readonly = true
+
+[node name="DataChannel" type="Label" parent="."]
+margin_top = 673.0
+margin_right = 1281.0
+margin_bottom = 719.0
+autowrap = true
+
+[node name="RPCTest2" type="Button" parent="."]
+margin_left = 51.0
+margin_top = 461.0
+margin_right = 226.0
+margin_bottom = 505.0
+text = "RpcTest2"
+
+[node name="RPCTest3" type="Button" parent="."]
+margin_left = 51.0
+margin_top = 286.0
+margin_right = 217.0
+margin_bottom = 371.0
+text = "RPCTest3"
+
+[node name="RPCTest4" type="Button" parent="."]
+margin_left = 57.0
+margin_top = 213.0
+margin_right = 199.0
+margin_bottom = 268.0
+text = "RPCTest4"
+
+[node name="fürTest2" type="TextEdit" parent="."]
+margin_left = 42.0
+margin_top = 383.0
+margin_right = 228.0
+margin_bottom = 432.0
+
+[node name="AudioAktiv" type="Button" parent="."]
+margin_left = 684.0
+margin_top = 577.0
+margin_right = 878.0
+margin_bottom = 634.0
+toggle_mode = true
+text = "Adio Aktiv"
+
+[connection signal="pressed" from="Senden" to="." method="_on_Senden_pressed"]
+[connection signal="pressed" from="RPCTestButton" to="." method="_on_RPCTestButton_pressed"]
+[connection signal="pressed" from="RPCTest2" to="." method="_on_RPCTest2_pressed"]
+[connection signal="pressed" from="RPCTest3" to="." method="_on_RPCTest3_pressed"]
+[connection signal="pressed" from="RPCTest4" to="." method="_on_RPCTest4_pressed"]
+[connection signal="pressed" from="AudioAktiv" to="." method="_on_AudioAktiv_pressed"]

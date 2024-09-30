@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Pixel-Peeker-Polka-faster(chosic.com).mp3-04f79020f1bcd0165843dd1a38487b12.mp3str"
+
+[deps]
+
+source_file="res://Assets/Sounds/Pixel-Peeker-Polka-faster(chosic.com).mp3"
+dest_files=[ "res://.import/Pixel-Peeker-Polka-faster(chosic.com).mp3-04f79020f1bcd0165843dd1a38487b12.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

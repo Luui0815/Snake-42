@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/DieSound_CC0_by_EugeneLoza.ogg-3cd3d8a1df9cbcbabcaf1d226d8293a8.oggstr"
+
+[deps]
+
+source_file="res://Assets/Snake Assets/DieSound_CC0_by_EugeneLoza.ogg"
+dest_files=[ "res://.import/DieSound_CC0_by_EugeneLoza.ogg-3cd3d8a1df9cbcbabcaf1d226d8293a8.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

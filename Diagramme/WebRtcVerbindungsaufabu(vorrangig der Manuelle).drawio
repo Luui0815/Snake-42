@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" modified="2024-09-03T10:05:56.110Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0" etag="c8ts7nWmahO-jd_Ai2WQ" version="24.6.4" type="device">
+  <diagram name="Seite-1" id="XwVUidIWImwikWiRtLNv">
+    <mxGraphModel dx="1186" dy="761" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-1" value="Teilnehmer A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="115" y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-2" value="Teilnehmer B" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-3" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="1040" as="sourcePoint" />
+            <mxPoint x="400" y="40" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-4" value="Erstelle SPD Daten&lt;div&gt;Setze diese SPD Daten als lokale SPD Daten&lt;br&gt;&lt;div&gt;Erstelle alle ICE Kandidaten&lt;/div&gt;&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="270" width="290" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-5" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJy4GTaJ42_gLIrtfCik-4" target="KJy4GTaJ42_gLIrtfCik-9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="390" as="sourcePoint" />
+            <mxPoint x="440" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-8" value="Sende die Daten an Partner B" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KJy4GTaJ42_gLIrtfCik-5">
+          <mxGeometry x="-0.0828" relative="1" as="geometry">
+            <mxPoint x="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-6" value="Erstelle einen Peer" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="125" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-7" value="Erstelle einen Peer" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-9" value="Setze die SPD Daten von Partner A als ferne SPD Daten&lt;div&gt;Füge die empfangene ICE Kandidaten deiner Verbindung hinzu&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="310" width="340" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-10" value="Ereignis: Teilnehmer A startet die Verbindung" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="170" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-11" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.55;exitY=0.95;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJy4GTaJ42_gLIrtfCik-10" target="KJy4GTaJ42_gLIrtfCik-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="320" as="sourcePoint" />
+            <mxPoint x="440" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-15" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="KJy4GTaJ42_gLIrtfCik-12" target="KJy4GTaJ42_gLIrtfCik-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-16" value="&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; background-color: rgb(251, 251, 251);&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22Sende%20die%20Daten%20an%20Partner%20B%22%20style%3D%22edgeLabel%3Bhtml%3D1%3Balign%3Dcenter%3BverticalAlign%3Dmiddle%3Bresizable%3D0%3Bpoints%3D%5B%5D%3B%22%20vertex%3D%221%22%20connectable%3D%220%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22410.92531937702984%22%20y%3D%22337.6578397124754%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%Se&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KJy4GTaJ42_gLIrtfCik-15">
+          <mxGeometry x="0.1503" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-17" value="Sende die Daten an Partner A" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KJy4GTaJ42_gLIrtfCik-15">
+          <mxGeometry x="-0.0064" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-12" value="Erstelle SDP Daten als Antwort auf die von Partner A&lt;div&gt;Setze diese SPD Daten als lokale SPD Daten&lt;br&gt;&lt;div&gt;Erstelle alle ICE Kandidaten&lt;/div&gt;&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="485" y="460" width="330" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-13" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="KJy4GTaJ42_gLIrtfCik-9" target="KJy4GTaJ42_gLIrtfCik-12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="420" as="sourcePoint" />
+            <mxPoint x="440" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KJy4GTaJ42_gLIrtfCik-14" value="Setze die SPD Daten von Partner B als ferne SPD Daten&lt;div&gt;Füge die empfangene ICE Kandidaten deiner Verbindung hinzu&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="17.5" y="570" width="355" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

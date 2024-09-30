@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Skripte/Hauptmenü.cs" type="Script" id=1]
+
+[node name="Hauptmenü" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="Verbindung erstellen" type="Button" parent="."]
+anchor_left = 0.042
+anchor_top = 0.132
+anchor_right = 0.229
+anchor_bottom = 0.22
+margin_left = 651.24
+margin_top = 194.96
+margin_right = 651.752
+margin_bottom = 195.16
+text = "Mehrspieler"
+
+[node name="Einzelspieler" type="Button" parent="."]
+anchor_left = 0.042
+anchor_top = 0.132
+anchor_right = 0.229
+anchor_bottom = 0.22
+margin_left = 251.24
+margin_top = 194.96
+margin_right = 251.752
+margin_bottom = 195.16
+text = "Einzelspieler"
+
+[node name="Label" type="Label" parent="."]
+margin_left = 436.0
+margin_top = 173.0
+margin_right = 816.0
+margin_bottom = 187.0
+text = "Das wunderbare und einzigartige Snake42 - Snake fo(u)r two"
+
+[connection signal="pressed" from="Verbindung erstellen" to="." method="_on_Verbindung_erstellen_pressed"]
+[connection signal="pressed" from="Einzelspieler" to="." method="_on_Einzelspieler_pressed"]

@@ -4,22 +4,26 @@ using System;
 public class ServerFormPopup : Popup
 {
     [Signal]
-    public delegate void Confirmed(int port);
+    public delegate void Confirmed(string ip, int port, string Spielername);
 
-    private LineEdit portInput;
+    private LineEdit _portInput;
 
     public override void _Ready()
     {
-        portInput = GetNode<LineEdit>("PortInput");
+        _portInput = GetNode<LineEdit>("PortInput");
     }
 
     private void _on_ConfirmButton_pressed()
     {
-        string port = portInput.Text;
+        string port = _portInput.Text;
         if (ValidatePort(port))
         {
-            EmitSignal(nameof(Confirmed), int.Parse(port));
-            Hide();
+            try
+            {
+                EmitSignal(nameof(Confirmed),0, int.Parse(port),"");
+            }
+            catch{}
+            QueueFree();
         }
     }
 
@@ -35,13 +39,13 @@ public class ServerFormPopup : Popup
             }
         }
         GD.Print("Vom Server eingegebener Port ist ungueltig");
-        portInput.Text = "Port ist ungueltig!";
+        _portInput.Text = "Port ist ungueltig!";
         return false;
     }
 
     private void _on_CancelButton_pressed()
     {
-        portInput.Text = "";
+        _portInput.Text = "";
         Hide();
     }
 }
