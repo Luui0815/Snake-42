@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public abstract class BaseSnake : Node2D
@@ -7,7 +8,7 @@ public abstract class BaseSnake : Node2D
     protected Vector2 _direction = Vector2.Right;
     protected Vector2 _directionCache;
     protected AudioStreamPlayer2D _audioPlayer;
-    protected Vector2[] _points;
+    protected List<Vector2> _points;
     protected Line2D _body;
     protected Node2D _face;
     protected Tween _tween;
@@ -25,7 +26,7 @@ public abstract class BaseSnake : Node2D
     protected bool _isServer;
     protected bool _isSnake1;
 
-    public Vector2[] Points { get { return _points; } }
+    public List<Vector2> Points { get { return _points; } }
 
     public override void _Ready()
     {
@@ -33,7 +34,11 @@ public abstract class BaseSnake : Node2D
         _controller = GetParent<GameController>();
         _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");
         _body = GetNode<Line2D>("Body");
-        _points = _body.Points;
+        _points = new List<Vector2>();
+        for(int i = 0; i < _body.GetPointCount(); i++)
+        {
+            _points.Add(new Vector2(_body.GetPointPosition(i)));
+        }
         _face = GetNode<Node2D>("Face");
         _tween = GetNode<Tween>("Tween");
 
@@ -77,7 +82,7 @@ public abstract class BaseSnake : Node2D
             int i = 0;
             foreach (Vector2 pos in _body.Points)
             {
-                Vector2 newPos, diff = Vector2.Zero;
+                Vector2 newPos = new Vector2(0,0), diff = Vector2.Zero;
                 if (i == 0)
                     newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
                 else
@@ -94,18 +99,19 @@ public abstract class BaseSnake : Node2D
                     }
                     else
                     {
-                        newPos = _body.GetPointPosition(i);
+                        newPos = _points[i];
                     }
                 }
-                _body.SetPointPosition(i, newPos);
+                _points[i] = newPos;
                 i++;
             }
 
             if (_eating == true)
             {
+                // beide unabhängig hinzufügen
                 _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+                _points.Add(_points[_points.Count - 1]);
                 _growing = true;
-                _points = _body.Points;
                 _eating = false;
             }
 
@@ -116,7 +122,7 @@ public abstract class BaseSnake : Node2D
             if (argv == 1)
             {
                 _Merker = true;
-                _points = _body.Points;
+                // _points = _body.Points;
                 CheckFruitCollision();
 
                 if (_growing == true)
@@ -190,9 +196,9 @@ public abstract class BaseSnake : Node2D
             }
         }
 
-        if (_points.Length >= 3)
+        if (_points.Count >= 3)
         {
-            for (int i = 1; i < _points.Length; i++)
+            for (int i = 1; i < _points.Count; i++)
             {
                 if (_points[0] == _points[i])
                 {

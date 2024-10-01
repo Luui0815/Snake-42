@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public class OfflineMultiplayerSnake : BaseSnake
@@ -18,7 +19,11 @@ public class OfflineMultiplayerSnake : BaseSnake
         _controller = GetParent<GameController>();
         _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");
         _body = GetNode<Line2D>("Body");
-        _points = _body.Points;
+        _points = new List<Vector2>();
+        for(int i = 0; i < _body.GetPointCount(); i++)
+        {
+            _points.Add(new Vector2(_body.GetPointPosition(i)));
+        }
         _face1 = GetNode<Node2D>("Face1");
         _face2 = GetNode<Node2D>("Face2");
         _tween = GetNode<Tween>("Tween");
@@ -97,8 +102,9 @@ public class OfflineMultiplayerSnake : BaseSnake
             if (_eating)
             {
                 _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
+                _points.Add(_points[_body.Points.Count() / 2]);
                 _growing = true;
-                _points = _body.Points;
+                //_points = _body.Points;
                 _eating = false;
             }
 
@@ -112,7 +118,7 @@ public class OfflineMultiplayerSnake : BaseSnake
             {
                 _tween.StopAll();
                 _Merker = true;
-                _points = _body.Points;
+                // _points = _body.Points;
 
                 CheckFruitCollision();
 
@@ -183,10 +189,10 @@ public class OfflineMultiplayerSnake : BaseSnake
             }
         }
 
-        if (_points.Length >= 3)
+        if (_points.Count >= 3)
         {
-            int startIndex = _isPlayerOneTurn ? 1 : _points.Length - 2;
-            int endIndex = _isPlayerOneTurn ? _points.Length : 0;
+            int startIndex = _isPlayerOneTurn ? 1 : _points.Count - 2;
+            int endIndex = _isPlayerOneTurn ? _points.Count : 0;
             int step = _isPlayerOneTurn ? 1 : -1;
 
             for (int i = startIndex; (step == 1 ? i < endIndex : i >= endIndex); i += step)

@@ -25,7 +25,7 @@ public class OfflineSnake : BaseSnake
                 _otherSnake = otherSnake;
 
             _body.DefaultColor = new Color(255, 255, 0, 1);
-            for (int i = 0; i < _points.Length; i++)
+            for (int i = 0; i < _points.Count - 1; i++)
             {
                 _points[i] += new Vector2(0, 2 * _gridSize);
                 _body.SetPointPosition(i, _points[i]);
