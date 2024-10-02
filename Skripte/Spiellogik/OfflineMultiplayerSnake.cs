@@ -11,6 +11,7 @@ public class OfflineMultiplayerSnake : BaseSnake
     private Vector2 _directionCachePlayer2;
     private Vector2 _currentDirection;
     private bool _isPlayerOneTurn;
+    private new Vector2[] _points;
 
     public override void _Ready()
     {

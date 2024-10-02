@@ -7,7 +7,7 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-
+    private new Vector2[] _points;
     public override void _Ready()
     {
         base._Ready();
@@ -161,8 +161,8 @@ public class OnlineSnake : BaseSnake
                         newPos = _body.GetPointPosition(i);
                     }
                 }
-                //_body.SetPointPosition(i, newPos);
-                _points[i] = newPos;
+                _body.SetPointPosition(i, newPos);
+                //_points[i] = newPos;
                 i++;
             }
 
@@ -252,8 +252,8 @@ public class OnlineSnake : BaseSnake
                         newPos = _body.GetPointPosition(i);
                     }
                 }
-                //_body.SetPointPosition(i, newPos);
-                _points[i] = newPos;
+                _body.SetPointPosition(i, newPos);
+                //_points[i] = newPos;
                 i++;
             }
 

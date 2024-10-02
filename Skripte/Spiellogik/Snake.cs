@@ -30,6 +30,7 @@ public class Snake : Node2D
 
     public override void _Ready()
     {
+        throw new NotImplementedException();
         _fruit = GetParent().GetNode<Fruit>("Fruit");
         _controller = GetParent<GameController>();
         _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");

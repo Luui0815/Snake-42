@@ -57,7 +57,7 @@ public class GameController : Node2D
 		_snake2.Name = "Snake2";
 		_multiplayerSnake.Name = "Snake3";
 
-        _multiplayerSnake = GetNode<OnlineMultiplayerSnake>("Snake3");
+        //_multiplayerSnake = GetNode<OnlineMultiplayerSnake>("Snake3");
 
         // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
         switch (GlobalVariables.Instance.LevelDifficulty)

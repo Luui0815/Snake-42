@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public abstract class BaseSnake : Node2D
@@ -7,7 +8,7 @@ public abstract class BaseSnake : Node2D
     protected Vector2 _direction = Vector2.Right;
     protected Vector2 _directionCache;
     protected AudioStreamPlayer2D _audioPlayer;
-    protected Vector2[] _points;
+    protected List<Vector2> _points = new List<Vector2>();
     protected Line2D _body;
     protected Node2D _face;
     protected Tween _tween;
@@ -24,8 +25,9 @@ public abstract class BaseSnake : Node2D
 
     protected bool _isServer;
     protected bool _isSnake1;
-
-    public Vector2[] Points { get { return _points; } }
+    protected bool _RoatationFinished = true;
+    protected Vector2 _AltDirection;
+    public List<Vector2> Points { get { return _points; } }
 
     public override void _Ready()
     {
@@ -33,11 +35,66 @@ public abstract class BaseSnake : Node2D
         _controller = GetParent<GameController>();
         _audioPlayer = GetNode<AudioStreamPlayer2D>("Eating");
         _body = GetNode<Line2D>("Body");
-        _points = _body.Points;
+
+        _points = new List<Vector2>();
+        for(int i = 0; i < _body.GetPointCount(); i++)
+        {
+            _points.Add(new Vector2(_body.GetPointPosition(i)));
+        }
+
         _face = GetNode<Node2D>("Face");
         _tween = GetNode<Tween>("Tween");
 
         _directionCache = _direction;
+    }
+
+    public override void _Process(float delta)
+    {
+        // nochmal das ganze interpoliren damit es besser aussieht
+        // hier eilt die Schlange den Punkten _points hinterher
+        // für Singelplayer kann man meinen ist es übertrieben, aber die bewegung ist jetzt nochmal angenehmer
+        // und im Online Spiel lassen sich so Aktualisierungsruckler verbergen (Hoff ich)
+        for (int i = 0; i < _body.Points.Length; i++)
+        {
+            _body.SetPointPosition(i, _body.Points[i].LinearInterpolate(_points[i], 0.2f));
+        }
+
+        RotateHead();
+    }
+
+    protected void RotateHead()
+    {
+        _face.Position = _body.Points[0];
+        float targetRotation = 0;
+        
+        // bestimmen nach wohin rotiert werden muss
+        targetRotation = _face.RotationDegrees - Mathf.Rad2Deg(_direction.AngleTo(_AltDirection));
+
+        if(targetRotation != _face.RotationDegrees)
+            _RoatationFinished = false;
+
+        float weight = 10;
+        bool AltFaceRotationLowerThanTargetRotation = _face.RotationDegrees < targetRotation ? true : false;
+
+        // checken ob bei der Differenz von Ziel und Akt Roation nach das Gewicht dazwischen passt, wenn nicht setzte kopf auf zielpos, rotation ist fertig
+        if(Math.Abs(targetRotation - _face.RotationDegrees) < weight)
+        {
+            // Rotation ist fertig
+            _RoatationFinished = true;
+            _face.RotationDegrees = targetRotation;
+        }
+
+        if(!_RoatationFinished)
+        {
+            if(_face.RotationDegrees < targetRotation)
+            {
+                _face.RotationDegrees += weight;
+            }
+            else
+            {
+                _face.RotationDegrees -= weight;
+            }
+        }
     }
 
     public abstract void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake);
@@ -69,54 +126,62 @@ public abstract class BaseSnake : Node2D
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
-
+    protected List<Vector2> AltPosition = new List<Vector2>();
     protected virtual void MoveTween(float argv)
     {
+        // initialisierung der alten Punkte
+        if(argv == 0)
+        {
+            AltPosition.Clear();
+            // aktuelle Punkte auf alte Punkte kopieren! keine Referenzen!
+            foreach(Vector2 vec in _points)
+            {
+                AltPosition.Add(new Vector2(vec));
+            }
+        }
+
         if (_Merker == false)
         {
-            int i = 0;
-            foreach (Vector2 pos in _body.Points)
+            for(int i = 0; i < _points.Count; i++)
             {
                 Vector2 newPos, diff = Vector2.Zero;
                 if (i == 0)
-                    newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
+                    newPos = new Vector2(AltPosition[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv));
                 else
                 {
-                    if (!(_growing == true && i == _body.Points.Count() - 1))
+                    if (!(_growing == true && i == _points.Count - 1))
                     {
                         diff = Vector2.Zero;
-                        if (_points[i - 1].x - _points[i].x != 0)
-                            diff.x = (_points[i - 1].x - _points[i].x) / _gridSize;
-                        if (_points[i - 1].y - _points[i].y != 0)
-                            diff.y = (_points[i - 1].y - _points[i].y) / _gridSize;
+                        if (AltPosition[i - 1].x - AltPosition[i].x != 0)
+                            diff.x = (AltPosition[i - 1].x - AltPosition[i].x) / _gridSize;
+                        if (AltPosition[i - 1].y - AltPosition[i].y != 0)
+                            diff.y = (AltPosition[i - 1].y - AltPosition[i].y) / _gridSize;
 
-                        newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        newPos = new Vector2(AltPosition[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv));
                     }
                     else
                     {
-                        newPos = _body.GetPointPosition(i);
+                        newPos = new Vector2(AltPosition[i]);
                     }
                 }
-                _body.SetPointPosition(i, newPos);
-                i++;
+                _points[i] = new Vector2(newPos);
             }
 
             if (_eating == true)
             {
                 _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+                _points.Add(new Vector2(_points[_points.Count() - 1]));
+                AltPosition.Add(new Vector2(_points[_points.Count() - 1]));
                 _growing = true;
-                _points = _body.Points;
+                // _points = _body.Points;
                 _eating = false;
             }
-
-            _face.Position = _body.Points[0];
-            _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
 
             // wenn argv = 1 dann ist eine Schleife durch
             if (argv == 1)
             {
                 _Merker = true;
-                _points = _body.Points;
+                // _points = _body.Points;
                 CheckFruitCollision();
 
                 if (_growing == true)
@@ -128,7 +193,12 @@ public abstract class BaseSnake : Node2D
                 }
                 else
                 {
+                    _AltDirection = _direction;
                     _direction = _directionCache;
+                    if(_direction != _directionCache)
+                    {
+                        _RoatationFinished = false;
+                    }
                 }
             }
         }
@@ -190,9 +260,9 @@ public abstract class BaseSnake : Node2D
             }
         }
 
-        if (_points.Length >= 3)
+        if (_points.Count >= 3)
         {
-            for (int i = 1; i < _points.Length; i++)
+            for (int i = 1; i < _points.Count; i++)
             {
                 if (_points[0] == _points[i])
                 {
@@ -204,4 +274,3 @@ public abstract class BaseSnake : Node2D
         return false;
     }
 }
-

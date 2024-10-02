@@ -29,7 +29,7 @@ playback/repeat = true
 
 [node name="Face" type="Node2D" parent="."]
 position = Vector2( 336, 336 )
-scale = Vector2( 1.2, 1.2 )
+rotation = 1.74882
 
 [node name="Eye" type="Sprite" parent="Face"]
 position = Vector2( -0.230075, -5.45 )
