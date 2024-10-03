@@ -7,10 +7,31 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
+    private bool _Interpolate;
+    private Timer _updateTimer;
 
     public override void _Ready()
     {
         base._Ready();
+        if(_isServer == true)
+        {
+            _updateTimer = GetNode<Timer>("UpdateTimer");
+            _updateTimer.WaitTime = 0.1f;
+            _updateTimer.OneShot = false;
+             _updateTimer.Connect("timeout", this, nameof(TimeToSynch));
+        }
+    }
+
+    void TimeToSynch()
+    {
+        float[] x = new float[_body.Points.Count()];
+        float[] y = new float[_body.Points.Count()];
+        for (int i = 0; i < _body.Points.Count(); i++)
+        {
+            x[i] = _points[i].x;
+            y[i] = _points[i].y;
+        }
+        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
     }
 
     public override void _Process(float delta)
@@ -113,6 +134,7 @@ public class OnlineSnake : BaseSnake
         _direction = _directionCache;
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
+        _updateTimer.Start();
     }
 
     public virtual void RPCTween(float argv)
@@ -194,14 +216,9 @@ public class OnlineSnake : BaseSnake
                 }
 
                 // Clientstand wieder mit Serverstand synchronisieren, jetzt sollten alle Pos. int sein
-                int[] x = new int[_body.Points.Count()];
-                int[] y = new int[_body.Points.Count()];
-                for (int j = 0; j < _body.Points.Count(); j++)
-                {
-                    x[j] = Convert.ToInt32(_body.Points[j].x);
-                    y[j] = Convert.ToInt32(_body.Points[j].y);
-                }
-
+                /*
+v
+                */
                 // int Array in Byte Array wandeln, da Json zu langsam wäre
                 /*
                 byte[] Xbyte = new byte[x.Length * sizeof(int)];
@@ -210,7 +227,6 @@ public class OnlineSnake : BaseSnake
                 byte[] Ybyte = new byte[y.Length * sizeof(int)];
                 Buffer.BlockCopy(y, 0, Ybyte, 0, Ybyte.Length);
                 */
-                NetworkManager.NetMan.rpc(GetPath(), nameof(SynchClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
             }
         }
 
@@ -283,13 +299,11 @@ public class OnlineSnake : BaseSnake
         }
     }
 
-    private bool _Interpolate;
-
     private void SynchClient(string Xjson, string Yjson)
     {
 
-        int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
-        int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
+        float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
+        float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
 
 
         for (int i = 0; i < x.Length; i++)

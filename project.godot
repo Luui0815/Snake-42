@@ -19,7 +19,7 @@ config/windows_native_icon="res://Assets/Snakeicon.ico"
 
 [audio]
 
-volume=0.0
+volume=100.0
 
 [autoload]
 
