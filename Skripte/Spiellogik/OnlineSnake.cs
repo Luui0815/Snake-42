@@ -7,31 +7,24 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    private bool _Interpolate;
-    private Timer _updateTimer;
+    protected bool _Interpolate;
+    protected Timer _updateTimer;
 
     public override void _Ready()
     {
         base._Ready();
-        if(_isServer == true)
-        {
-            _updateTimer = GetNode<Timer>("UpdateTimer");
-            _updateTimer.WaitTime = 0.1f;
-            _updateTimer.OneShot = false;
-             _updateTimer.Connect("timeout", this, nameof(TimeToSynch));
-        }
     }
 
-    void TimeToSynch()
+    protected void TimeToSynchBody()
     {
         float[] x = new float[_body.Points.Count()];
         float[] y = new float[_body.Points.Count()];
         for (int i = 0; i < _body.Points.Count(); i++)
         {
-            x[i] = _points[i].x;
-            y[i] = _points[i].y;
+            x[i] = _body.Points[i].x;
+            y[i] = _body.Points[i].y;
         }
-        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
+        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
     }
 
     public override void _Process(float delta)
@@ -67,14 +60,23 @@ public class OnlineSnake : BaseSnake
         _isPlayerOne = true;
         _otherSnake = otherSnake;
         _isSnake1 = isSnake1;
+
+        // UpdateTimer stellen wenn Server
+        if(_isServer == true)
+        {
+            _updateTimer = GetNode<Timer>("UpdateTimer");
+            _updateTimer.WaitTime = 0.1f;
+            _updateTimer.OneShot = false;
+            _updateTimer.Connect("timeout", this, nameof(TimeToSynchBody));
+        }
     }
 
     public override void _Input(InputEvent @event)
     {
-        if (_isPlayerOne == false)
+        if (_isPlayerOne == false) // Prüfen ob das weg kann!
             return;
 
-        if (@event.IsPressed())
+        if (@event.IsPressed()) // // Prüfen ob das weg kann!
         {
             Vector2 direction = Vector2.Zero;
 
@@ -88,6 +90,7 @@ public class OnlineSnake : BaseSnake
             }
             else
             {
+                // Prüfen ob das weg kann!
                 if (Input.IsActionPressed("move_right") && _direction != Vector2.Left) direction = Vector2.Right;
                 if (Input.IsActionPressed("move_left") && _direction != Vector2.Right) direction = Vector2.Left;
                 if (Input.IsActionPressed("move_up") && _direction != Vector2.Down) direction = Vector2.Up;
@@ -123,7 +126,7 @@ public class OnlineSnake : BaseSnake
         }
     }
 
-    public virtual void SetAktDirectionCache(int X, int Y)
+    protected virtual void SetAktDirectionCache(int X, int Y)
     {
         _directionCache.x = X;
         _directionCache.y = Y;
@@ -134,7 +137,8 @@ public class OnlineSnake : BaseSnake
         _direction = _directionCache;
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
-        _updateTimer.Start();
+        if(_isServer == true)
+            _updateTimer.Start();
     }
 
     public virtual void RPCTween(float argv)
@@ -227,12 +231,34 @@ v
                 byte[] Ybyte = new byte[y.Length * sizeof(int)];
                 Buffer.BlockCopy(y, 0, Ybyte, 0, Ybyte.Length);
                 */
+                // Nun _points aktualisieren!
+                int[] x = new int[_points.Length];
+                int[] y = new int[_points.Length];
+                for (int j = 0; j < _points.Length; j++)
+                {
+                    x[j] = Convert.ToInt32(_points[j].x); // Hier kein Datenverlust da float hier Ganzzahlen sind
+                    y[j] = Convert.ToInt32(_points[j].y);
+                }
+                NetworkManager.NetMan.rpc(GetPath(), nameof(SynchPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
             }
         }
 
         if (argv != 1)
         {
             _Merker = false;
+        }
+    }
+
+    private void SynchPointsOnClient(string Xjson, string Yjson)
+    {
+
+        int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
+        int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
+
+
+        for (int i = 0; i < x.Length; i++)
+        {
+            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
         }
     }
 
@@ -299,7 +325,7 @@ v
         }
     }
 
-    private void SynchClient(string Xjson, string Yjson)
+    private void SynchBodyPointsOnClient(string Xjson, string Yjson)
     {
 
         float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
@@ -308,10 +334,8 @@ v
 
         for (int i = 0; i < x.Length; i++)
         {
-            _points[i] = new Vector2(x[i], y[i]);
+            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
         }
-        _Interpolate = true;
-
     }
 
     protected override void CheckFruitCollision()

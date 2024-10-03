@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Linq;
 
-public class OnlineMultiplayerSnake : BaseSnake
+public class OnlineMultiplayerSnake : OnlineSnake
 {
     private Node2D _face1;
     private Node2D _face2;
@@ -29,40 +29,72 @@ public class OnlineMultiplayerSnake : BaseSnake
         _isPlayerOneTurn = true;
     }
 
-    public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
+    // falls es kracht BaseSnake otherSnake in Übergabeparameter!
+    public void SetPlayerSettings(bool isServer, bool isSnake1)
     {
         // Server hat beide Schlangen, steuert aktiv aber nur die 1.
         // Bei jeder Bewegungsaenderung sendet er es an den 2.Spieler
         // Der 2. Spieler sendet nur Richtungsaenderungen an den Server(Spieler 1!)
         _isServer = isServer;
         _isPlayerOneTurn = true;
+
+        if(_isServer == true)
+        {
+            _updateTimer = GetNode<Timer>("UpdateTimer");
+            _updateTimer.WaitTime = 0.1f;
+            _updateTimer.OneShot = false;
+            _updateTimer.Connect("timeout", this, nameof(TimeToSynchBody));
+        }
     }
 
     public override void _Input(InputEvent @event)
     {
-        if (_isPlayerOneTurn)
+        if (_isPlayerOne == false) // Prüfen ob das weg kann!
+            return;
+        Vector2 direction = Vector2.Zero;
+
+        if (Input.IsActionPressed("ui_up") && _currentDirection != Vector2.Down) direction = Vector2.Up;
+        if (Input.IsActionPressed("ui_right") && _currentDirection != Vector2.Left) direction = Vector2.Right;
+        if (Input.IsActionPressed("ui_left") && _currentDirection != Vector2.Right) direction = Vector2.Left;
+        if (Input.IsActionPressed("ui_down") && _currentDirection != Vector2.Up) direction = Vector2.Down;
+
+        if (direction != Vector2.Zero)
         {
-            if (Input.IsActionPressed("ui_up") && _currentDirection != Vector2.Down) _directionCachePlayer1 = Vector2.Up;
-            if (Input.IsActionPressed("ui_right") && _currentDirection != Vector2.Left) _directionCachePlayer1 = Vector2.Right;
-            if (Input.IsActionPressed("ui_left") && _currentDirection != Vector2.Right) _directionCachePlayer1 = Vector2.Left;
-            if (Input.IsActionPressed("ui_down") && _currentDirection != Vector2.Up) _directionCachePlayer1 = Vector2.Down;
+            // Prüfen ob man Spieler 1 oder Spieler 2 ist, je nachdem muss das in den anderen Cache
+            // Player1 ist automatisch Server => SetAktDirectionCache muss übergeben werden welcher akt. werden soll
+            // auf beiden Geräten!
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true,Convert.ToInt32(direction.x), Convert.ToInt32(direction.y), _isServer);
+            
+        }
+    }
+
+    protected void SetAktDirectionCache(int X, int Y, bool AktCache1)
+    {
+        if(AktCache1 == true)
+        {
+            // Cache des 1.Spielers aktualisieren!
+            _directionCachePlayer1.x = X;
+            _directionCachePlayer1.y = Y;
         }
         else
         {
-            if (Input.IsActionPressed("move_up") && _currentDirection != Vector2.Down) _directionCachePlayer2 = Vector2.Up;
-            if (Input.IsActionPressed("move_right") && _currentDirection != Vector2.Left) _directionCachePlayer2 = Vector2.Right;
-            if (Input.IsActionPressed("move_left") && _currentDirection != Vector2.Right) _directionCachePlayer2 = Vector2.Left;
-            if (Input.IsActionPressed("move_down") && _currentDirection != Vector2.Up) _directionCachePlayer2 = Vector2.Down;
+            // Cache des 2.Spielers aktualisieren
+            _directionCachePlayer2.x = X;
+            _directionCachePlayer2.y = Y;
         }
-
-        GD.Print($"Cache 1{_directionCachePlayer1} Cache 2{_directionCachePlayer2}\nRichtung: {_currentDirection}");
     }
-
+    /* kann so von Online Snake übernommen werden:
     public override void MoveSnake()
     {
         //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
         _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
+    }
+    */
+
+    public override void RPCTween(float argv)
+    {
+        MoveTween(argv);
     }
 
     protected override void MoveTween(float argv)
@@ -110,7 +142,6 @@ public class OnlineMultiplayerSnake : BaseSnake
 
             if (argv == 1)
             {
-                _tween.StopAll();
                 _Merker = true;
                 _points = _body.Points;
 
@@ -127,8 +158,6 @@ public class OnlineMultiplayerSnake : BaseSnake
                 {
                     SwapControl();
                 }
-
-                MoveSnake();
             }
         }
 
@@ -200,7 +229,7 @@ public class OnlineMultiplayerSnake : BaseSnake
         }
         return false;
     }
-
+    /*
     private Vector2[] SetPoints(Vector2[] points)
     {
         Vector2[] newPoints = new Vector2[points.Length];
@@ -210,7 +239,7 @@ public class OnlineMultiplayerSnake : BaseSnake
         }
         return newPoints;
     }
-
+    */
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;

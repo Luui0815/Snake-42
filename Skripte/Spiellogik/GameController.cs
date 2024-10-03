@@ -63,7 +63,7 @@ public class GameController : Node2D
 			case 0:
 			{
 				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 0.3f; // auf 0.3 stellen, zum nicht mehr debuggen
+				_snake1.moveDelay = _snake2.moveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
 				_multiplayerSnake.moveDelay = 0.4f;
                 break;
 			}

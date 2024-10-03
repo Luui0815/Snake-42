@@ -296,6 +296,7 @@ margin_top = 288.0
 margin_right = 1140.0
 margin_bottom = 348.0
 custom_fonts/font = SubResource( 8 )
+toggle_mode = true
 text = "Ton aus"
 
 [node name="ToggleMicrophone" type="Button" parent="."]
@@ -304,6 +305,7 @@ margin_top = 288.0
 margin_right = 1275.0
 margin_bottom = 348.0
 custom_fonts/font = SubResource( 9 )
+toggle_mode = true
 text = "Mikrofon aus"
 
 [node name="MainTheme" type="AudioStreamPlayer2D" parent="."]
