@@ -65,7 +65,7 @@ public class OnlineSnake : BaseSnake
         if(_isServer == true)
         {
             _updateTimer = GetNode<Timer>("UpdateTimer");
-            _updateTimer.WaitTime = 0.1f;
+            _updateTimer.WaitTime = 0.05f;
             _updateTimer.OneShot = false;
             _updateTimer.Connect("timeout", this, nameof(TimeToSynchBody));
         }
@@ -258,7 +258,8 @@ v
 
         for (int i = 0; i < x.Length; i++)
         {
-            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
+            _points[i].x = x[i];
+            _points[i].y = y[i];
         }
     }
 
