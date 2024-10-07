@@ -148,12 +148,14 @@ public class OnlineSnake : BaseSnake
 
     public override void MoveSnake()
     {
+        TimeToSynchPoints();
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        if(_isServer)
+        //_clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        //if(_isServer)
             _tween.Start();
-        else
-            _clietTween.Start();
+        //else
+        ;
+            // _clietTween.Start();
     }
 
     public virtual void RPCTween(float argv)
@@ -168,7 +170,7 @@ public class OnlineSnake : BaseSnake
         }
         else
         {
-            // ClientMoveTween(argv);
+             ClientMoveTween(argv);
         }
     }
 
@@ -300,24 +302,22 @@ v
 
     private void satrtClientTween()
     {
-        //_clietTween.Resume(_clietTween);
-        // _clietTween.SetActive(true);
-        _clietTween.StopAll();  // Beendet alle laufenden Animationen im Tween
-        _clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _clietTween.Start();  // Startet den Tween erneut
+        _tween.StopAll();  // Beendet alle laufenden Animationen im Tween
+        _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _direction = _directionCache;
+        _tween.Start();
         _Merker = false;
-        _isAsynchron = false;
     }
 
     protected void _on_Tween_tween_all_completed()
     {
+        TimeToSynchPoints();
+        NetworkManager.NetMan.rpc(GetPath(), nameof(satrtClientTween), false, false, true);
         _tween.StopAll();  // Beendet alle laufenden Animationen im Tween
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _direction = _directionCache;
-        TimeToSynchPoints();
         _tween.Start();
-        NetworkManager.NetMan.rpc(GetPath(), nameof(satrtClientTween), false, false, true);
+        _Merker = false;
     }
 
     private void SynchPointsOnClient(string Xjson, string Yjson)
