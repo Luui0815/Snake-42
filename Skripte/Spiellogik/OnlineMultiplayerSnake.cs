@@ -37,14 +37,6 @@ public class OnlineMultiplayerSnake : OnlineSnake
         // Der 2. Spieler sendet nur Richtungsaenderungen an den Server(Spieler 1!)
         _isServer = isServer;
         _isPlayerOneTurn = true;
-
-        if(_isServer == true)
-        {
-            _updateTimer = GetNode<Timer>("UpdateTimer");
-            _updateTimer.WaitTime = 0.1f;
-            _updateTimer.OneShot = false;
-            _updateTimer.Connect("timeout", this, nameof(TimeToSynchBody));
-        }
     }
 
     public override void _Input(InputEvent @event)

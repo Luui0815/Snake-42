@@ -23,9 +23,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Tween" type="Tween" parent="."]
-repeat = true
 playback_process_mode = 0
-playback/repeat = true
 
 [node name="Face" type="Node2D" parent="."]
 position = Vector2( 336, 336 )
@@ -46,5 +44,8 @@ stream = ExtResource( 4 )
 volume_db = -10.0
 
 [node name="UpdateTimer" type="Timer" parent="."]
+
+[node name="ClientTween" type="Tween" parent="."]
+playback_process_mode = 0
 
 [connection signal="tween_all_completed" from="Tween" to="." method="_on_Tween_tween_all_completed"]

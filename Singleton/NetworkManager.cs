@@ -279,7 +279,7 @@ public class NetworkManager : Node
             }
             catch(Exception e)
             {
-                RPCFehler.Add(e);
+                // RPCFehler.Add(e);
                 // Juckt? throw new Exception("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
             }
         }
@@ -300,7 +300,7 @@ public class NetworkManager : Node
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.UnreliableOrdered;
             
             _RtcMsg msg = new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings));
-            RPCPuffer.Add(msg);
+            // RPCPuffer.Add(msg);
             SendRawMessage(_RtcMsg.ConvertToJson(msg).ToUTF8());
         } 
     }

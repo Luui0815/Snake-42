@@ -7,12 +7,18 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
+    // 2 Tweens einen 
     protected bool _Interpolate;
-    protected Timer _updateTimer;
+    protected float _updateTime = 0.05f;
+    protected float _timeSinceLastUpdate;
+    protected Tween _clietTween;
+    protected bool _isAsynchron = false;
 
     public override void _Ready()
     {
         base._Ready();
+        _clietTween = GetNode<Tween>("ClientTween");
+        _tween.Connect("tween_completed", this, nameof(_on_Tween_tween_all_completed));
     }
 
     protected void TimeToSynchBody()
@@ -38,6 +44,23 @@ public class OnlineSnake : BaseSnake
             if (Convert.ToInt32(_body.Points[0].x) == Convert.ToInt32(_points[0].x) && Convert.ToInt32(_body.Points[0].y) == Convert.ToInt32(_points[0].y))
                 _Interpolate = false;
         }
+
+        if(_isServer)
+        {
+            _timeSinceLastUpdate += delta;
+            if(_timeSinceLastUpdate > _updateTime)
+            {
+                _timeSinceLastUpdate = 0;
+                // TimeToSynchBody();
+                // if(_isAsynchron == false)
+                    // CheckSynchron();
+                // else
+                {
+                    // TimeToSynchBody();
+                }
+            }
+        }
+
     }
 
     public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
@@ -60,15 +83,6 @@ public class OnlineSnake : BaseSnake
         _isPlayerOne = true;
         _otherSnake = otherSnake;
         _isSnake1 = isSnake1;
-
-        // UpdateTimer stellen wenn Server
-        if(_isServer == true)
-        {
-            _updateTimer = GetNode<Timer>("UpdateTimer");
-            _updateTimer.WaitTime = 0.05f;
-            _updateTimer.OneShot = false;
-            _updateTimer.Connect("timeout", this, nameof(TimeToSynchBody));
-        }
     }
 
     public override void _Input(InputEvent @event)
@@ -134,11 +148,12 @@ public class OnlineSnake : BaseSnake
 
     public override void MoveSnake()
     {
-        _direction = _directionCache;
         _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _tween.Start();
-        if(_isServer == true)
-            _updateTimer.Start();
+        _clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        if(_isServer)
+            _tween.Start();
+        else
+            _clietTween.Start();
     }
 
     public virtual void RPCTween(float argv)
@@ -153,7 +168,7 @@ public class OnlineSnake : BaseSnake
         }
         else
         {
-            ClientMoveTween(argv);
+            // ClientMoveTween(argv);
         }
     }
 
@@ -232,7 +247,22 @@ v
                 Buffer.BlockCopy(y, 0, Ybyte, 0, Ybyte.Length);
                 */
                 // Nun _points aktualisieren!
-                int[] x = new int[_points.Length];
+                
+                
+                
+            }
+        }
+
+        if (argv != 1)
+        {
+            _Merker = false;
+            
+        }
+    }
+
+    protected void TimeToSynchPoints()
+    {
+        int[] x = new int[_points.Length];
                 int[] y = new int[_points.Length];
                 for (int j = 0; j < _points.Length; j++)
                 {
@@ -240,13 +270,54 @@ v
                     y[j] = Convert.ToInt32(_points[j].y);
                 }
                 NetworkManager.NetMan.rpc(GetPath(), nameof(SynchPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
-            }
-        }
+    }
 
-        if (argv != 1)
+    protected void CheckSynchron(string xJson = null, string yJson = null)
+    {
+        if(_isServer)
         {
-            _Merker = false;
+            int[] x = new int[_points.Length];
+                int[] y = new int[_points.Length];
+                for (int j = 0; j < _points.Length; j++)
+                {
+                    x[j] = Convert.ToInt32(_points[j].x); // Hier kein Datenverlust da float hier Ganzzahlen sind
+                    y[j] = Convert.ToInt32(_points[j].y);
+                }
+            NetworkManager.NetMan.rpc(GetPath(),nameof(CheckSynchron), false,false, true, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
         }
+        else
+        {
+            int[] x = JsonConvert.DeserializeObject<int[]>(xJson);
+            int[] y = JsonConvert.DeserializeObject<int[]>(yJson);
+            int toleranz = _gridSize/2;
+            if(Math.Abs(x[0] - _points[0].x) < toleranz && Math.Abs(y[0] - _points[0].y) < toleranz && _clietTween.IsActive())
+                return;
+            
+            _clietTween.StopAll();
+            _isAsynchron = true;
+        }
+    }
+
+    private void satrtClientTween()
+    {
+        //_clietTween.Resume(_clietTween);
+        // _clietTween.SetActive(true);
+        _clietTween.StopAll();  // Beendet alle laufenden Animationen im Tween
+        _clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _clietTween.Start();  // Startet den Tween erneut
+        _direction = _directionCache;
+        _Merker = false;
+        _isAsynchron = false;
+    }
+
+    protected void _on_Tween_tween_all_completed()
+    {
+        _tween.StopAll();  // Beendet alle laufenden Animationen im Tween
+        _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _direction = _directionCache;
+        TimeToSynchPoints();
+        _tween.Start();
+        NetworkManager.NetMan.rpc(GetPath(), nameof(satrtClientTween), false, false, true);
     }
 
     private void SynchPointsOnClient(string Xjson, string Yjson)
@@ -254,8 +325,7 @@ v
 
         int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
         int[] y = JsonConvert.DeserializeObject<int[]>(Yjson);
-
-
+        
         for (int i = 0; i < x.Length; i++)
         {
             _points[i].x = x[i];
@@ -317,12 +387,9 @@ v
                     _growing = false;
 
                 _direction = _directionCache;
+                // _clietTween.SetActive(false);
+                _clietTween.StopAll();
             }
-        }
-
-        if (argv != 1)
-        {
-            _Merker = false;
         }
     }
 
