@@ -41,6 +41,7 @@ public abstract class BaseSnake : Node2D
     }
 
     public abstract void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake);
+    public virtual void SetPlayerSettings(bool isServer){}
 
     public override void _Input(InputEvent @event)
     {

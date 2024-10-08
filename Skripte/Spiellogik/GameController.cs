@@ -97,7 +97,23 @@ public class GameController : Node2D
 				// Miteinander
 				_snake1.QueueFree();
 				_snake2.QueueFree();
-				_multiplayerSnake.MoveSnake();
+
+				if(GlobalVariables.Instance.OnlineGame == false)
+				{
+					_multiplayerSnake.MoveSnake();
+				}
+				else
+				{
+					// Spieler 1
+					if(GlobalVariables.Instance.Room.IamPlayerOne == true)
+						_multiplayerSnake.SetPlayerSettings(true);
+					else
+					{
+						_multiplayerSnake.SetPlayerSettings(false);
+						NetworkManager.NetMan.rpc(_multiplayerSnake.GetPath(), nameof(_multiplayerSnake.MoveSnake));
+					}
+				}
+				
 				break;
 			}
 			case 1:

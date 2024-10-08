@@ -5,3 +5,4 @@ Das ConformationDialog Fenster wird nie gelöscht sondern immer neu erzeugt! => 
 AUgen drehen evtl.zu schnell die etwas smooth machen!
 Todesgrund im Online Multiplayer stimmt nicht!
 GameChat geht nicht die Signale werden von den Empfängermethoden nicht aufgerufen!
+Miteinander Schlange wächst nicht

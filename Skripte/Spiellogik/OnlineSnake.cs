@@ -12,7 +12,7 @@ public class OnlineSnake : BaseSnake
     public override void _Ready()
     {
         base._Ready();
-        _tween.Connect("tween_completed", this, nameof(_on_Tween_tween_all_completed));
+        _tween.Connect("tween_all_completed", this, nameof(_on_Tween_tween_all_completed));
     }
 
     public override void _Process(float delta)
@@ -128,7 +128,7 @@ public class OnlineSnake : BaseSnake
         _growing = false;
     }
 
-    protected void _on_Tween_tween_all_completed()
+    protected virtual void _on_Tween_tween_all_completed()
     {
         if(_isServer)
         {
@@ -140,7 +140,7 @@ public class OnlineSnake : BaseSnake
             // danch prüft der Server für beide ob einen Frucht gegessen wurde!
             CheckFruitCollision(); // => Diese Methode setzt bei, wenn eine Frucht gegessen wurde die Frucht bei beiden an die gleich Stelle neu!
             // danach prüfen beide ob sie gestorben 
-            NetworkManager.NetMan.rpc(GetPath(), nameof(IsGameOver), false, true, true);
+            CheckIfGameOver();
             // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
             _points = _body.Points;
             // PunkteUpdate an Client senden!
@@ -167,7 +167,7 @@ public class OnlineSnake : BaseSnake
         NetworkManager.NetMan.rpc(GetPath(), nameof(SynchPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
     }
 
-    private void SynchPointsOnClient(string Xjson, string Yjson)
+    protected void SynchPointsOnClient(string Xjson, string Yjson)
     {
 
         int[] x = JsonConvert.DeserializeObject<int[]>(Xjson);
@@ -212,12 +212,56 @@ public class OnlineSnake : BaseSnake
         _points = _body.Points;
     }
 
-    protected override bool IsGameOver()
+    protected void CheckIfGameOver()
     {
-        if(base.IsGameOver())
+        string LoseMsg = "";
+        // Alte is GameOver Logik:
+        foreach (var obstacle in _controller.Obstacles)
         {
-            _controller.OnGameFinished();
+            if (_body.Points[0] == obstacle.RectGlobalPosition)
+            {
+                LoseMsg = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
+            }
         }
-        return false;
+
+        if (_otherSnake != null && IsInstanceValid(_otherSnake))
+        {
+            if (_otherSnake.Points.Contains(_body.Points[0]))
+            {
+                if (_body.Points[0] == _otherSnake.Points[0])
+                {
+                    LoseMsg = ($"Unentschieden.\n{Name} und {_otherSnake.Name} sind kollidiert.");
+                }
+                else
+                {
+                    LoseMsg = ($"Game Over fuer {Name}.\nIst mit {_otherSnake.Name} kollidiert!");
+                }
+
+            }
+        }
+
+        if (_points.Length >= 3)
+        {
+            for (int i = 1; i < _points.Length; i++)
+            {
+                if (_points[0] == _points[i])
+                {
+                    LoseMsg = $"Game Over fuer {Name}. Hat sich selbst gefressen!";
+                }
+            }
+        }
+
+        // wenn LoseMsg != "" dann ist Spiel vorbei => Lose MSG noch an Client senden!
+        if(LoseMsg != "")
+        {
+            NetworkManager.NetMan.rpc(GetPath(), nameof(ShowGameOverScreenAndFinishGame), false, true, true, LoseMsg);
+            
+        }
+    }
+
+    protected void ShowGameOverScreenAndFinishGame(string LoseMsg)
+    {
+        _controller.LoseMessage = LoseMsg;
+        _controller.OnGameFinished();
     }
 }
