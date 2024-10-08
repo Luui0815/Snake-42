@@ -84,10 +84,6 @@ public class OnlineMultiplayerSnake : OnlineSnake
     }
     */
 
-    public override void RPCTween(float argv)
-    {
-        MoveTween(argv);
-    }
 
     protected override void MoveTween(float argv)
     {

@@ -43,9 +43,4 @@ texture = ExtResource( 2 )
 stream = ExtResource( 4 )
 volume_db = -10.0
 
-[node name="UpdateTimer" type="Timer" parent="."]
-
-[node name="ClientTween" type="Tween" parent="."]
-playback_process_mode = 0
-
 [connection signal="tween_all_completed" from="Tween" to="." method="_on_Tween_tween_all_completed"]

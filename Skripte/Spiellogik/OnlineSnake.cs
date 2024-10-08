@@ -7,34 +7,17 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    // 2 Tweens einen 
-    protected bool _Interpolate;
-    protected float _updateTime = 0.05f;
-    protected float _timeSinceLastUpdate;
-    protected Tween _clietTween;
-    protected bool _isAsynchron = false;
-
+    protected bool _isGameOver;
+    protected bool _PointsOnClientUpdated;
     public override void _Ready()
     {
         base._Ready();
-        _clietTween = GetNode<Tween>("ClientTween");
         _tween.Connect("tween_completed", this, nameof(_on_Tween_tween_all_completed));
-    }
-
-    protected void TimeToSynchBody()
-    {
-        float[] x = new float[_body.Points.Count()];
-        float[] y = new float[_body.Points.Count()];
-        for (int i = 0; i < _body.Points.Count(); i++)
-        {
-            x[i] = _body.Points[i].x;
-            y[i] = _body.Points[i].y;
-        }
-        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
     }
 
     public override void _Process(float delta)
     {
+        /*
         if (_Interpolate == true)
         {
             for (int i = 0; i < _body.Points.Length; i++)
@@ -44,23 +27,7 @@ public class OnlineSnake : BaseSnake
             if (Convert.ToInt32(_body.Points[0].x) == Convert.ToInt32(_points[0].x) && Convert.ToInt32(_body.Points[0].y) == Convert.ToInt32(_points[0].y))
                 _Interpolate = false;
         }
-
-        if(_isServer)
-        {
-            _timeSinceLastUpdate += delta;
-            if(_timeSinceLastUpdate > _updateTime)
-            {
-                _timeSinceLastUpdate = 0;
-                // TimeToSynchBody();
-                // if(_isAsynchron == false)
-                    // CheckSynchron();
-                // else
-                {
-                    // TimeToSynchBody();
-                }
-            }
-        }
-
+        */
     }
 
     public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
@@ -79,65 +46,26 @@ public class OnlineSnake : BaseSnake
                 _body.SetPointPosition(i, _points[i]);
             }
         }
-        // Egal ob Spiler 1 oder 2 beide steuern mit wasd, also _IsSpiler1 = true
-        _isPlayerOne = true;
         _otherSnake = otherSnake;
         _isSnake1 = isSnake1;
     }
 
     public override void _Input(InputEvent @event)
     {
-        if (_isPlayerOne == false) // Prüfen ob das weg kann!
-            return;
-
-        if (@event.IsPressed()) // // Prüfen ob das weg kann!
+        Vector2 direction = Vector2.Zero;
+        if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) direction = Vector2.Up;
+        if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) direction = Vector2.Right;
+        if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) direction = Vector2.Left;
+        if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down;
+        // es wird auf alle Inputs reagiert
+        // nur wenn direction != 0,0 wurde der richtige gedrueckt!
+        if (direction != Vector2.Zero)
         {
-            Vector2 direction = Vector2.Zero;
-
-            if (_isPlayerOne)
-            {
-
-                if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) direction = Vector2.Up;
-                if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) direction = Vector2.Right;
-                if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) direction = Vector2.Left;
-                if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down;
-            }
-            else
-            {
-                // Prüfen ob das weg kann!
-                if (Input.IsActionPressed("move_right") && _direction != Vector2.Left) direction = Vector2.Right;
-                if (Input.IsActionPressed("move_left") && _direction != Vector2.Right) direction = Vector2.Left;
-                if (Input.IsActionPressed("move_up") && _direction != Vector2.Down) direction = Vector2.Up;
-                if (Input.IsActionPressed("move_down") && _direction != Vector2.Up) direction = Vector2.Down;
-            }
-            // es wird auf alle Inputs reagiert
-            // nur wenn direction != 0,0 wurde der richtige gedrueckt!
-
-
-            // online
-            if (direction != Vector2.Zero)
-            {
-                // Wenn Server, dann aktualisieren deinen Cache selbst, der Spieler2 muss das nicht wissen
-                //if(_isServer == true)
-                //{
-                //    SetAktDirectionCache(Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
-                //}
-                //else
-                //{
-                // Wenn er Spiler 2 ist sollen seine Einagben an Spielr 1 geschickt werden!
-                // da er 2 Schlangen hat, wuerde die Richtungseingabe 2 mal gesendet, daher nur RichtungsÄnderungen 
-                // senden die von Schlange 2 kommen => dann stimmt der rpc Pfad gleich beim Spiler 1 überein!
-                // mit folgendem rpc call wird der directioncache von Spiler1 von Schlange 2 durch Spieler2 Schlange 2 geändert
-                //if(_isSnake1 == false)
-                //{
-                // Aus irgendeinem Grund kann Vector2 nicht gewnadelt werden!
-                // Nur diejenige Schlange sendet Richtungsaenderung welche der Spiler auch wirklich steuert!
-                if ((_isServer && _isSnake1) || (!_isServer && !_isSnake1))
-                    NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
-                //}
-                //}
-            }
+            // Nur diejenige Schlange sendet Richtungsaenderung welche der Spiler auch wirklich steuert!
+            if ((_isServer && _isSnake1) || (!_isServer && !_isSnake1))
+                NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
         }
+        
     }
 
     protected virtual void SetAktDirectionCache(int X, int Y)
@@ -148,38 +76,17 @@ public class OnlineSnake : BaseSnake
 
     public override void MoveSnake()
     {
-        TimeToSynchPoints();
-        _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        //_clietTween.InterpolateMethod(this, "ClientMoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        //if(_isServer)
-            _tween.Start();
-        //else
-        ;
-            // _clietTween.Start();
-    }
-
-    public virtual void RPCTween(float argv)
-    {
-        // Wenn Server mache MoveTween
-        // Wenn Client mache ClientMoveTween
-        if (_isServer == true)
-        {
-            // Man hat das Problem das die Positionen der Schlangen bei beiden Spielern auseinander gehen, da argv nicht bei jedem genau uzr gleichen zeit
-            // die gleichen Werte haben, daher muss man ingewissen Abstaenden den Cleint wieder mit dem Server synchronisieren!!! => Wie? Kein blassen Schimemr
-            MoveTween(argv);
-        }
-        else
-        {
-             ClientMoveTween(argv);
-        }
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _direction = _directionCache;
+        _tween.Start();
+        _Merker = false;
     }
 
     protected override void MoveTween(float argv)
     {
         if (_Merker == false)
         {
-            int i = 0;
-            foreach (Vector2 pos in _body.Points)
+            for (int i = 0; i < _body.GetPointCount(); i++)
             {
                 Vector2 newPos, diff = Vector2.Zero;
                 if (i == 0)
@@ -203,15 +110,6 @@ public class OnlineSnake : BaseSnake
                     }
                 }
                 _body.SetPointPosition(i, newPos);
-                i++;
-            }
-
-            if (_eating == true)
-            {
-                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
-                _growing = true;
-                _points = _body.Points;
-                _eating = false;
             }
 
             _face.Position = _body.Points[0];
@@ -221,103 +119,52 @@ public class OnlineSnake : BaseSnake
             if (argv == 1)
             {
                 _Merker = true;
-                _points = _body.Points;
-                CheckFruitCollision();
-
-                if (_growing == true)
-                    _growing = false;
-
-                if (IsGameOver())
-                {
-                    NetworkManager.NetMan.rpc(_controller.GetPath(), nameof(_controller.OnGameFinished));
-                }
-                else
-                {
-                    _direction = _directionCache;
-                }
-
-                // Clientstand wieder mit Serverstand synchronisieren, jetzt sollten alle Pos. int sein
-                /*
-v
-                */
-                // int Array in Byte Array wandeln, da Json zu langsam wäre
-                /*
-                byte[] Xbyte = new byte[x.Length * sizeof(int)];
-                Buffer.BlockCopy(x, 0, Xbyte, 0, Xbyte.Length);
-
-                byte[] Ybyte = new byte[y.Length * sizeof(int)];
-                Buffer.BlockCopy(y, 0, Ybyte, 0, Ybyte.Length);
-                */
-                // Nun _points aktualisieren!
-                
-                
-                
             }
         }
+    }
 
-        if (argv != 1)
+    protected void ResetGrowing()
+    {
+        _growing = false;
+    }
+
+    protected void _on_Tween_tween_all_completed()
+    {
+        if(_isServer)
         {
-            _Merker = false;
-            
+            // Der Server aktualisiert, anchdem er einen Schritt gelaufen ist grundlegenden Daten
+            // zuerst wird der evtl noch laufende Tweeen auf dem Client gestoppt
+            NetworkManager.NetMan.rpc(_tween.GetPath(), nameof(_tween.StopAll), false, false, true);
+            // growing wird bei beiden Zurückgesetzt
+            NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
+            // danch prüft der Server für beide ob einen Frucht gegessen wurde!
+            CheckFruitCollision(); // => Diese Methode setzt bei, wenn eine Frucht gegessen wurde die Frucht bei beiden an die gleich Stelle neu!
+            // danach prüfen beide ob sie gestorben 
+            NetworkManager.NetMan.rpc(GetPath(), nameof(IsGameOver), false, true, true);
+            // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
+            _points = _body.Points;
+            // PunkteUpdate an Client senden!
+            TimeToSynchPoints();
+            // Client sendet antwort wenn Punkte aktualisier werden an Server => dann Tween wieder starten
         }
+    }
+
+    protected void PointUpdateOnClientReceived()
+    {
+        // Punkteupdate erfolgreich => Tween bei beiden wieder starten!
+        NetworkManager.NetMan.rpc(GetPath(), nameof(MoveSnake));
     }
 
     protected void TimeToSynchPoints()
     {
         int[] x = new int[_points.Length];
-                int[] y = new int[_points.Length];
-                for (int j = 0; j < _points.Length; j++)
-                {
-                    x[j] = Convert.ToInt32(_points[j].x); // Hier kein Datenverlust da float hier Ganzzahlen sind
-                    y[j] = Convert.ToInt32(_points[j].y);
-                }
-                NetworkManager.NetMan.rpc(GetPath(), nameof(SynchPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
-    }
-
-    protected void CheckSynchron(string xJson = null, string yJson = null)
-    {
-        if(_isServer)
+        int[] y = new int[_points.Length];
+        for (int j = 0; j < _points.Length; j++)
         {
-            int[] x = new int[_points.Length];
-                int[] y = new int[_points.Length];
-                for (int j = 0; j < _points.Length; j++)
-                {
-                    x[j] = Convert.ToInt32(_points[j].x); // Hier kein Datenverlust da float hier Ganzzahlen sind
-                    y[j] = Convert.ToInt32(_points[j].y);
-                }
-            NetworkManager.NetMan.rpc(GetPath(),nameof(CheckSynchron), false,false, true, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
+            x[j] = Convert.ToInt32(_points[j].x); // Hier kein Datenverlust da float hier Ganzzahlen sind
+            y[j] = Convert.ToInt32(_points[j].y);
         }
-        else
-        {
-            int[] x = JsonConvert.DeserializeObject<int[]>(xJson);
-            int[] y = JsonConvert.DeserializeObject<int[]>(yJson);
-            int toleranz = _gridSize/2;
-            if(Math.Abs(x[0] - _points[0].x) < toleranz && Math.Abs(y[0] - _points[0].y) < toleranz && _clietTween.IsActive())
-                return;
-            
-            _clietTween.StopAll();
-            _isAsynchron = true;
-        }
-    }
-
-    private void satrtClientTween()
-    {
-        _tween.StopAll();  // Beendet alle laufenden Animationen im Tween
-        _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _direction = _directionCache;
-        _tween.Start();
-        _Merker = false;
-    }
-
-    protected void _on_Tween_tween_all_completed()
-    {
-        TimeToSynchPoints();
-        NetworkManager.NetMan.rpc(GetPath(), nameof(satrtClientTween), false, false, true);
-        _tween.StopAll();  // Beendet alle laufenden Animationen im Tween
-        _tween.InterpolateMethod(this, "RPCTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _direction = _directionCache;
-        _tween.Start();
-        _Merker = false;
+        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
     }
 
     private void SynchPointsOnClient(string Xjson, string Yjson)
@@ -331,90 +178,21 @@ v
             _points[i].x = x[i];
             _points[i].y = y[i];
         }
-    }
-
-    protected virtual void ClientMoveTween(float argv)
-    {
-        if (_Merker == false)
-        {
-            //_Interpolate = false;
-            int i = 0;
-            foreach (Vector2 pos in _body.Points)
-            {
-                Vector2 newPos, diff = Vector2.Zero;
-                if (i == 0)
-                    newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
-                else
-                {
-                    if (!(_growing == true && i == _body.Points.Count() - 1))
-                    {
-                        diff = Vector2.Zero;
-                        if (_points[i - 1].x - _points[i].x != 0)
-                            diff.x = (_points[i - 1].x - _points[i].x) / _gridSize;
-                        if (_points[i - 1].y - _points[i].y != 0)
-                            diff.y = (_points[i - 1].y - _points[i].y) / _gridSize;
-
-                        newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
-                    }
-                    else
-                    {
-                        // letztes Koerperteil darf nicht bewegt werden!
-                        newPos = _body.GetPointPosition(i);
-                    }
-                }
-                _body.SetPointPosition(i, newPos);
-                i++;
-            }
-
-            if (_eating == true)
-            {
-                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
-                _growing = true;
-                _points = _body.Points;
-                _eating = false;
-            }
-
-            _face.Position = _body.Points[0];
-            _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
-
-            // wenn argv = 1 dann ist eine Schleife durch
-            if (argv == 1)
-            {
-                _Merker = true;
-                _points = _body.Points;
-
-                if (_growing == true)
-                    _growing = false;
-
-                _direction = _directionCache;
-                // _clietTween.SetActive(false);
-                _clietTween.StopAll();
-            }
-        }
-    }
-
-    private void SynchBodyPointsOnClient(string Xjson, string Yjson)
-    {
-
-        float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
-        float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
-
-
-        for (int i = 0; i < x.Length; i++)
-        {
-            _body.SetPointPosition(i, new Vector2(x[i], y[i]));
-        }
+        // antwort an Server schicken das alle Punkte aktualisiert worden sind
+        NetworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
 
     protected override void CheckFruitCollision()
     {
         if (_body.Points[0] == _fruit.Position)
         {
-            _eating = true;
             _audioPlayer.Play();
             //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
+            _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+            _growing = true;
+            _points = _body.Points;
 
             Vector2 newPos = _fruit.RandomizePosition();
             NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x, newPos.y);
@@ -425,11 +203,21 @@ v
 
     protected virtual void SetEatingOnOtherPlayer()
     {
-        _eating = true;
         _audioPlayer.Play();
         //IncreaseSpeed();
         _controller.UpdateScore();
         GD.Print($"{Name} hat Frucht gefressen!");
+        _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+        _growing = true;
+        _points = _body.Points;
     }
 
+    protected override bool IsGameOver()
+    {
+        if(base.IsGameOver())
+        {
+            _controller.OnGameFinished();
+        }
+        return false;
+    }
 }
