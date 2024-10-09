@@ -75,7 +75,13 @@ public class OnlineMultiplayerSnake : OnlineSnake
         }
     }
 
-    // public override void MoveSnake() => kann so bleiben
+    public override void MoveSnake()
+    {
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _direction = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+        _tween.Start();
+        _Merker = false;
+    }
     protected override void MoveTween(float argv)
     {
         if (!_Merker)
@@ -99,7 +105,10 @@ public class OnlineMultiplayerSnake : OnlineSnake
                 {
                     int prevIndex = i - direction;
                     Vector2 diff = (_points[prevIndex] - _points[i]) / _gridSize;
-                    newPos = _points[i] + diff * _gridSize * argv;
+                    if (!(_growing == true && (_isPlayerOneTurn ? i < _body.Points.Count() - 1 : i >= 1)))
+                        newPos = _points[i] + diff * _gridSize * argv;
+                    else
+                        newPos = _body.GetPointPosition(i);
                 }
 
                 _body.SetPointPosition(i, newPos);
@@ -108,8 +117,21 @@ public class OnlineMultiplayerSnake : OnlineSnake
             _face1.Position = _body.Points[0];
             _face2.Position = _body.Points[_body.Points.Count() - 1];
 
-            _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
-            _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
+            Vector2 lookDirection;
+            if (_isPlayerOneTurn)
+            {
+                // genau in die entgegengesetzte Richtung des an ihm befindlichen Körperteil setzten
+                lookDirection = ((_points[_points.Count() - 1] - _points[_points.Count() - 2]) / _gridSize) * -1;
+                _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
+                _face2.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Left));
+            }
+            else
+            {
+                // -1 mehr da durch CheckFruit Collision der letzte Punkte dupliziert wurde. d.h. 2 mal gleiche Punktkoordinaten!
+                lookDirection = ((_points[1] - _points[0]) / _gridSize) * -1;
+                _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
+                _face1.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Right));
+            }
 
             if (argv == 1)
             {
@@ -130,17 +152,17 @@ public class OnlineMultiplayerSnake : OnlineSnake
             NetworkManager.NetMan.rpc(_tween.GetPath(), nameof(_tween.StopAll), false, false, true);
             // growing wird bei beiden Zurückgesetzt
             NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
+            // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
+            _points = _body.Points;
+            // danach prüfen beide ob sie gestorben 
+            CheckIfGameOver();
             // danch prüft der Server für beide ob einen Frucht gegessen wurde!
             CheckFruitCollision(); // => Diese Methode setzt bei, wenn eine Frucht gegessen wurde die Frucht bei beiden an die gleich Stelle neu!
-            // danach prüfen beide ob sie gestorben 
-            NetworkManager.NetMan.rpc(GetPath(), nameof(IsGameOver), false, true, true);
             // Swap Control ausführen wenn gegessen wurde
             if(_growing)
             {
                 NetworkManager.NetMan.rpc(GetPath(), nameof(SwapControl));
             }
-            // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
-            _points = _body.Points;
             // PunkteUpdate an Client senden!
             TimeToSynchPoints();
             // Client sendet antwort wenn Punkte aktualisier werden an Server => dann Tween wieder starten
@@ -150,20 +172,86 @@ public class OnlineMultiplayerSnake : OnlineSnake
     // PointUpdateOnClientReceived() => kann so bleiben
     // TimeToSynchPoints() => kann so bleiben
     // SynchPointsOnClient() => kann so bleiben
-    // CheckFruitCollision() => kann so bleiben
+    protected override void CheckFruitCollision()
+    {
+        if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == _fruit.Position)
+        {
+            _audioPlayer.Play();
+            _controller.UpdateScore();
+            GD.Print($"{Name} hat Frucht gefressen!");
+            _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
+            _growing = true;
+            //IncreseSpeed();
+            _points = _body.Points;
+
+            _fruit.SetNewPosition(_fruit.RandomizePosition());
+            Vector2 newPos = _fruit.RandomizePosition();
+            NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x, newPos.y);
+            // Jetzte dem Client sagen das eine Frucht gegeseen wurde!
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetEatingOnOtherPlayer), false, false, true);
+        }
+    }
     // SetEatingOnOtherPlayer() => kann so bleiben
-    // IsGameOver() => kann so bleiben
+
+    protected override void CheckIfGameOver()
+    {
+        string LoseMsg = "";
+        // Angepasste GameOVer Logik von OfflineMultiplayerSnake:
+        foreach (var obstacle in _controller.Obstacles)
+        {
+            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle.RectGlobalPosition)
+            {
+                LoseMsg = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
+            }
+        }
+
+        if (_otherSnake != null && IsInstanceValid(_otherSnake))
+        {
+            if (_otherSnake.Points.Contains(_body.Points[0]))
+            {
+                if (_body.Points[0] == _otherSnake.Points[0])
+                {
+                    LoseMsg = ($"Unentschieden.\n{Name} und {_otherSnake.Name} sind kollidiert.");
+                }
+                else
+                {
+                    LoseMsg = ($"Game Over fuer {Name}.\nIst mit {_otherSnake.Name} kollidiert!");
+                }
+
+            }
+        }
+
+        // Prüfen ob sie sich elbst gefressen hat
+        for(int i = (_isPlayerOneTurn ? 1 : 0); i < (_isPlayerOneTurn ? _points.Count() : _points.Count() - 1); i++)
+        {
+            if(_points[_isPlayerOneTurn ? 0 : _points.Count() - 1].x == _points[i].x && _points[_isPlayerOneTurn ? 0 : _points.Count() - 1].y == _points[i].y)
+            {
+                LoseMsg = ($"Game Over fuer {Name}. Hat sich selbst gefressen!");
+                break;
+            }
+        }
+        
+
+        if(LoseMsg != "")
+        {
+            NetworkManager.NetMan.rpc(GetPath(), nameof(ShowGameOverScreenAndFinishGame), false, true, true, LoseMsg);
+        }
+    }
+
+    // ShowGameOverScreenAndFinishGame() => kann so bleiben
 
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
         if (_isPlayerOneTurn)
         {
-            _directionCachePlayer1 = _directionCachePlayer2 * -1;
+            // genau in die entgegengesetzte Richtung des an ihm befindlichen Körperteil setzten
+            _directionCachePlayer1 = ((_points[1] - _points[0]) / _gridSize) * -1;
         }
         else
         {
-            _directionCachePlayer2 = _directionCachePlayer1 * -1;
+            // -1 mehr da durch CheckFruit Collision der letzte Punkte dupliziert wurde. d.h. 2 mal gleiche Punktkoordinaten!
+            _directionCachePlayer2 = ((_points[_points.Count() - 1] - _points[_points.Count() - 2]) / _gridSize) * -1;
         }
 
         _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));

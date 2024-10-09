@@ -212,7 +212,7 @@ public class OnlineSnake : BaseSnake
         _points = _body.Points;
     }
 
-    protected void CheckIfGameOver()
+    protected virtual void CheckIfGameOver()
     {
         string LoseMsg = "";
         // Alte is GameOver Logik:
@@ -255,7 +255,6 @@ public class OnlineSnake : BaseSnake
         if(LoseMsg != "")
         {
             NetworkManager.NetMan.rpc(GetPath(), nameof(ShowGameOverScreenAndFinishGame), false, true, true, LoseMsg);
-            
         }
     }
 
