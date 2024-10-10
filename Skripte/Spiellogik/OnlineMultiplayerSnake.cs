@@ -116,14 +116,14 @@ public class OnlineMultiplayerSnake : OnlineSnake
             }
             else
             {
-                for (int i = _body.GetPointCount() - 1; i >= 0; i++)
+                for (int i = _body.Points.Length - 1; i >= 0; i--)
                 {
                     Vector2 newPos, diff = Vector2.Zero;
-                    if (i == _body.GetPointCount() - 1)
+                    if (i == _body.Points.Length - 1)
                         newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
                     else
                     {
-                        if (!(_growing == true && i == _body.Points.Count() - 3))
+                        if (!(_growing == true && i == _body.Points.Length - 2))
                         {
                             diff = Vector2.Zero;
                             if (_points[i + 1].x - _points[i].x != 0)

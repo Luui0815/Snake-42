@@ -12,14 +12,13 @@ namespace Snake42
     class msg
     {
         public Nachricht state;
-        public int publisher; // 0 Server, alles andere ID von Clients
+        public int publisher;
         public int target;
         public string data;
-
         public msg(Nachricht state,int publisherid, int target, string data)
         {
             this.state = state;
-            this.publisher = publisherid;
+            publisher = publisherid;
             this.target = target;  
             this.data = data; 
         }
