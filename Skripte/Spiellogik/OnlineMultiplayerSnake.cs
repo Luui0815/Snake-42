@@ -86,33 +86,63 @@ public class OnlineMultiplayerSnake : OnlineSnake
     {
         if (!_Merker)
         {
-            _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
-
-            int headIndex = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
-            int direction = _isPlayerOneTurn ? 1 : -1;
-
-            for (int i = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
-                 _isPlayerOneTurn ? i < _body.Points.Count() : i >= 0;
-                 i += direction)
+            if(_isPlayerOneTurn)
             {
-                Vector2 newPos = new Vector2();
-
-                if (i == headIndex)
+                for (int i = 0; i < _body.GetPointCount(); i++)
                 {
-                    newPos = _points[i] + _currentDirection * _gridSize * argv;
-                }
-                else
-                {
-                    int prevIndex = i - direction;
-                    Vector2 diff = (_points[prevIndex] - _points[i]) / _gridSize;
-                    if (!(_growing == true && (_isPlayerOneTurn ? i < _body.Points.Count() - 1 : i >= 1)))
-                        newPos = _points[i] + diff * _gridSize * argv;
+                    Vector2 newPos, diff = Vector2.Zero;
+                    if (i == 0)
+                        newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
                     else
-                        newPos = _body.GetPointPosition(i);
-                }
+                    {
+                        if (!(_growing == true && i == _body.Points.Count() - 1))
+                        {
+                            diff = Vector2.Zero;
+                            if (_points[i - 1].x - _points[i].x != 0)
+                                diff.x = (_points[i - 1].x - _points[i].x) / _gridSize;
+                            if (_points[i - 1].y - _points[i].y != 0)
+                                diff.y = (_points[i - 1].y - _points[i].y) / _gridSize;
 
-                _body.SetPointPosition(i, newPos);
+                            newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        }
+                        else
+                        {
+                            // letztes Koerperteil darf nicht bewegt werden!
+                            newPos = _body.GetPointPosition(i);
+                        }
+                    }
+                    _body.SetPointPosition(i, newPos);
+                }
             }
+            else
+            {
+                for (int i = _body.GetPointCount() - 1; i >= 0; i++)
+                {
+                    Vector2 newPos, diff = Vector2.Zero;
+                    if (i == _body.GetPointCount() - 1)
+                        newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
+                    else
+                    {
+                        if (!(_growing == true && i == _body.Points.Count() - 3))
+                        {
+                            diff = Vector2.Zero;
+                            if (_points[i + 1].x - _points[i].x != 0)
+                                diff.x = (_points[i + 1].x - _points[i].x) / _gridSize;
+                            if (_points[i + 1].y - _points[i].y != 0)
+                                diff.y = (_points[i + 1].y - _points[i].y) / _gridSize;
+
+                            newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        }
+                        else
+                        {
+                            // letztes Koerperteil darf nicht bewegt werden!
+                            newPos = _body.GetPointPosition(i);
+                        }
+                    }
+                    _body.SetPointPosition(i, newPos);
+                }
+            }
+            
 
             _face1.Position = _body.Points[0];
             _face2.Position = _body.Points[_body.Points.Count() - 1];
@@ -221,7 +251,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
             }
         }
 
-        // Prüfen ob sie sich elbst gefressen hat
+        // Prüfen ob sie sich selbst gefressen hat
         for(int i = (_isPlayerOneTurn ? 1 : 0); i < (_isPlayerOneTurn ? _points.Count() : _points.Count() - 1); i++)
         {
             if(_points[_isPlayerOneTurn ? 0 : _points.Count() - 1].x == _points[i].x && _points[_isPlayerOneTurn ? 0 : _points.Count() - 1].y == _points[i].y)
