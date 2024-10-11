@@ -7,27 +7,37 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected bool _isGameOver;
-    protected bool _PointsOnClientUpdated;
+    protected float _updateInterval = 0.085f;
+    protected float _TimeSinceLastUpdate;
+    protected Vector2[] _TargetPoints;
+
     public override void _Ready()
     {
         base._Ready();
-        _tween.Connect("tween_all_completed", this, nameof(_on_Tween_tween_all_completed));
+        // _tween.Connect("tween_all_completed", this, nameof(_on_Tween_tween_all_completed));
+        _TargetPoints = _body.Points;
     }
 
     public override void _Process(float delta)
     {
-        /*
-        if (_Interpolate == true)
+        if(_isServer)
         {
-            for (int i = 0; i < _body.Points.Length; i++)
+            _TimeSinceLastUpdate += delta;
+            if(_TimeSinceLastUpdate > _updateInterval)
             {
-                _body.SetPointPosition(i, _body.Points[i].LinearInterpolate(_points[i], 0.01f));// war 0.001f
+                _TimeSinceLastUpdate = 0;
+                TimeToSynchBodyPoints();
             }
-            if (Convert.ToInt32(_body.Points[0].x) == Convert.ToInt32(_points[0].x) && Convert.ToInt32(_body.Points[0].y) == Convert.ToInt32(_points[0].y))
-                _Interpolate = false;
         }
-        */
+        else
+        {
+            float latencyFactor = Mathf.Clamp(NetworkManager.NetMan.PingTime / 1000 /_updateInterval , 0.1f, 1.0f);  // Dynamischer Interpolationsfaktor
+            // _TargetPoints werden alle 50 ms gesendet, d.h. denen nach interpolieren!
+            for(int i = 0; i < _body.GetPointCount(); i++)
+            {
+                _body.SetPointPosition(i, _TargetPoints[i].LinearInterpolate(_body.GetPointPosition(i), latencyFactor));
+            }
+        }
     }
 
     public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
@@ -44,6 +54,7 @@ public class OnlineSnake : BaseSnake
             {
                 _points[i] += new Vector2(0, 2 * _gridSize);
                 _body.SetPointPosition(i, _points[i]);
+                _TargetPoints = _body.Points;
             }
         }
         _otherSnake = otherSnake;
@@ -56,12 +67,12 @@ public class OnlineSnake : BaseSnake
         if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) direction = Vector2.Up;
         if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) direction = Vector2.Right;
         if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) direction = Vector2.Left;
-        if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down;
+        if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down; // DAS ANPASSEN!
         // es wird auf alle Inputs reagiert
         // nur wenn direction != 0,0 wurde der richtige gedrueckt!
         if (direction != Vector2.Zero)
         {
-            // Nur diejenige Schlange sendet Richtungsaenderung welche der Spiler auch wirklich steuert!
+            // Nur diejenige Schlange sendet Richtungsaenderung welche der Spieler auch wirklich steuert!
             if ((_isServer && _isSnake1) || (!_isServer && !_isSnake1))
                 NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirectionCache), false, true, true, Convert.ToInt32(direction.x), Convert.ToInt32(direction.y));
         }
@@ -76,10 +87,13 @@ public class OnlineSnake : BaseSnake
 
     public override void MoveSnake()
     {
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-        _direction = _directionCache;
-        _tween.Start();
-        _Merker = false;
+        if(_isServer)
+        {
+            _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+            _direction = _directionCache;
+            _tween.Start();
+            _Merker = false;
+        }
     }
 
     protected override void MoveTween(float argv)
@@ -119,8 +133,11 @@ public class OnlineSnake : BaseSnake
             if (argv == 1)
             {
                 _Merker = true;
+                _on_Tween_tween_all_completed();
             }
         }
+        if(argv != 1)
+            _Merker = false;
     }
 
     protected void ResetGrowing()
@@ -134,9 +151,10 @@ public class OnlineSnake : BaseSnake
         {
             // Der Server aktualisiert, anchdem er einen Schritt gelaufen ist grundlegenden Daten
             // zuerst wird der evtl noch laufende Tweeen auf dem Client gestoppt
-            NetworkManager.NetMan.rpc(_tween.GetPath(), nameof(_tween.StopAll), false, false, true);
+            // NetworkManager.NetMan.rpc(_tween.GetPath(), nameof(_tween.StopAll), false, false, true);
             // growing wird bei beiden Zurückgesetzt
-            NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
+            // NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
+            _growing = false;
             // danch prüft der Server für beide ob einen Frucht gegessen wurde!
             CheckFruitCollision(); // => Diese Methode setzt bei, wenn eine Frucht gegessen wurde die Frucht bei beiden an die gleich Stelle neu!
             // danach prüfen beide ob sie gestorben 
@@ -146,14 +164,17 @@ public class OnlineSnake : BaseSnake
             // PunkteUpdate an Client senden!
             TimeToSynchPoints();
             // Client sendet antwort wenn Punkte aktualisier werden an Server => dann Tween wieder starten
+            _direction = new Vector2(_directionCache);
         }
     }
 
+    /*
     protected void PointUpdateOnClientReceived()
     {
         // Punkteupdate erfolgreich => Tween bei beiden wieder starten!
         NetworkManager.NetMan.rpc(GetPath(), nameof(MoveSnake));
     }
+    */
 
     protected void TimeToSynchPoints()
     {
@@ -179,7 +200,34 @@ public class OnlineSnake : BaseSnake
             _points[i].y = y[i];
         }
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
-        NetworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
+        // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
+    }
+
+    protected void TimeToSynchBodyPoints()
+    {
+        float[] x = new float[_body.GetPointCount()];
+        float[] y = new float[_body.GetPointCount()];
+        for (int j = 0; j < _body.GetPointCount(); j++)
+        {
+            x[j] = _body.GetPointPosition(j).x;
+            y[j] = _body.GetPointPosition(j).y;
+        }
+        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
+    }
+
+    protected void SynchBodyPointsOnClient(string Xjson, string Yjson)
+    {
+
+        float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
+        float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
+        _TargetPoints = new Vector2[x.Length];
+        
+        for (int i = 0; i < x.Length; i++)
+        {
+            _TargetPoints[i] = new Vector2(x[i], y[i]);
+        }
+        // antwort an Server schicken das alle Punkte aktualisiert worden sind
+        // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
 
     protected override void CheckFruitCollision()

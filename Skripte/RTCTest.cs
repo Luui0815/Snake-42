@@ -61,10 +61,17 @@ public class RTCTest : Control
 
     private void _on_RPCTest4_pressed()
     {
-        Sprite S = new Sprite();
-        S.Position = new Vector2(1056,607);
-        S.Texture =  ResourceLoader.Load<Texture>("res://.import/icon.png-ec880de02d5dab0aa15458af9d6c53ed.stex");
-        NetworkManager.NetMan.rpc(GetPath(), nameof(TestRpc4),false);
+        Rpc(nameof(ShowMsg));
+    }
+
+    [RemoteSync]
+    private void ShowMsg()
+    {
+        ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+        ErrorPopup.Init("RPC","RPC erhalten");
+        GetTree().Root.AddChild(ErrorPopup);
+        ErrorPopup.PopupCentered();
+        ErrorPopup.Show();
     }
     
     private void TestRpc1()

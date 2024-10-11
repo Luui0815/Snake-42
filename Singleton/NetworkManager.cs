@@ -5,6 +5,7 @@ using System.CodeDom;
 using System.Runtime.InteropServices;
 using NAudio.Wave;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 // die Klasse wird benutzt um eine Spielrverbindung zu managen
 public class NetworkManager : Node
@@ -170,7 +171,18 @@ public class NetworkManager : Node
     private bool _multiplayerIsActive;
     private bool _PingAnswerReceived;
     private int _CyclesWithoutPing = 0; // wenn mehr als 5 Zyklen kein Ping empfangen wird ist es als Verbindungsabbruch zu werten!
-
+    private WebRTCPeerConnectionGDNative rtc = new WebRTCPeerConnectionGDNative();
+    public int BufferCount
+    {
+        get
+        {
+            if(_multiplayerIsActive)
+                return _multiplayer.GetAvailablePacketCount();
+            else
+                return 0;
+        }
+    }
+    public UInt64 PingTime;
     public void Init(WebRTCMultiplayer multiplayer, float KeepAlivePingInterval = 1.0f)
     {
         _multiplayer = multiplayer;
@@ -232,6 +244,7 @@ public class NetworkManager : Node
                         {
                             _PingAnswerReceived = true;
                             _CyclesWithoutPing = 0;
+                            PingTime = Convert.ToUInt64((DateTime.Now - JsonConvert.DeserializeObject<DateTime>(data.Data)).TotalMilliseconds);
                             break;
                         }
                     }
@@ -255,7 +268,7 @@ public class NetworkManager : Node
                 }
                 // Zeit einen neuen Ping zu senden!
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
-                SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, "1")).ToUTF8());
+                SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, JsonConvert.SerializeObject(DateTime.Now))).ToUTF8());
                 _PingAnswerReceived = false;
                 _LastPingTime = 0.0f;
             }

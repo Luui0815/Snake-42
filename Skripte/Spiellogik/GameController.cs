@@ -199,7 +199,13 @@ public class GameController : Node2D
 		_audioPlayer.PauseMode = PauseModeEnum.Process;
     }
 
-	private void CreateGameField()
+    public override void _Process(float delta)
+    {
+        GetNode<Label>("Puffer").Text = "Puffer " + NetworkManager.NetMan.BufferCount;
+		GetNode<Label>("Ping").Text = "Ping" + NetworkManager.NetMan.PingTime;
+    }
+
+    private void CreateGameField()
 	{
 		switch (_levelName)
 		{
