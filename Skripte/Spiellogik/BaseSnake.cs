@@ -26,6 +26,7 @@ public abstract class BaseSnake : Node2D
     protected bool _isSnake1;
 
     public Vector2[] Points { get { return _points; } }
+    public virtual float latencyFactor{ get; protected set;}
 
     public override void _Ready()
     {

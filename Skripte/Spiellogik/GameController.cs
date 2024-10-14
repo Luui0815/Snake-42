@@ -203,6 +203,17 @@ public class GameController : Node2D
     {
         GetNode<Label>("Puffer").Text = "Puffer " + NetworkManager.NetMan.BufferCount;
 		GetNode<Label>("Ping").Text = "Ping" + NetworkManager.NetMan.PingTime;
+		try
+		{
+			GetNode<Label>("Latenzfaktor").Text = "Latenz Faktor Snake1: " + Convert.ToString(_snake1.latencyFactor) + " Latenz Faktor Snake2: " + Convert.ToString(_snake2.latencyFactor);
+		}
+		catch{}
+		try
+		{
+			GetNode<Label>("Latenzfaktor").Text = "Latenz Faktor Snake1: " + Convert.ToString(_multiplayerSnake.latencyFactor);
+		}
+		catch{}
+
     }
 
     private void CreateGameField()

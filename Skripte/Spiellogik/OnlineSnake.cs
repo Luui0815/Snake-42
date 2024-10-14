@@ -9,7 +9,10 @@ public class OnlineSnake : BaseSnake
 {
     protected float _updateInterval = 0.085f; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected float _TimeSinceLastUpdate;
+    protected UInt64 _ClientTimeAtBodyPointUpdate;
+    protected UInt64 _ClientTimeDiffBodyUpdate;
     protected List<Vector2> _TargetPoints = new List<Vector2>();
+    public override float latencyFactor{get; protected set;}
 
     public override void _Ready()
     {
@@ -32,12 +35,42 @@ public class OnlineSnake : BaseSnake
         }
         else
         {
-            // Interpolieren aufgrund des Pings ist doch nicht so cool, bzw. springt der Pinge sehr, bzw. ist ein Interpolationsfaktor von 0.3 bis 0.4 am besten
-            float latencyFactor = Mathf.Clamp(NetworkManager.NetMan.PingTime * 2.0f / 1000.0f /_updateInterval, 0.1f ,0.3f);  // Dynamischer Interpolationsfaktor
-            // _TargetPoints werden alle 50 ms gesendet, d.h. denen nach interpolieren!
-            for(int i = 0; i < _body.GetPointCount(); i++)
+            float diff;
+            if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
+                diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
+            else
+                diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
+            
+            if(_ClientTimeDiffBodyUpdate != 0f)
+                latencyFactor = Math.Abs(diff) * delta / _ClientTimeDiffBodyUpdate;
+            else
+                latencyFactor = 0.5f;
+
+            for(int i = 0; i < _TargetPoints.Count(); i++)
             {
-                _body.SetPointPosition(i, _TargetPoints[i].LinearInterpolate(_body.GetPointPosition(i), latencyFactor));
+                Vector2 direction = Vector2.Zero;
+                if(i != 0)
+                {
+                    if(_TargetPoints[i - 1].x - _TargetPoints[i].x == 0f)
+                    {
+                        if(_TargetPoints[i - 1].y - _TargetPoints[i].y > 0f)
+                            direction = Vector2.Up;
+                        else
+                            direction = Vector2.Down;
+                    }
+                    else
+                    {
+                        if(_TargetPoints[i - 1].x - _TargetPoints[i].x > 0f)
+                            direction = Vector2.Right;
+                        else
+                            direction = Vector2.Left;
+                    }
+                }
+                else
+                    direction = _direction;
+                
+                Vector2 newPos = direction * (latencyFactor * diff);
+                _body.SetPointPosition(i, newPos);
             }
             // Gesicht nachsetzen
             _face.Position = _body.Points[0];
@@ -100,6 +133,8 @@ public class OnlineSnake : BaseSnake
             _tween.Start();
             _Merker = false;
         }
+        else
+            _ClientTimeAtBodyPointUpdate = OS.GetTicksMsec();
     }
 
     protected override void MoveTween(float argv)
@@ -235,6 +270,9 @@ public class OnlineSnake : BaseSnake
         {
             _TargetPoints.Add(new Vector2(x[i], y[i]));
         }
+        _ClientTimeDiffBodyUpdate = OS.GetTicksMsec() - _ClientTimeAtBodyPointUpdate;
+        _ClientTimeAtBodyPointUpdate = OS.GetTicksMsec();
+    
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
