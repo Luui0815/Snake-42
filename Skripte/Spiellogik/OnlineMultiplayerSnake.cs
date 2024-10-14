@@ -181,7 +181,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
             // zuerst wird der evtl noch laufende Tweeen auf dem Client gestoppt
             NetworkManager.NetMan.rpc(_tween.GetPath(), nameof(_tween.StopAll), false, false, true);
             // growing wird bei beiden Zurückgesetzt
-            NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
+            // NetworkManager.NetMan.rpc(GetPath(), nameof(ResetGrowing), false, true, true);
             // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
             _points = _body.Points;
             // danach prüfen beide ob sie gestorben 
@@ -194,7 +194,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
                 NetworkManager.NetMan.rpc(GetPath(), nameof(SwapControl));
             }
             // PunkteUpdate an Client senden!
-            TimeToSynchPoints();
+            // TimeToSynchPoints();
             // Client sendet antwort wenn Punkte aktualisier werden an Server => dann Tween wieder starten
         }
     }

@@ -7,15 +7,16 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected float _updateInterval = 0.085f;
+    protected float _updateInterval = 0.085f; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected float _TimeSinceLastUpdate;
-    protected Vector2[] _TargetPoints;
+    protected List<Vector2> _TargetPoints = new List<Vector2>();
 
     public override void _Ready()
     {
         base._Ready();
         // _tween.Connect("tween_all_completed", this, nameof(_on_Tween_tween_all_completed));
-        _TargetPoints = _body.Points;
+        for(int i = 0; i < _body.GetPointCount(); i++)
+            _TargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
     }
 
     public override void _Process(float delta)
@@ -31,12 +32,16 @@ public class OnlineSnake : BaseSnake
         }
         else
         {
-            float latencyFactor = Mathf.Clamp(NetworkManager.NetMan.PingTime / 1000 /_updateInterval , 0.1f, 1.0f);  // Dynamischer Interpolationsfaktor
+            // Interpolieren aufgrund des Pings ist doch nicht so cool, bzw. springt der Pinge sehr, bzw. ist ein Interpolationsfaktor von 0.3 bis 0.4 am besten
+            float latencyFactor = Mathf.Clamp(NetworkManager.NetMan.PingTime * 2.0f / 1000.0f /_updateInterval, 0.1f ,0.3f);  // Dynamischer Interpolationsfaktor
             // _TargetPoints werden alle 50 ms gesendet, d.h. denen nach interpolieren!
             for(int i = 0; i < _body.GetPointCount(); i++)
             {
                 _body.SetPointPosition(i, _TargetPoints[i].LinearInterpolate(_body.GetPointPosition(i), latencyFactor));
             }
+            // Gesicht nachsetzen
+            _face.Position = _body.Points[0];
+            _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
         }
     }
 
@@ -54,7 +59,8 @@ public class OnlineSnake : BaseSnake
             {
                 _points[i] += new Vector2(0, 2 * _gridSize);
                 _body.SetPointPosition(i, _points[i]);
-                _TargetPoints = _body.Points;
+                for(int j = 0; j < _body.GetPointCount(); j++)
+                    _TargetPoints[j] = new Vector2(_body.GetPointPosition(j));
             }
         }
         _otherSnake = otherSnake;
@@ -67,7 +73,7 @@ public class OnlineSnake : BaseSnake
         if (Input.IsActionPressed("ui_up") && _direction != Vector2.Down) direction = Vector2.Up;
         if (Input.IsActionPressed("ui_right") && _direction != Vector2.Left) direction = Vector2.Right;
         if (Input.IsActionPressed("ui_left") && _direction != Vector2.Right) direction = Vector2.Left;
-        if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down; // DAS ANPASSEN!
+        if (Input.IsActionPressed("ui_down") && _direction != Vector2.Up) direction = Vector2.Down;
         // es wird auf alle Inputs reagiert
         // nur wenn direction != 0,0 wurde der richtige gedrueckt!
         if (direction != Vector2.Zero)
@@ -140,9 +146,10 @@ public class OnlineSnake : BaseSnake
             _Merker = false;
     }
 
-    protected void ResetGrowing()
+    protected void SetAktDirection()
     {
-        _growing = false;
+        // bracuht auch der Client, dadurch schickt er in der input Methode nur gültige Richtungsangaben an den Server und dieser muss weniger machen
+        _direction = new Vector2(_directionCache);
     }
 
     protected virtual void _on_Tween_tween_all_completed()
@@ -161,10 +168,10 @@ public class OnlineSnake : BaseSnake
             CheckIfGameOver();
             // Punkte auf _body.Points setzen, diese sind in diesem Zyklus noch nicht gewandert!
             _points = _body.Points;
-            // PunkteUpdate an Client senden!
-            TimeToSynchPoints();
-            // Client sendet antwort wenn Punkte aktualisier werden an Server => dann Tween wieder starten
-            _direction = new Vector2(_directionCache);
+            // PunkteUpdate an Client senden! => unnötig
+            // TimeToSynchPoints(); => unnötig
+            // Client und Server akt. ihre Richtung
+            NetworkManager.NetMan.rpc(GetPath(), nameof(SetAktDirection));
         }
     }
 
@@ -176,6 +183,7 @@ public class OnlineSnake : BaseSnake
     }
     */
 
+    /*
     protected void TimeToSynchPoints()
     {
         int[] x = new int[_points.Length];
@@ -202,6 +210,7 @@ public class OnlineSnake : BaseSnake
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
+    */
 
     protected void TimeToSynchBodyPoints()
     {
@@ -220,11 +229,11 @@ public class OnlineSnake : BaseSnake
 
         float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
         float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
-        _TargetPoints = new Vector2[x.Length];
+        _TargetPoints.Clear();
         
         for (int i = 0; i < x.Length; i++)
         {
-            _TargetPoints[i] = new Vector2(x[i], y[i]);
+            _TargetPoints.Add(new Vector2(x[i], y[i]));
         }
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
@@ -256,8 +265,7 @@ public class OnlineSnake : BaseSnake
         _controller.UpdateScore();
         GD.Print($"{Name} hat Frucht gefressen!");
         _body.AddPoint(_body.GetPointPosition(_body.Points.Count() - 1));
-        _growing = true;
-        _points = _body.Points;
+        _TargetPoints.Add(_body.GetPointPosition(_body.Points.Count() - 1)); // hoffen das es funzt
     }
 
     protected virtual void CheckIfGameOver()
