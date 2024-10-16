@@ -26,6 +26,10 @@ volume=0.0
 GlobalVariables="*res://Singleton/GlobalVariables.cs"
 NetworkManager="*res://Singleton/NetworkManager.cs"
 
+[debug]
+
+settings/fps/force_fps=90
+
 [display]
 
 window/size/width=1280
@@ -106,6 +110,7 @@ limits/webrtc/max_channel_in_buffer_kb=500000
 [physics]
 
 common/enable_pause_aware_picking=true
+common/physics_interpolation=true
 
 [rendering]
 

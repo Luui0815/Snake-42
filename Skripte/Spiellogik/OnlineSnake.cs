@@ -7,7 +7,7 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected UInt64 _updateInterval = 85; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
+    protected UInt64 _updateInterval = 85000; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected UInt64 _TimeSinceLastUpdate;
     protected UInt64 _ClientTimeAtBodyPointUpdate;
     public UInt64 _ClientTimeDiffBodyUpdate;
@@ -23,18 +23,24 @@ public class OnlineSnake : BaseSnake
             _TargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
     }
 
+    // _Process hat nur 30 fps und syncht nicht die Bewegungen! => Bewegungsprozess des Clients muss in _PhysicsProcess, das läuft auf 60 fps, je nach Einstellungen
     public override void _Process(float delta)
     {
         if(_isServer)
         {
-            UInt64 test = OS.GetTicksMsec();
-            if(OS.GetTicksMsec() - _TimeSinceLastUpdate > _updateInterval)
+            UInt64 test = Time.GetTicksUsec();
+            if(Time.GetTicksUsec() - _TimeSinceLastUpdate > _updateInterval)
             {
-                _TimeSinceLastUpdate = OS.GetTicksMsec();
+                _TimeSinceLastUpdate = Time.GetTicksUsec();
                 TimeToSynchBodyPoints();
             }
         }
-        else
+    }
+
+    // Läuft auf 60 fps:
+    public override void _PhysicsProcess(float delta)
+    {
+        if(!_isServer)
         {
             float diff = 0f;
 
@@ -51,7 +57,7 @@ public class OnlineSnake : BaseSnake
 
                 float distanceeffortpercycle;
                 if(_ClientTimeDiffBodyUpdate != 0f)
-                    distanceeffortpercycle = (diff * delta) / (_ClientTimeDiffBodyUpdate / 1000f);
+                    distanceeffortpercycle = ((diff - diff * 0.05f) * delta) / (_ClientTimeDiffBodyUpdate / 1000f); // 5% der diff abziehen, da beschleunigung besser aussieht als ein stopp!
                 else
                     distanceeffortpercycle = 0.5f;
 
@@ -108,6 +114,7 @@ public class OnlineSnake : BaseSnake
                 Vector2 newPos = _body.GetPointPosition(i).LinearInterpolate(_TargetPoints[i], latencyFactor);
                 _body.SetPointPosition(i, newPos);
             }
+            // Vielleicht wenn man über den TargetPoints ist, dann das vorrausschauend weiter setzen
 
             // Gesicht nachsetzen
             _face.Position = _body.Points[0];
@@ -309,10 +316,10 @@ public class OnlineSnake : BaseSnake
             x[j] = _body.GetPointPosition(j).x;
             y[j] = _body.GetPointPosition(j).y;
         }
-        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y));
+        NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y), Time.GetTicksUsec());
     }
 
-    protected void SynchBodyPointsOnClient(string Xjson, string Yjson)
+    protected void SynchBodyPointsOnClient(string Xjson, string Yjson, UInt64 SendTime)
     {
 
         float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
@@ -323,13 +330,15 @@ public class OnlineSnake : BaseSnake
         {
             _TargetPoints.Add(new Vector2(x[i], y[i]));
         }
-        _ClientTimeDiffBodyUpdate = OS.GetTicksMsec() - _ClientTimeAtBodyPointUpdate;
-        _ClientTimeAtBodyPointUpdate = OS.GetTicksMsec();
+        _ClientTimeDiffBodyUpdate = SendTime - _ClientTimeAtBodyPointUpdate;
+        _ClientTimeAtBodyPointUpdate = SendTime;
         if(_ClientTimeDiffBodyUpdate < _updateInterval)
             _ClientTimeDiffBodyUpdate = _updateInterval;
+
+        // Umwandlung von Micro in Millisek
+        _ClientTimeDiffBodyUpdate /= 1000;
+
         _CalculateNewLatenyFactor = true;
-        OS.GetTicksUsec
-    
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
