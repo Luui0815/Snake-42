@@ -7,12 +7,13 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected float _updateInterval = 0.085f; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
-    protected float _TimeSinceLastUpdate;
+    protected UInt64 _updateInterval = 85; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
+    protected UInt64 _TimeSinceLastUpdate;
     protected UInt64 _ClientTimeAtBodyPointUpdate;
     public UInt64 _ClientTimeDiffBodyUpdate;
     protected List<Vector2> _TargetPoints = new List<Vector2>();
     private float latencyFactor{get; set;}
+    protected bool _CalculateNewLatenyFactor;
 
     public override void _Ready()
     {
@@ -26,33 +27,48 @@ public class OnlineSnake : BaseSnake
     {
         if(_isServer)
         {
-            _TimeSinceLastUpdate += delta;
-            if(_TimeSinceLastUpdate > _updateInterval)
+            UInt64 test = OS.GetTicksMsec();
+            if(OS.GetTicksMsec() - _TimeSinceLastUpdate > _updateInterval)
             {
-                _TimeSinceLastUpdate = 0;
+                _TimeSinceLastUpdate = OS.GetTicksMsec();
                 TimeToSynchBodyPoints();
             }
         }
         else
         {
-            float diff;
-            if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
-                diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
-            else
-                diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
-            
-            //diff = Mathf.Clamp(diff, 0.0f, 32.0f);
-            if(diff>500)
-                diff = 500;
-            
-            if(_ClientTimeDiffBodyUpdate != 0f)
-                latencyFactor = (Math.Abs(diff) * delta) / (_ClientTimeDiffBodyUpdate / 1000);
-            else
-                latencyFactor = 0.5f;
+            float diff = 0f;
 
-            latencyFactor = Mathf.Clamp(latencyFactor, 0.0001f, 1f); // Jetzt in ein Verhältnis etzen
+            if(_CalculateNewLatenyFactor)
+            {
+                if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
+                    diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
+                else
+                    diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
 
-            
+                //diff = Mathf.Clamp(diff, 0.0f, 32.0f);
+                if(diff>200)
+                    diff = 200;
+
+                float distanceeffortpercycle;
+                if(_ClientTimeDiffBodyUpdate != 0f)
+                    distanceeffortpercycle = (diff * delta) / (_ClientTimeDiffBodyUpdate / 1000f);
+                else
+                    distanceeffortpercycle = 0.5f;
+
+                if(diff != 0f)
+                {
+                    latencyFactor = Mathf.Abs(distanceeffortpercycle / diff); 
+                    if(latencyFactor < 0f)
+                        latencyFactor = 0f;
+                    if(latencyFactor > 1f)
+                        latencyFactor = 1f;
+                }
+                else
+                    latencyFactor = 0;
+
+                _CalculateNewLatenyFactor = false;
+            }
+            /*
             for(int i = 0; i < _TargetPoints.Count(); i++)
             {
                 Vector2 direction = Vector2.Zero;
@@ -77,12 +93,21 @@ public class OnlineSnake : BaseSnake
                     direction = _direction;
                 
                 Vector2 currentPos = _body.GetPointPosition(i);
-                Vector2 newPos = currentPos + direction * latencyFactor; // latenyFactor ist kein Faktor eher eine Differenz die jeden Zyklus zu der aktPos addiert werden muss
+                Vector2 newPos = currentPos + direction * (latencyFactor * diff);
+
+                if(newPos.y > 900 || newPos.x > 900 || newPos.y < 0 || newPos.x < 0)
+                    newPos = _TargetPoints[i];
 
                 _body.SetPointPosition(i, newPos);
             }
+            */
             
-            // Ansatz war toll hat nicht funktioniert
+            // Ansatz war toll hat nicht ganz funktioniert, bzw. bissel ruckler noch
+            for(int i = 0; i < _TargetPoints.Count(); i++)
+            {
+                Vector2 newPos = _body.GetPointPosition(i).LinearInterpolate(_TargetPoints[i], latencyFactor);
+                _body.SetPointPosition(i, newPos);
+            }
 
             // Gesicht nachsetzen
             _face.Position = _body.Points[0];
@@ -159,7 +184,10 @@ public class OnlineSnake : BaseSnake
             _Merker = false;
         }
         else
+        {
             _ClientTimeAtBodyPointUpdate = OS.GetTicksMsec();
+            _CalculateNewLatenyFactor = true;
+        }
     }
 
     protected override void MoveTween(float argv)
@@ -297,6 +325,10 @@ public class OnlineSnake : BaseSnake
         }
         _ClientTimeDiffBodyUpdate = OS.GetTicksMsec() - _ClientTimeAtBodyPointUpdate;
         _ClientTimeAtBodyPointUpdate = OS.GetTicksMsec();
+        if(_ClientTimeDiffBodyUpdate < _updateInterval)
+            _ClientTimeDiffBodyUpdate = _updateInterval;
+        _CalculateNewLatenyFactor = true;
+        OS.GetTicksUsec
     
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
