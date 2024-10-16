@@ -41,6 +41,13 @@ public partial class GlobalVariables : Node
         // Weiter Stun Server hinzufügen!
     };
 
+    public float PingTimeSnake1;
+    public float Snake1diff;
+    public float Snake1LatencyFactor;
+    public float PingTimeSnake2;
+    public float Snake2diff;
+    public float Snake2LatencyFactor;
+
 
     public override void _Ready()
     {

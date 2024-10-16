@@ -203,16 +203,9 @@ public class GameController : Node2D
     {
         GetNode<Label>("Puffer").Text = "Puffer " + NetworkManager.NetMan.BufferCount;
 		GetNode<Label>("Ping").Text = "Ping" + NetworkManager.NetMan.PingTime;
-		try
-		{
-			GetNode<Label>("Latenzfaktor").Text = "Latenz Faktor Snake1: " + Convert.ToString(_snake1.latencyFactor) + " Latenz Faktor Snake2: " + Convert.ToString(_snake2.latencyFactor);
-		}
-		catch{}
-		try
-		{
-			GetNode<Label>("Latenzfaktor").Text = "Latenz Faktor Snake1: " + Convert.ToString(_multiplayerSnake.latencyFactor);
-		}
-		catch{}
+		
+		GetNode<Label>("Info").Text = "Snake1: RealPing: " + GlobalVariables.Instance.PingTimeSnake1 + " DiffDistance: " + GlobalVariables.Instance.Snake1diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake1LatencyFactor +
+		                          "\n  Snake2: RealPing: " + GlobalVariables.Instance.PingTimeSnake2 + " DiffDistance: " + GlobalVariables.Instance.Snake2diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake2LatencyFactor;
 
     }
 

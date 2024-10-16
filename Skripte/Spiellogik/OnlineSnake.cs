@@ -10,9 +10,9 @@ public class OnlineSnake : BaseSnake
     protected float _updateInterval = 0.085f; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected float _TimeSinceLastUpdate;
     protected UInt64 _ClientTimeAtBodyPointUpdate;
-    protected UInt64 _ClientTimeDiffBodyUpdate;
+    public UInt64 _ClientTimeDiffBodyUpdate;
     protected List<Vector2> _TargetPoints = new List<Vector2>();
-    public override float latencyFactor{get; protected set;}
+    private float latencyFactor{get; set;}
 
     public override void _Ready()
     {
@@ -41,11 +41,18 @@ public class OnlineSnake : BaseSnake
             else
                 diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
             
+            //diff = Mathf.Clamp(diff, 0.0f, 32.0f);
+            if(diff>500)
+                diff = 500;
+            
             if(_ClientTimeDiffBodyUpdate != 0f)
-                latencyFactor = Math.Abs(diff) * delta / _ClientTimeDiffBodyUpdate;
+                latencyFactor = (Math.Abs(diff) * delta) / (_ClientTimeDiffBodyUpdate / 1000);
             else
                 latencyFactor = 0.5f;
 
+            latencyFactor = Mathf.Clamp(latencyFactor, 0.0001f, 1f); // Jetzt in ein Verhältnis etzen
+
+            
             for(int i = 0; i < _TargetPoints.Count(); i++)
             {
                 Vector2 direction = Vector2.Zero;
@@ -69,12 +76,30 @@ public class OnlineSnake : BaseSnake
                 else
                     direction = _direction;
                 
-                Vector2 newPos = direction * (latencyFactor * diff);
+                Vector2 currentPos = _body.GetPointPosition(i);
+                Vector2 newPos = currentPos + direction * latencyFactor; // latenyFactor ist kein Faktor eher eine Differenz die jeden Zyklus zu der aktPos addiert werden muss
+
                 _body.SetPointPosition(i, newPos);
             }
+            
+            // Ansatz war toll hat nicht funktioniert
+
             // Gesicht nachsetzen
             _face.Position = _body.Points[0];
             _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
+
+            if(Name == "Snake1")
+            {
+                GlobalVariables.Instance.PingTimeSnake1 = _ClientTimeDiffBodyUpdate;
+                GlobalVariables.Instance.Snake1diff = diff;
+                GlobalVariables.Instance.Snake1LatencyFactor = latencyFactor;
+            }
+            if(Name == "Snake2")
+            {
+                GlobalVariables.Instance.PingTimeSnake2 = _ClientTimeDiffBodyUpdate;
+                GlobalVariables.Instance.Snake2diff = diff;
+                GlobalVariables.Instance.Snake2LatencyFactor = latencyFactor;
+            }
         }
     }
 

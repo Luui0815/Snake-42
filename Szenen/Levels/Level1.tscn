@@ -328,7 +328,7 @@ margin_right = 887.0
 margin_bottom = 141.0
 text = "Ping"
 
-[node name="Latenzfaktor" type="Label" parent="."]
+[node name="Info" type="Label" parent="."]
 modulate = Color( 0, 0, 0, 1 )
 margin_left = 391.0
 margin_top = 132.0
