@@ -319,8 +319,12 @@ public class OnlineSnake : BaseSnake
         NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y), Time.GetTicksUsec());
     }
 
+    private List<List<Vector2>> SavedTargetPoints = new List<List<Vector2>>();
+    private List<Vector2[]> SavedBodyPoints = new List<Vector2[]>();
     protected void SynchBodyPointsOnClient(string Xjson, string Yjson, UInt64 SendTime)
     {
+        SavedTargetPoints.Add(_TargetPoints);
+        SavedBodyPoints.Add(_body.Points);
 
         float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
         float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
