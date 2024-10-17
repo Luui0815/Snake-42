@@ -36,7 +36,7 @@ public class OnlineSnake : BaseSnake
             }
         }
     }
-
+    private int farmes = 0;
     // Läuft auf 60 fps:
     public override void _PhysicsProcess(float delta)
     {
@@ -44,7 +44,7 @@ public class OnlineSnake : BaseSnake
         {
             float diff = 0f;
 
-            if(_CalculateNewLatenyFactor)
+            if(_CalculateNewLatenyFactor && farmes == 60)
             {
                 if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
                     diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
@@ -57,7 +57,7 @@ public class OnlineSnake : BaseSnake
 
                 float distanceeffortpercycle;
                 if(_ClientTimeDiffBodyUpdate != 0f)
-                    distanceeffortpercycle = ((diff - diff * 0.05f) * delta) / (_ClientTimeDiffBodyUpdate / 1000f); // 5% der diff abziehen, da beschleunigung besser aussieht als ein stopp!
+                    distanceeffortpercycle = ((diff - diff * 0.0f) * delta) / (_ClientTimeDiffBodyUpdate / 1000f); // 5% der diff abziehen, da beschleunigung besser aussieht als ein stopp!
                 else
                     distanceeffortpercycle = 0.5f;
 
@@ -114,6 +114,7 @@ public class OnlineSnake : BaseSnake
                 Vector2 newPos = _body.GetPointPosition(i).LinearInterpolate(_TargetPoints[i], latencyFactor);
                 _body.SetPointPosition(i, newPos);
             }
+            farmes ++;
             // Vielleicht wenn man über den TargetPoints ist, dann das vorrausschauend weiter setzen
 
             // Gesicht nachsetzen
