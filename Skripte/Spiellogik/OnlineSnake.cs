@@ -36,7 +36,9 @@ public class OnlineSnake : BaseSnake
             }
         }
     }
-    private int farmes = 0;
+    protected List<Vector2> _SavedTargetPoints = new List<Vector2>(); // wird benötigt da TargetPoints unabhängig von dem Animationszyklus geändert werden kann
+    protected List<UInt64> _ListMeassuredPingTimes = new List<UInt64>();
+    protected double _AveragePingTime;
     // Läuft auf 60 fps:
     public override void _PhysicsProcess(float delta)
     {
@@ -44,20 +46,16 @@ public class OnlineSnake : BaseSnake
         {
             float diff = 0f;
 
-            if(_CalculateNewLatenyFactor && farmes == 60)
+            if(_CalculateNewLatenyFactor)
             {
                 if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
                     diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
                 else
                     diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
 
-                //diff = Mathf.Clamp(diff, 0.0f, 32.0f);
-                if(diff>200)
-                    diff = 200;
-
                 float distanceeffortpercycle;
-                if(_ClientTimeDiffBodyUpdate != 0f)
-                    distanceeffortpercycle = ((diff - diff * 0.0f) * delta) / (_ClientTimeDiffBodyUpdate / 1000f); // 5% der diff abziehen, da beschleunigung besser aussieht als ein stopp!
+                if(_AveragePingTime != 0f)
+                    distanceeffortpercycle = (diff * delta) / ((float)(_AveragePingTime / 1000f)); 
                 else
                     distanceeffortpercycle = 0.5f;
 
@@ -71,51 +69,25 @@ public class OnlineSnake : BaseSnake
                 }
                 else
                     latencyFactor = 0;
+                
+                MakeAverageLatenyFactor();
 
                 _CalculateNewLatenyFactor = false;
-            }
-            /*
-            for(int i = 0; i < _TargetPoints.Count(); i++)
-            {
-                Vector2 direction = Vector2.Zero;
-                if(i != 0)
-                {
-                    if(_TargetPoints[i - 1].x - _TargetPoints[i].x == 0f)
-                    {
-                        if(_TargetPoints[i - 1].y - _TargetPoints[i].y > 0f)
-                            direction = Vector2.Up;
-                        else
-                            direction = Vector2.Down;
-                    }
-                    else
-                    {
-                        if(_TargetPoints[i - 1].x - _TargetPoints[i].x > 0f)
-                            direction = Vector2.Right;
-                        else
-                            direction = Vector2.Left;
-                    }
-                }
-                else
-                    direction = _direction;
                 
-                Vector2 currentPos = _body.GetPointPosition(i);
-                Vector2 newPos = currentPos + direction * (latencyFactor * diff);
-
-                if(newPos.y > 900 || newPos.x > 900 || newPos.y < 0 || newPos.x < 0)
-                    newPos = _TargetPoints[i];
-
-                _body.SetPointPosition(i, newPos);
+                // die jetzigen TargetPoints speichern da sie asynchron aktualisiertwe dren können, das führt zu rucklern!
+                _SavedTargetPoints.Clear();
+                for(int i = 0; i < _TargetPoints.Count(); i++)
+                    _SavedTargetPoints.Add(new Vector2(_TargetPoints[i]));
+                _points = _body.Points;
             }
-            */
             
-            // Ansatz war toll hat nicht ganz funktioniert, bzw. bissel ruckler noch
-            for(int i = 0; i < _TargetPoints.Count(); i++)
+            for(int i = 0; i < _SavedTargetPoints.Count(); i++)
             {
-                Vector2 newPos = _body.GetPointPosition(i).LinearInterpolate(_TargetPoints[i], latencyFactor);
+                Vector2 DiffVec = _SavedTargetPoints[i] - _points[i];
+                DiffVec *= latencyFactor;
+                Vector2 newPos = _body.Points[i] + DiffVec;
                 _body.SetPointPosition(i, newPos);
             }
-            farmes ++;
-            // Vielleicht wenn man über den TargetPoints ist, dann das vorrausschauend weiter setzen
 
             // Gesicht nachsetzen
             _face.Position = _body.Points[0];
@@ -123,17 +95,39 @@ public class OnlineSnake : BaseSnake
 
             if(Name == "Snake1")
             {
-                GlobalVariables.Instance.PingTimeSnake1 = _ClientTimeDiffBodyUpdate;
+                GlobalVariables.Instance.PingTimeSnake1 = (float)_AveragePingTime;
                 GlobalVariables.Instance.Snake1diff = diff;
                 GlobalVariables.Instance.Snake1LatencyFactor = latencyFactor;
             }
             if(Name == "Snake2")
             {
-                GlobalVariables.Instance.PingTimeSnake2 = _ClientTimeDiffBodyUpdate;
+                GlobalVariables.Instance.PingTimeSnake2 = (float)_AveragePingTime;
                 GlobalVariables.Instance.Snake2diff = diff;
                 GlobalVariables.Instance.Snake2LatencyFactor = latencyFactor;
             }
         }
+    }
+    protected List<float> ListLatencyFactorHistory = new List<float>();
+    protected void MakeAverageLatenyFactor()
+    {
+        if(ListLatencyFactorHistory.Count() > 45)
+            ListLatencyFactorHistory.RemoveAt(0);
+        ListLatencyFactorHistory.Add(latencyFactor);
+        
+        latencyFactor = ListLatencyFactorHistory.Average();
+    }
+
+    protected void CalculatePingTimeStatistic()
+    {
+        // Mir scheint es so das ohne diese Satistik die Schlange trotzdem flüssiger läuft
+        // Auf Basis der letzten 5 Pingzeiten wird ein durchschnittlicher Ping berechnet
+        if(_ListMeassuredPingTimes.Count() > 15)
+            _ListMeassuredPingTimes.RemoveAt(0);
+        _ListMeassuredPingTimes.Add(_ClientTimeDiffBodyUpdate);
+
+        // jetzt den durchschnitt berechnen!
+        _AveragePingTime = _ListMeassuredPingTimes.Average(ping => (double)ping);;
+        
     }
 
     public override void SetPlayerSettings(bool isServer, bool isSnake1, BaseSnake otherSnake)
@@ -319,14 +313,8 @@ public class OnlineSnake : BaseSnake
         }
         NetworkManager.NetMan.rpc(GetPath(), nameof(SynchBodyPointsOnClient), false, false, false, JsonConvert.SerializeObject(x), JsonConvert.SerializeObject(y), Time.GetTicksUsec());
     }
-
-    private List<List<Vector2>> SavedTargetPoints = new List<List<Vector2>>();
-    private List<Vector2[]> SavedBodyPoints = new List<Vector2[]>();
     protected void SynchBodyPointsOnClient(string Xjson, string Yjson, UInt64 SendTime)
     {
-        SavedTargetPoints.Add(_TargetPoints);
-        SavedBodyPoints.Add(_body.Points);
-
         float[] x = JsonConvert.DeserializeObject<float[]>(Xjson);
         float[] y = JsonConvert.DeserializeObject<float[]>(Yjson);
         _TargetPoints.Clear();
@@ -344,6 +332,8 @@ public class OnlineSnake : BaseSnake
         _ClientTimeDiffBodyUpdate /= 1000;
 
         _CalculateNewLatenyFactor = true;
+        // um Netzwerkschwankungen auszugelcihen wird für folgende Berechnungen ein Mittelwert beerchnet
+        CalculatePingTimeStatistic();
         // antwort an Server schicken das alle Punkte aktualisiert worden sind
         // etworkManager.NetMan.rpc(GetPath(), nameof(PointUpdateOnClientReceived), false, false, true);
     }
