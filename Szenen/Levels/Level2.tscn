@@ -321,7 +321,6 @@ color = Color( 0.294118, 0.266667, 0.266667, 1 )
 modulate = Color( 0, 0, 0, 1 )
 margin_right = 542.0
 margin_bottom = 17.0
-custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "Puffergröße"
 
 [node name="Ping" type="Label" parent="PingLabel"]

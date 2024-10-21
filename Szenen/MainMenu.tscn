@@ -27,7 +27,7 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color( 0, 0, 0, 1 )
 
-[sub_resource type="ConvexPolygonShape2D" id=6]
+[sub_resource type="ConvexPolygonShape2D" id=16]
 points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
 
 [sub_resource type="TileSet" id=4]
@@ -97,14 +97,14 @@ points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
 6/navigation_offset = Vector2( 0, 0 )
 6/shape_offset = Vector2( 0, 0 )
 6/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
-6/shape = SubResource( 6 )
+6/shape = SubResource( 16 )
 6/shape_one_way = false
 6/shape_one_way_margin = 1.0
 6/shapes = [ {
 "autotile_coord": Vector2( 0, 0 ),
 "one_way": false,
 "one_way_margin": 1.0,
-"shape": SubResource( 6 ),
+"shape": SubResource( 16 ),
 "shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
 } ]
 6/z_index = 0
