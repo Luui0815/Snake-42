@@ -11,7 +11,7 @@ public class HighScores
 
 public class HighScoreManager
 {
-    private string _filePath = ProjectSettings.GlobalizePath("user://highscores.json");
+    private readonly string _filePath = ProjectSettings.GlobalizePath("user://highscores.json");
     private HighScores _highscores;
 
     public HighScoreManager()

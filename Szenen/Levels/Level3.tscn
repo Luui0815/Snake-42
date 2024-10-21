@@ -290,14 +290,6 @@ text = "Test"
 align = 1
 valign = 1
 
-[node name="Pause" type="Button" parent="."]
-visible = false
-margin_left = 1136.0
-margin_top = 24.0
-margin_right = 1232.0
-margin_bottom = 64.0
-text = "Pause"
-
 [node name="ToggleVoiceSound" type="Button" parent="."]
 margin_left = 1061.0
 margin_top = 288.0
@@ -318,4 +310,35 @@ text = "Mikrofon aus"
 stream = ExtResource( 7 )
 volume_db = -10.0
 
-[connection signal="pressed" from="Pause" to="." method="_on_Pause_pressed"]
+[node name="PingLabel" type="ColorRect" parent="."]
+margin_left = 320.0
+margin_top = 8.0
+margin_right = 768.0
+margin_bottom = 88.0
+color = Color( 0.294118, 0.266667, 0.266667, 1 )
+
+[node name="Puffer" type="Label" parent="PingLabel"]
+modulate = Color( 0, 0, 0, 1 )
+margin_right = 542.0
+margin_bottom = 17.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+text = "Puffergröße"
+
+[node name="Ping" type="Label" parent="PingLabel"]
+modulate = Color( 0, 0, 0, 1 )
+margin_top = 16.0
+margin_right = 501.0
+margin_bottom = 40.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+text = "Ping"
+
+[node name="Info" type="Label" parent="PingLabel"]
+modulate = Color( 0, 0, 0, 1 )
+margin_top = 32.0
+margin_right = 520.0
+margin_bottom = 75.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+text = "LatenzFaktor "
+
+[connection signal="pressed" from="ToggleVoiceSound" to="." method="_on_ToggleVoiceSound_pressed"]
+[connection signal="pressed" from="ToggleMicrophone" to="." method="_on_ToggleMicrophone_pressed"]

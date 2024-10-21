@@ -6,12 +6,10 @@ using System.Runtime.CompilerServices;
 public class GameController : Node2D
 {
 	private HighScoreManager _highScoreManager;
-	private BaseSnake _snake1;
-	private BaseSnake _snake2;
-	private BaseSnake _multiplayerSnake;
+	private BaseSnake _snake1, _snake2, _multiplayerSnake;
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
-	private Label _highScoreLabel, _scoreLabel;
+	private Label _highScoreLabel, _scoreLabel, _puffer, _ping, _info;
 	private Button _playSoundButton, _playVoiceButton;
 	private AudioStreamPlayer2D _audioPlayer;
 
@@ -26,21 +24,36 @@ public class GameController : Node2D
 	public List<ColorRect> Obstacles{ get{return _obstacles; } }
 
 	public override void _Ready()
+	{		
+        _levelName = GetTree().CurrentScene.Name;
+		InitializeSnakeScenes();
+		InitializeSnakeSpeed();
+		HandleLevelMode();
+		InitializeHighScoreManager();
+		InitializeVoiceChatButtons();
+		CreateGameField();
+		InitializeFruit();
+		InitializeAudioPlayer();
+		InitializePingDisplay();
+        _gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
+    }
+
+    private void InitializeSnakeScenes()
 	{
-		if (GlobalVariables.Instance.OnlineGame)
-		{
+        if (GlobalVariables.Instance.OnlineGame)
+        {
             PackedScene onlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineSnake.tscn");
             _snake1 = onlineSnakeScene.Instance() as OnlineSnake;
             AddChild(_snake1);
             _snake2 = onlineSnakeScene.Instance() as OnlineSnake;
             AddChild(_snake2);
 
-			PackedScene onlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineMultiplayerSnake.tscn");
-			_multiplayerSnake = onlineMultiplayerSnakeScene.Instance() as OnlineMultiplayerSnake;
-			AddChild(_multiplayerSnake);
+            PackedScene onlineMultiplayerSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OnlineMultiplayerSnake.tscn");
+            _multiplayerSnake = onlineMultiplayerSnakeScene.Instance() as OnlineMultiplayerSnake;
+            AddChild(_multiplayerSnake);
         }
-		else if (!GlobalVariables.Instance.OnlineGame)
-		{
+        else if (!GlobalVariables.Instance.OnlineGame)
+        {
             PackedScene offlineSnakeScene = (PackedScene)ResourceLoader.Load("res://Szenen/Game Elements/OfflineSnake.tscn");
             _snake1 = offlineSnakeScene.Instance() as OfflineSnake;
             AddChild(_snake1);
@@ -51,162 +64,182 @@ public class GameController : Node2D
             _multiplayerSnake = offlineMultiplayerSnakeScene.Instance() as OfflineMultiplayerSnake;
             AddChild(_multiplayerSnake);
         }
-		_snake1.Name = "Snake1";
-		_snake2.Name = "Snake2";
-		_multiplayerSnake.Name = "Snake3";
-
+        _snake1.Name = "Snake1";
+        _snake2.Name = "Snake2";
+        _multiplayerSnake.Name = "Snake3";
         //_multiplayerSnake = GetNode<OfflineMultiplayerSnake>("Snake3");
+    }
 
+    private void InitializeSnakeSpeed()
+	{
         // folgendes BITTE NICHT durch eine Formel ersetzen, da man es so feiner einstellen kann!
         switch (GlobalVariables.Instance.LevelDifficulty)
-		{
-			case 0:
-			{
-				// einfach
-				_snake1.moveDelay = _snake2.moveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
-				_multiplayerSnake.moveDelay = 0.4f;
-                break;
-			}
-			case 1:
-			{
-				// mittel
-				_snake1.moveDelay = _snake2.moveDelay =  0.2f;
-					_multiplayerSnake.moveDelay = 0.35f;
-                break;
-			}
-			case 2:
-			{
-				// schwer
-				_snake1.moveDelay = _snake2.moveDelay= 0.15f;
+        {
+            case 0:
+                {
+                    // einfach
+                    _snake1.moveDelay = _snake2.moveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
+                    _multiplayerSnake.moveDelay = 0.4f;
+                    break;
+                }
+            case 1:
+                {
+                    // mittel
+                    _snake1.moveDelay = _snake2.moveDelay = 0.2f;
+                    _multiplayerSnake.moveDelay = 0.35f;
+                    break;
+                }
+            case 2:
+                {
+                    // schwer
+                    _snake1.moveDelay = _snake2.moveDelay = 0.15f;
                     _multiplayerSnake.moveDelay = 0.3f;
                     break;
-			}
-			case 3:
-			{
-				// profi
-				_snake1.moveDelay = _snake2.moveDelay= 0.09f;
+                }
+            case 3:
+                {
+                    // profi
+                    _snake1.moveDelay = _snake2.moveDelay = 0.09f;
                     _multiplayerSnake.moveDelay = 0.2f;
                     break;
-			}
-		}
+                }
+        }
+    }
 
-		switch (GlobalVariables.Instance.LevelMode)
-		{
-			case 0:
-			{
-				// Miteinander
-				_snake1.QueueFree();
-				_snake2.QueueFree();
+	private void HandleLevelMode()
+    {
+        switch (GlobalVariables.Instance.LevelMode)
+        {
+            case 0:
+                {
+                    // Miteinander
+                    _snake1.QueueFree();
+                    _snake2.QueueFree();
 
-				if(GlobalVariables.Instance.OnlineGame == false)
-				{
-					_multiplayerSnake.MoveSnake();
-				}
-				else
-				{
-					// Spieler 1
-					if(GlobalVariables.Instance.Room.IamPlayerOne == true)
-						_multiplayerSnake.SetPlayerSettings(true);
-					else
-					{
-						_multiplayerSnake.SetPlayerSettings(false);
-						NetworkManager.NetMan.rpc(_multiplayerSnake.GetPath(), nameof(_multiplayerSnake.MoveSnake));
-					}
-				}
-				
-				break;
-			}
-			case 1:
-			{
-				//Gegeneinander
-				_multiplayerSnake.QueueFree();
-				
-				// Offline
-				if(GlobalVariables.Instance.OnlineGame == false)
-				{
-					_snake1.SetPlayerSettings(false, true, _snake2);
-					_snake2.SetPlayerSettings(false, false, _snake2);
-					_snake1.MoveSnake();
-					_snake2.MoveSnake();
-				}
-				// Online
-				else
-				{
-					// Spieler 1
-					if(GlobalVariables.Instance.Room.IamPlayerOne == true)
-					{
-						_snake1.SetPlayerSettings(true, true, _snake2);
-						_snake2.SetPlayerSettings(true, false, _snake1);
-					}
-					// Spieler 2
-					else
-					{
-						_snake1.SetPlayerSettings(false, true, _snake2);
-						_snake2.SetPlayerSettings(false, false, _snake1);
-						// Der 2.Spieler startet beide Schlangen da er langsamer ist
-						NetworkManager.NetMan.rpc(_snake1.GetPath(), nameof(_snake1.MoveSnake));
-						NetworkManager.NetMan.rpc(_snake2.GetPath(), nameof(_snake2.MoveSnake));
-					}	
-				}
+                    if (GlobalVariables.Instance.OnlineGame == false)
+                    {
+                        _multiplayerSnake.MoveSnake();
+                    }
+                    else
+                    {
+                        // Spieler 1
+                        if (GlobalVariables.Instance.Room.IamPlayerOne == true)
+                            _multiplayerSnake.SetPlayerSettings(true);
+                        else
+                        {
+                            _multiplayerSnake.SetPlayerSettings(false);
+                            NetworkManager.NetMan.rpc(_multiplayerSnake.GetPath(), nameof(_multiplayerSnake.MoveSnake));
+                        }
+                    }
 
-				break;
-			}
-			case 2:
-			{
-				//Einzelspieler
-				_snake2.QueueFree();
-				_multiplayerSnake.QueueFree();
-                _snake1.SetPlayerSettings(false, true, null);
-                _snake1.MoveSnake();
-				break;
-			}
-		}
+                    break;
+                }
+            case 1:
+                {
+                    //Gegeneinander
+                    _multiplayerSnake.QueueFree();
+
+                    // Offline
+                    if (GlobalVariables.Instance.OnlineGame == false)
+                    {
+                        _snake1.SetPlayerSettings(false, true, _snake2);
+                        _snake2.SetPlayerSettings(false, false, _snake2);
+                        _snake1.MoveSnake();
+                        _snake2.MoveSnake();
+                    }
+                    // Online
+                    else
+                    {
+                        // Spieler 1
+                        if (GlobalVariables.Instance.Room.IamPlayerOne == true)
+                        {
+                            _snake1.SetPlayerSettings(true, true, _snake2);
+                            _snake2.SetPlayerSettings(true, false, _snake1);
+                        }
+                        // Spieler 2
+                        else
+                        {
+                            _snake1.SetPlayerSettings(false, true, _snake2);
+                            _snake2.SetPlayerSettings(false, false, _snake1);
+                            // Der 2.Spieler startet beide Schlangen da er langsamer ist
+                            NetworkManager.NetMan.rpc(_snake1.GetPath(), nameof(_snake1.MoveSnake));
+                            NetworkManager.NetMan.rpc(_snake2.GetPath(), nameof(_snake2.MoveSnake));
+                        }
+                    }
+
+                    break;
+                }
+            case 2:
+                {
+                    //Einzelspieler
+                    _snake2.QueueFree();
+                    _multiplayerSnake.QueueFree();
+                    _snake1.SetPlayerSettings(false, true, null);
+                    _snake1.MoveSnake();
+                    break;
+                }
+        }
+    }
+
+	private void InitializeHighScoreManager()
+	{
+        _highScoreManager = new HighScoreManager();
+        _highScoreLabel = GetNode<Label>("ScoreLabels/HighScore");
+        _scoreLabel = GetNode<Label>("ScoreLabels/Score");
+        _scoreLabel.Text = "Punktestand: " + _score;
+        UpdateHighScoreDisplay();
+    }
+
+	private void InitializeVoiceChatButtons()
+	{
+        _playSoundButton = GetNode<Button>("ToggleVoiceSound");
+        _playVoiceButton = GetNode<Button>("ToggleMicrophone");
+        if (!GlobalVariables.Instance.OnlineGame)
+        {
+            _playSoundButton.Hide();
+            _playVoiceButton.Hide();
+        }
+    }
+
+	private void InitializeFruit()
+	{
         _fruit = GetNode<Fruit>("Fruit");
-		_fruit.Init();
-		_highScoreManager = new HighScoreManager();
-		_gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
+        _fruit.Init();
+        if (GlobalVariables.Instance.OnlineGame == false)
+            _fruit.SetNewPosition(_fruit.RandomizePosition());
+        else
+        {
+            Vector2 newPos = _fruit.RandomizePosition();
+            // Nur Spieler1 erzeugt bei beiden die Frucht!
+            if (GlobalVariables.Instance.Room.IamPlayerOne == true)
+            {
+                NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x, newPos.y);
+            }
+        }
+    }
 
-		_highScoreLabel = GetNode<Label>("ScoreLabels/HighScore");
-		_scoreLabel = GetNode<Label>("ScoreLabels/Score");
-		_scoreLabel.Text = "Punktestand: " + _score;
+    private void InitializeAudioPlayer()
+    {
+        _audioPlayer = GetNode<AudioStreamPlayer2D>("MainTheme");
+        _audioPlayer.Play();
+        _audioPlayer.PauseMode = PauseModeEnum.Process;
+    }
 
-		_playSoundButton = GetNode<Button>("ToggleVoiceSound");
-		_playVoiceButton = GetNode<Button>("ToggleMicrophone");
-		if (!GlobalVariables.Instance.OnlineGame)
-		{
-			_playSoundButton.Hide();
-			_playVoiceButton.Hide();
-		}
-
-        _levelName = GetTree().CurrentScene.Name;
-		CreateGameField();
-
-		if(GlobalVariables.Instance.OnlineGame == false)
-			_fruit.SetNewPosition(_fruit.RandomizePosition());
-		else
-		{
-			Vector2 newPos = _fruit.RandomizePosition();
-			// Nur Spieler1 erzeugt bei beiden die Frucht!
-			if(GlobalVariables.Instance.Room.IamPlayerOne == true)
-			{
-				NetworkManager.NetMan.rpc(_fruit.GetPath(), nameof(_fruit.SetNewPosition), false, true, true, newPos.x , newPos.y);
-			}
-		}
-		UpdateHighScoreDisplay();
-
-		_audioPlayer = GetNode<AudioStreamPlayer2D>("MainTheme");
-		_audioPlayer.Play();
-		_audioPlayer.PauseMode = PauseModeEnum.Process;
+    private void InitializePingDisplay()
+    {
+        _puffer = GetNode<Label>("PingLabel/Puffer");
+        _ping = GetNode<Label>("PingLabel/Ping");
+        _info = GetNode<Label>("PingLabel/Info");
+        if (!GlobalVariables.Instance.OnlineGame)
+            GetNode<ColorRect>("PingLabel").Hide();
     }
 
     public override void _Process(float delta)
     {
-        GetNode<Label>("Puffer").Text = "Puffer " + NetworkManager.NetMan.BufferCount;
-		GetNode<Label>("Ping").Text = "Ping" + NetworkManager.NetMan.PingTime;
-		
-		GetNode<Label>("Info").Text = "Snake1: RealPing: " + GlobalVariables.Instance.PingTimeSnake1 + " DiffDistance: " + GlobalVariables.Instance.Snake1diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake1LatencyFactor +
+        _puffer.Text = "Puffer " + NetworkManager.NetMan.BufferCount;
+		_ping.Text = "Ping" + NetworkManager.NetMan.PingTime;
+		_info.Text = "Snake1: RealPing: " + GlobalVariables.Instance.PingTimeSnake1 + " DiffDistance: " + GlobalVariables.Instance.Snake1diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake1LatencyFactor +
 		                          "\n  Snake2: RealPing: " + GlobalVariables.Instance.PingTimeSnake2 + " DiffDistance: " + GlobalVariables.Instance.Snake2diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake2LatencyFactor;
-
     }
 
     private void CreateGameField()
@@ -318,6 +351,7 @@ public class GameController : Node2D
 					obstacle.Color = new Color(0, 0, 0, 0); 
 					obstacle.RectSize = new Vector2(32, 32);
 					obstacle.RectPosition = new Vector2((y*32)+16, (x*32)+16);
+					obstacle.MouseFilter = Control.MouseFilterEnum.Ignore;
 					Obstacles.Add(obstacle);
 					AddChild(obstacle);
 				}
@@ -347,6 +381,7 @@ public class GameController : Node2D
 
 	private void _on_ToggleVoiceSound_pressed()
 	{
+		GD.Print("ToggleVoiceSound pressed");
 		if (_playSoundButton.Pressed == true)
 			NetworkManager.NetMan.AudioIsPlaying = false;
 		else
@@ -356,6 +391,7 @@ public class GameController : Node2D
 
     private void _on_ToggleMicrophone_pressed()
 	{
+        GD.Print("ToggleMicrophone pressed");
         if (_playVoiceButton.Pressed == true)
             NetworkManager.NetMan.AudioIsRecording = false;
         else

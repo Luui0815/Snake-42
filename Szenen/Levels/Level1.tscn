@@ -291,9 +291,9 @@ align = 1
 valign = 1
 
 [node name="ToggleVoiceSound" type="Button" parent="."]
-margin_left = 1061.0
+margin_left = 1064.0
 margin_top = 288.0
-margin_right = 1140.0
+margin_right = 1143.0
 margin_bottom = 348.0
 custom_fonts/font = SubResource( 8 )
 toggle_mode = true
@@ -312,28 +312,34 @@ text = "Mikrofon aus"
 stream = ExtResource( 7 )
 volume_db = -10.0
 
-[node name="Puffer" type="Label" parent="."]
+[node name="PingLabel" type="ColorRect" parent="."]
+margin_left = 320.0
+margin_top = 8.0
+margin_right = 768.0
+margin_bottom = 88.0
+color = Color( 0.294118, 0.266667, 0.266667, 1 )
+
+[node name="Puffer" type="Label" parent="PingLabel"]
 modulate = Color( 0, 0, 0, 1 )
-margin_left = 387.0
-margin_top = 100.0
-margin_right = 929.0
-margin_bottom = 117.0
+margin_right = 542.0
+margin_bottom = 17.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "Puffergröße"
 
-[node name="Ping" type="Label" parent="."]
+[node name="Ping" type="Label" parent="PingLabel"]
 modulate = Color( 0, 0, 0, 1 )
-margin_left = 386.0
-margin_top = 117.0
-margin_right = 887.0
-margin_bottom = 141.0
+margin_top = 16.0
+margin_right = 501.0
+margin_bottom = 40.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "Ping"
 
-[node name="Info" type="Label" parent="."]
+[node name="Info" type="Label" parent="PingLabel"]
 modulate = Color( 0, 0, 0, 1 )
-margin_left = 391.0
-margin_top = 132.0
-margin_right = 911.0
-margin_bottom = 175.0
+margin_top = 32.0
+margin_right = 520.0
+margin_bottom = 75.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "LatenzFaktor "
 
 [connection signal="pressed" from="ToggleVoiceSound" to="." method="_on_ToggleVoiceSound_pressed"]
