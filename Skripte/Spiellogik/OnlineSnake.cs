@@ -12,8 +12,12 @@ public class OnlineSnake : BaseSnake
     protected UInt64 _ClientTimeAtBodyPointUpdate;
     public UInt64 _ClientTimeDiffBodyUpdate;
     protected List<Vector2> _TargetPoints = new List<Vector2>();
-    private float latencyFactor{get; set;}
+    protected float latencyFactor{get; set;}
     protected bool _CalculateNewLatenyFactor;
+    protected List<Vector2> _SavedTargetPoints = new List<Vector2>(); // wird benötigt da TargetPoints unabhängig von dem Animationszyklus geändert werden kann
+    protected List<UInt64> _ListMeassuredPingTimes = new List<UInt64>();
+    protected double _AveragePingTime;
+    protected List<float> ListLatencyFactorHistory = new List<float>();
 
     public override void _Ready()
     {
@@ -28,7 +32,6 @@ public class OnlineSnake : BaseSnake
     {
         if(_isServer)
         {
-            UInt64 test = Time.GetTicksUsec();
             if(Time.GetTicksUsec() - _TimeSinceLastUpdate > _updateInterval)
             {
                 _TimeSinceLastUpdate = Time.GetTicksUsec();
@@ -36,9 +39,6 @@ public class OnlineSnake : BaseSnake
             }
         }
     }
-    protected List<Vector2> _SavedTargetPoints = new List<Vector2>(); // wird benötigt da TargetPoints unabhängig von dem Animationszyklus geändert werden kann
-    protected List<UInt64> _ListMeassuredPingTimes = new List<UInt64>();
-    protected double _AveragePingTime;
     // Läuft auf 60 fps:
     public override void _PhysicsProcess(float delta)
     {
@@ -107,7 +107,7 @@ public class OnlineSnake : BaseSnake
             }
         }
     }
-    protected List<float> ListLatencyFactorHistory = new List<float>();
+    
     protected void MakeAverageLatenyFactor()
     {
         if(ListLatencyFactorHistory.Count() > 45)
@@ -144,8 +144,9 @@ public class OnlineSnake : BaseSnake
             {
                 _points[i] += new Vector2(0, 2 * _gridSize);
                 _body.SetPointPosition(i, _points[i]);
-                for(int j = 0; j < _body.GetPointCount(); j++)
-                    _TargetPoints[j] = new Vector2(_body.GetPointPosition(j));
+                _TargetPoints[i] = new Vector2(_body.GetPointPosition(i));
+                // for(int j = 0; j < _body.GetPointCount(); j++)
+                //    _TargetPoints[j] = new Vector2(_body.GetPointPosition(j));
             }
         }
         _otherSnake = otherSnake;
