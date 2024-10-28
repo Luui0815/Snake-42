@@ -348,7 +348,8 @@ public class Lobby : Control
                 _client.StopConnection();
             QueueFree();
         }
-        GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
+        
+        GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
     }
 
     private void _on_PrintRTC_pressed()
