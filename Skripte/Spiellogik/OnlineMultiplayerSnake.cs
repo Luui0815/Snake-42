@@ -248,7 +248,8 @@ public class OnlineMultiplayerSnake : OnlineSnake
             _audioPlayer.Play();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
-            _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
+            _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
+            // _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
             _growing = true;
             //IncreseSpeed();
             _points = _body.Points;
@@ -268,8 +269,9 @@ public class OnlineMultiplayerSnake : OnlineSnake
         //IncreaseSpeed();
         _controller.UpdateScore();
         GD.Print($"{Name} hat Frucht gefressen!");
-        _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
-        //_TargetPoints.Add(_body.GetPointPosition(_body.Points.Count() - 1)); // hoffen das es funzt
+        _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
+        // _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
+        // _TargetPoints.Add(_body.GetPointPosition(_body.Points.Count() - 1)); // hoffen das es funzt
         SwapControl();
     }
 
