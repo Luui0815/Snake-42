@@ -354,10 +354,10 @@ margin_bottom = 448.0
 custom_fonts/font = SubResource( 2 )
 
 [node name="InfoBereit" type="Label" parent="."]
-margin_left = 960.0
-margin_top = 640.0
-margin_right = 1151.0
-margin_bottom = 688.0
+margin_left = 928.0
+margin_top = 672.0
+margin_right = 1119.0
+margin_bottom = 720.0
 custom_fonts/font = SubResource( 13 )
 
 [node name="LabelName" type="Label" parent="."]

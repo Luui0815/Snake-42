@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=1]
 [ext_resource path="res://Szenen/Game Elements/Fruit.tscn" type="PackedScene" id=3]
@@ -242,10 +242,6 @@ font_data = ExtResource( 6 )
 size = 10
 font_data = ExtResource( 6 )
 
-[sub_resource type="DynamicFont" id=9]
-size = 10
-font_data = ExtResource( 6 )
-
 [node name="Level1" type="Node2D"]
 script = ExtResource( 4 )
 
@@ -290,30 +286,20 @@ text = "Test"
 align = 1
 valign = 1
 
-[node name="ToggleVoiceSound" type="Button" parent="."]
-margin_left = 1064.0
-margin_top = 288.0
-margin_right = 1143.0
-margin_bottom = 348.0
+[node name="ToggleVoiceChat" type="Button" parent="."]
+margin_left = 1056.0
+margin_top = 272.0
+margin_right = 1272.0
+margin_bottom = 320.0
 custom_fonts/font = SubResource( 8 )
 toggle_mode = true
-text = "Ton aus"
-
-[node name="ToggleMicrophone" type="Button" parent="."]
-margin_left = 1152.0
-margin_top = 288.0
-margin_right = 1275.0
-margin_bottom = 348.0
-custom_fonts/font = SubResource( 9 )
-toggle_mode = true
-text = "Mikrofon aus"
+text = "Sprachchat anschalten"
 
 [node name="MainTheme" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
 volume_db = -10.0
 
 [node name="PingLabel" type="ColorRect" parent="."]
-visible = false
 margin_left = 320.0
 margin_top = 8.0
 margin_right = 768.0
@@ -343,5 +329,4 @@ margin_bottom = 75.0
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "LatenzFaktor "
 
-[connection signal="pressed" from="ToggleVoiceSound" to="." method="_on_ToggleVoiceSound_pressed"]
-[connection signal="pressed" from="ToggleMicrophone" to="." method="_on_ToggleMicrophone_pressed"]
+[connection signal="pressed" from="ToggleVoiceChat" to="." method="_on_ToggleVoiceSound_pressed"]

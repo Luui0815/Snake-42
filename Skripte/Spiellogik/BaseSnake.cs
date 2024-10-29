@@ -164,6 +164,7 @@ public abstract class BaseSnake : Node2D
 
     protected virtual bool IsGameOver()
     {
+        //Hinderniskollision
         foreach (var obstacle in _controller.Obstacles)
         {
             if (_body.Points[0] == obstacle)
@@ -173,6 +174,7 @@ public abstract class BaseSnake : Node2D
             }
         }
 
+        //Kollision mit Gegner
         if (_otherSnake != null && IsInstanceValid(_otherSnake))
         {
             if (_otherSnake.Points.Contains(_body.Points[0]))
@@ -191,6 +193,7 @@ public abstract class BaseSnake : Node2D
             }
         }
 
+        //Selbstkollision
         if (_points.Length >= 3)
         {
             for (int i = 1; i < _points.Length; i++)

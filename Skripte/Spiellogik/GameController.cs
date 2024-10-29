@@ -11,7 +11,7 @@ public class GameController : Node2D
 	private Fruit _fruit;
 	private PackedScene _gameOverScreen;
 	private Label _highScoreLabel, _scoreLabel, _puffer, _ping, _info;
-	private Button _playSoundButton, _playVoiceButton;
+    private Button _voicechatButton;
 	private AudioStreamPlayer2D _audioPlayer;
 
 	private int _cellSize = 32;
@@ -25,7 +25,10 @@ public class GameController : Node2D
 	public List<Vector2> Obstacles{ get{ return _obstacles; } }
 
 	public override void _Ready()
-	{		
+	{
+        if(GlobalVariables.Instance.OnlineGame)
+        NetworkManager.NetMan.Init(GlobalVariables.Instance.WebRTC);
+
         _levelName = GetTree().CurrentScene.Name;
 		InitializeSnakeScenes();
 		InitializeSnakeSpeed();
@@ -193,12 +196,10 @@ public class GameController : Node2D
 
 	private void InitializeVoiceChatButtons()
 	{
-        _playSoundButton = GetNode<Button>("ToggleVoiceSound");
-        _playVoiceButton = GetNode<Button>("ToggleMicrophone");
+        _voicechatButton = GetNode<Button>("ToggleVoiceChat");
         if (!GlobalVariables.Instance.OnlineGame)
         {
-            _playSoundButton.Hide();
-            _playVoiceButton.Hide();
+            _voicechatButton.Hide();
         }
     }
 
@@ -378,23 +379,22 @@ public class GameController : Node2D
 
 	private void _on_ToggleVoiceSound_pressed()
 	{
-		GD.Print("ToggleVoiceSound pressed");
-		if (_playSoundButton.Pressed == true)
-			NetworkManager.NetMan.AudioIsPlaying = false;
-		else
-			NetworkManager.NetMan.AudioIsPlaying = true;
-        _playSoundButton.Text = NetworkManager.NetMan.AudioIsPlaying ? "Ton aus" : "Ton an";
+		GD.Print($"ToggleVoiceSound pressed:");
+        if (_voicechatButton.Pressed == true)
+        {
+            NetworkManager.NetMan.AudioIsRecording = true;
+            NetworkManager.NetMan.AudioIsPlaying = true;
+            _voicechatButton.Text = "Sprachchat ausschalten";
+        }
+        else
+        {
+            NetworkManager.NetMan.AudioIsRecording = false;
+            NetworkManager.NetMan.AudioIsPlaying = false;
+            _voicechatButton.Text = "Sprachchat anschalten";
+
+        }
     }
 
-    private void _on_ToggleMicrophone_pressed()
-	{
-        GD.Print("ToggleMicrophone pressed");
-        if (_playVoiceButton.Pressed == true)
-            NetworkManager.NetMan.AudioIsRecording = false;
-        else
-            NetworkManager.NetMan.AudioIsRecording = true;
-        _playVoiceButton.Text = NetworkManager.NetMan.AudioIsPlaying ? "Mikrofon aus" : "Mikrofon an";
-    }
 
     private void _on_Pause_pressed()
 	{
