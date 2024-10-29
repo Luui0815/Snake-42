@@ -379,17 +379,46 @@ public class OnlineMultiplayerSnake : OnlineSnake
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
-        
+
         if (_isPlayerOneTurn)
         {
-            _directionCachePlayer1 = _directionCachePlayer2 * -1;
+            _directionCachePlayer1 = GetLastSegmentDirection(_isPlayerOneTurn);
         }
         else
         {
-            _directionCachePlayer2 = _directionCachePlayer1 * -1;
+            _directionCachePlayer2 = GetLastSegmentDirection(_isPlayerOneTurn);
         }
-        
+
         // _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
         // _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
+    }
+
+    private Vector2 GetLastSegmentDirection(bool isPlayerOneTurn)
+    {
+        var points = _body.Points;
+        Vector2 lastSegmentDirection;
+
+        if (!isPlayerOneTurn)
+        {
+            lastSegmentDirection = points[points.Length - 1] - points[points.Length - 2];
+        }
+        else
+        {
+            lastSegmentDirection = points[0] - points[1];
+        }
+
+        lastSegmentDirection = lastSegmentDirection.Normalized();
+
+        if (Mathf.Abs(lastSegmentDirection.x) > Mathf.Abs(lastSegmentDirection.y))
+        {
+            lastSegmentDirection = new Vector2(Mathf.Sign(lastSegmentDirection.x), 0);
+        }
+        else
+        {
+            lastSegmentDirection = new Vector2(0, Mathf.Sign(lastSegmentDirection.y));
+        }
+
+        GD.Print(lastSegmentDirection);
+        return lastSegmentDirection;
     }
 }
