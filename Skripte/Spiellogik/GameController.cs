@@ -1,4 +1,5 @@
 using Godot;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -17,11 +18,11 @@ public class GameController : Node2D
 	private int _score = 0;
 	private int[,] _gameField;
 	string _levelName;
-	private List<ColorRect> _obstacles = new List<ColorRect>();
+	private List<Vector2> _obstacles = new List<Vector2>();
 
     public string LoseMessage { get; set; }
     public int[,] GameField { get { return _gameField; } }
-	public List<ColorRect> Obstacles{ get{return _obstacles; } }
+	public List<Vector2> Obstacles{ get{ return _obstacles; } }
 
 	public override void _Ready()
 	{		
@@ -78,29 +79,29 @@ public class GameController : Node2D
             case 0:
                 {
                     // einfach
-                    _snake1.moveDelay = _snake2.moveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
-                    _multiplayerSnake.moveDelay = 0.4f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
+                    _multiplayerSnake.MoveDelay = 0.4f;
                     break;
                 }
             case 1:
                 {
                     // mittel
-                    _snake1.moveDelay = _snake2.moveDelay = 0.2f;
-                    _multiplayerSnake.moveDelay = 0.35f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.2f;
+                    _multiplayerSnake.MoveDelay = 0.35f;
                     break;
                 }
             case 2:
                 {
                     // schwer
-                    _snake1.moveDelay = _snake2.moveDelay = 0.15f;
-                    _multiplayerSnake.moveDelay = 0.3f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.15f;
+                    _multiplayerSnake.MoveDelay = 0.3f;
                     break;
                 }
             case 3:
                 {
                     // profi
-                    _snake1.moveDelay = _snake2.moveDelay = 0.09f;
-                    _multiplayerSnake.moveDelay = 0.2f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.09f;
+                    _multiplayerSnake.MoveDelay = 0.2f;
                     break;
                 }
         }
@@ -307,7 +308,7 @@ public class GameController : Node2D
 			case "Level3":
 				_gameField = new int[,]
 				{
-					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},//40, spielbar 24
 					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 					{1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1},
@@ -330,16 +331,17 @@ public class GameController : Node2D
 					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 					{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+                    //23, spielbar 17
 				};
 				GD.Print("Spielfeld 3 initialisiert");
 				break;
 			default:
 				break;
 		}
-		CreateObstacles();
+		SaveObstaclePositions();
 	}
 
-	private void CreateObstacles()
+	private void SaveObstaclePositions()
 	{
 		for (int y = 0; y < _gameField.GetLength(1); y++)
 		{
@@ -347,13 +349,8 @@ public class GameController : Node2D
 			{
 				if (_gameField[x, y] == 1)
 				{
-					var obstacle = new ColorRect();
-					obstacle.Color = new Color(0, 0, 0, 0); 
-					obstacle.RectSize = new Vector2(32, 32);
-					obstacle.RectPosition = new Vector2((y*32)+16, (x*32)+16);
-					obstacle.MouseFilter = Control.MouseFilterEnum.Ignore;
-					Obstacles.Add(obstacle);
-					AddChild(obstacle);
+					var obstaclePosition = new Vector2((y*32)+16, (x*32)+16);
+                    _obstacles.Add(obstaclePosition);
 				}
 			}
 		}

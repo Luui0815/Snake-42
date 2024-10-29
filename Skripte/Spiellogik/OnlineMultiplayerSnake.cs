@@ -170,7 +170,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
     // public override void MoveSnake() => kann so bleiben
     protected override void MoveTween(float argv)
     {
-        if (!_Merker)
+        if (!_merker)
         {
             _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
             Vector2 newPos = Vector2.Zero;
@@ -224,12 +224,12 @@ public class OnlineMultiplayerSnake : OnlineSnake
             
             if (argv == 1)
             {
-                _Merker = true;
+                _merker = true;
                 _on_Tween_tween_all_completed();
             }
         }
         if(argv != 1)
-            _Merker = false;
+            _merker = false;
     }
 
     protected void RotateAndMoveFace()
@@ -329,7 +329,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
         // Angepasste GameOVer Logik von OfflineMultiplayerSnake:
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle.RectGlobalPosition)
+            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle)
             {
                 LoseMsg = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
             }

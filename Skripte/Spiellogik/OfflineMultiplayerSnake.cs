@@ -61,13 +61,13 @@ public class OfflineMultiplayerSnake : BaseSnake
     public override void MoveSnake()
     {
         //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, MoveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
     protected override void MoveTween(float argv)
     {
-        if (!_Merker)
+        if (!_merker)
         {
             _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
 
@@ -111,7 +111,7 @@ public class OfflineMultiplayerSnake : BaseSnake
             if (argv == 1)
             {
                 _tween.StopAll();
-                _Merker = true;
+                _merker = true;
                 _points = _body.Points;
 
                 CheckFruitCollision();
@@ -134,7 +134,7 @@ public class OfflineMultiplayerSnake : BaseSnake
 
         if (argv != 1)
         {
-            _Merker = false;
+            _merker = false;
         }
     }
 
@@ -158,7 +158,7 @@ public class OfflineMultiplayerSnake : BaseSnake
     {
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle.RectGlobalPosition)
+            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle)
             {
                 _controller.LoseMessage = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
                 return true;

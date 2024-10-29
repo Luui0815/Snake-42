@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BaseSnake">
+    <Position X="7.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>YBAAAIAIACAAgAoAgAiAAAIgAAQiAABAAIAIBECEkAA=</HashCode>
+      <FileName>Skripte\Spiellogik\BaseSnake.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OfflineSnake">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Skripte\Spiellogik\OfflineSnake.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OfflineMultiplayerSnake">
+    <Position X="10" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>YBgAAIAAAgAAAAAAAAAAAAAgIAQAAAAAAIAQABCAgAA=</HashCode>
+      <FileName>Skripte\Spiellogik\OfflineMultiplayerSnake.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OnlineSnake">
+    <Position X="4.25" Y="2.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>YAAAAIoQABBoAAAACEAAJhAgABwCAABAA4CAAAAAAAg=</HashCode>
+      <FileName>Skripte\Spiellogik\OnlineSnake.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OnlineMultiplayerSnake">
+    <Position X="1" Y="2.25" Width="2.5" />
+    <InheritanceLine Type="OnlineSnake" FixedToPoint="true">
+      <Path>
+        <Point X="4.25" Y="5" />
+        <Point X="3.5" Y="5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>YBgAAIAAABEIAAAAQAAAAgAgIAgAAIAAA4AQABAAgAA=</HashCode>
+      <FileName>Skripte\Spiellogik\OnlineMultiplayerSnake.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
