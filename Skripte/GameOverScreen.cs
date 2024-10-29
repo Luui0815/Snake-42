@@ -7,6 +7,7 @@ public class GameOverScreen : Control
     private Button _restartButton;
     private Button _backButton;
     private bool _isGamePaused;
+    private bool _isOnlineGame;
 
     public override void _Ready()
     {
@@ -20,7 +21,7 @@ public class GameOverScreen : Control
     }
 
     //ueberprueft, ob Pause oder GameOver und passt Labels an
-    public void SetScreenMode(bool isGamePaused, string loseMessage)
+    public void SetScreenMode(bool isGamePaused, string loseMessage, bool IsOnline = false)
     {
         _isGamePaused = isGamePaused;
 
@@ -36,6 +37,7 @@ public class GameOverScreen : Control
             _loseMessage.Text = loseMessage;
             _restartButton.Text = "Neu starten";
         }
+        _isOnlineGame = IsOnline;
     }
 
     //Neustarten des levels
@@ -43,18 +45,62 @@ public class GameOverScreen : Control
     {
         if (_isGamePaused)
         {
-            GetTree().Paused = false;
-            QueueFree();
+            if(_isOnlineGame)
+            {
+                // Jeder darf das Spiel wieder starten!
+                NetworkManager.NetMan.rpc(GetPath(), nameof(ContinueOnlineGame));
+            }
+            else
+            {
+                GetTree().Paused = false;
+                QueueFree();
+            }
         }
         else
         {
-            GetTree().Paused = false;
-            GetTree().ReloadCurrentScene();
+            if(_isOnlineGame)
+            {
+                // Wenn einer drauf drückt wird bei beiden das Spiel neugestartet
+                // Der schnellere gewinnt!
+                NetworkManager.NetMan.rpc(GetPath(), nameof(RestartOnlineGame));
+            }
+            else
+            {
+                GetTree().Paused = false;
+                GetTree().ReloadCurrentScene();
+            }
         }
+    }
+
+    private void RestartOnlineGame()
+    {
+        GetTree().Paused = false;
+        GetTree().ReloadCurrentScene();
+    }
+
+    private void ContinueOnlineGame()
+    {
+        GetTree().Paused = false;
+        QueueFree();
     }
 
     //Zurueck zum hauptmenu
     private void _on_Back_pressed()
+    {
+        if(_isOnlineGame)
+        {
+            // Jeder darf in Einstellungen zurück gehen, dabei wird der 2. immer mitgezogen, egal ob er will oder nicht
+            NetworkManager.NetMan.rpc(GetPath(), nameof(GetBackToOptions));
+        }
+        else
+        {
+            GetTree().Paused = false;
+            GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
+        }
+        
+    }
+
+    private void GetBackToOptions()
     {
         GetTree().Paused = false;
         GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");

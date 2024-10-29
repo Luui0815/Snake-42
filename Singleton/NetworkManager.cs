@@ -197,6 +197,8 @@ public class NetworkManager : Node
         _audioStream =  new AudioStreaming(SendAudio);
         _playAudioStream = _audioStream.GetPlayMethod();
         _multiplayerIsActive = false;
+        // Die Node muss um jeden Preis laufen sonst Verbindungsabbruch und totales Chaos
+        PauseMode = PauseModeEnum.Process;
     }
 
     public override void _Process(float delta)
@@ -261,9 +263,9 @@ public class NetworkManager : Node
                     if(_CyclesWithoutPing > 5)
                     {
                         // keine Antwort => Verbindungsabbruch!
-                        // ErrorMessage("Verbindungsabbruch", "Die Peer To Peer Verbindung wurde abgebrochen.").Connect("popup_hide", GlobalVariables.Instance, nameof(GlobalVariables.Instance.BackToMainMenuOrLobby));
+                        ErrorMessage("Verbindungsabbruch", "Die Peer To Peer Verbindung wurde abgebrochen.").Connect("popup_hide", GlobalVariables.Instance, nameof(GlobalVariables.Instance.BackToMainMenuOrLobby));
                         // eigene Verbindung schließen, da nur 2 Spieler miteinander verbunden sind und es wenig sinn macht den anderen im Raum zu lassen!
-                        // CloseConnection();
+                        CloseConnection();
                     }
                 }
                 // Zeit einen neuen Ping zu senden!

@@ -373,7 +373,12 @@ public class GameController : Node2D
     {
         if (@event.IsActionPressed("ui_cancel"))
         {
-			_on_Pause_pressed();
+            if(GlobalVariables.Instance.OnlineGame)
+            {
+                NetworkManager.NetMan.rpc(GetPath(), nameof(OnlinePausePressed));
+            }
+            else
+			    _on_Pause_pressed();
         }
     }
 
@@ -394,7 +399,13 @@ public class GameController : Node2D
 
         }
     }
-
+    private void OnlinePausePressed()
+    {
+        GetTree().Paused = true;
+        GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
+        AddChild(popupInstance);
+		popupInstance.SetScreenMode(true, "", true);
+    }
 
     private void _on_Pause_pressed()
 	{
@@ -415,6 +426,6 @@ public class GameController : Node2D
 
 		GameOverScreen popupInstance = (GameOverScreen)_gameOverScreen.Instance();
 		AddChild(popupInstance);
-        popupInstance.SetScreenMode(false, LoseMessage);
+        popupInstance.SetScreenMode(false, LoseMessage, GlobalVariables.Instance.OnlineGame);
     }
 }

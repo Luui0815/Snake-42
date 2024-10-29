@@ -48,7 +48,6 @@ public partial class GlobalVariables : Node
     public float Snake2diff;
     public float Snake2LatencyFactor;
 
-
     public override void _Ready()
     {
         Instance = this;
