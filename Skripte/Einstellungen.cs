@@ -7,6 +7,8 @@ public class Einstellungen : Control
     private OptionSelection _SelectLevel;
     private OptionSelection _SelectMode;
     private AudioStreamPlayer2D _audioplayer;
+    private Button _voicechatButton;
+
     //für online:
     private bool _OtherPlayerIsReady;
     private bool _IamReady;
@@ -109,6 +111,36 @@ public class Einstellungen : Control
         //Audioplayer abspielen
         _audioplayer = GetNode<AudioStreamPlayer2D>("LobbyTheme");
         _audioplayer.Play();
+
+        InitializeVoiceChatButtons();
+    }
+
+    private void InitializeVoiceChatButtons()
+    {
+        _voicechatButton = GetNode<Button>("ToggleVoiceChat");
+        if (!GlobalVariables.Instance.OnlineGame)
+        {
+            _voicechatButton.Hide();
+        }
+    }
+
+    private void _on_ToggleVoiceChat_pressed()
+    {
+        GD.Print($"ToggleVoiceSound pressed:");
+        if (_voicechatButton.Pressed == true)
+        {
+            NetworkManager.NetMan.AudioIsRecording = true;
+            NetworkManager.NetMan.AudioIsPlaying = true;
+            _voicechatButton.Text = "Sprachchat ausschalten";
+            GD.Print("Sprachchat ist an");
+        }
+        else
+        {
+            NetworkManager.NetMan.AudioIsRecording = false;
+            NetworkManager.NetMan.AudioIsPlaying = false;
+            _voicechatButton.Text = "Sprachchat anschalten";
+            GD.Print("Sprachchat ist aus");
+        }
     }
 
     private void _on_Start_pressed()

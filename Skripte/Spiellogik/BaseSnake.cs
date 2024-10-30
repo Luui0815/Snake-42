@@ -155,7 +155,6 @@ public abstract class BaseSnake : Node2D
         }
     }
 
-
     protected void IncreaseSpeed()
     {
         MoveDelay *= 0.95f;
