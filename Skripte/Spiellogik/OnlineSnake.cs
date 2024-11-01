@@ -181,10 +181,10 @@ public class OnlineSnake : BaseSnake
     {
         if(_isServer)
         {
-            _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+            _tween.InterpolateMethod(this, "MoveTween", 0, 1, MoveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
             _direction = _directionCache;
             _tween.Start();
-            _Merker = false;
+            _merker = false;
         }
         else
         {
@@ -195,7 +195,7 @@ public class OnlineSnake : BaseSnake
 
     protected override void MoveTween(float argv)
     {
-        if (_Merker == false)
+        if (_merker == false)
         {
             for (int i = 0; i < _body.GetPointCount(); i++)
             {
@@ -229,12 +229,12 @@ public class OnlineSnake : BaseSnake
             // wenn argv = 1 dann ist eine Schleife durch
             if (argv == 1)
             {
-                _Merker = true;
+                _merker = true;
                 _on_Tween_tween_all_completed();
             }
         }
         if(argv != 1)
-            _Merker = false;
+            _merker = false;
     }
 
     protected void SetAktDirection()
@@ -374,7 +374,7 @@ public class OnlineSnake : BaseSnake
         // Alte is GameOver Logik:
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (_body.Points[0] == obstacle.RectGlobalPosition)
+            if (_body.Points[0] == obstacle)
             {
                 LoseMsg = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
             }

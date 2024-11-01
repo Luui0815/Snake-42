@@ -60,16 +60,16 @@ public class OfflineMultiplayerSnake : BaseSnake
 
     public override void MoveSnake()
     {
-        //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, MoveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
     protected override void MoveTween(float argv)
     {
-        if (!_Merker)
+        if (!_merker)
         {
-            _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+            //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
 
             int headIndex = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
             int direction = _isPlayerOneTurn ? 1 : -1;
@@ -111,7 +111,7 @@ public class OfflineMultiplayerSnake : BaseSnake
             if (argv == 1)
             {
                 _tween.StopAll();
-                _Merker = true;
+                _merker = true;
                 _points = _body.Points;
 
                 CheckFruitCollision();
@@ -134,7 +134,7 @@ public class OfflineMultiplayerSnake : BaseSnake
 
         if (argv != 1)
         {
-            _Merker = false;
+            _merker = false;
         }
     }
 
@@ -158,7 +158,7 @@ public class OfflineMultiplayerSnake : BaseSnake
     {
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle.RectGlobalPosition)
+            if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == obstacle)
             {
                 _controller.LoseMessage = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
                 return true;
@@ -214,13 +214,14 @@ public class OfflineMultiplayerSnake : BaseSnake
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
+
         if (_isPlayerOneTurn)
         {
-            _directionCachePlayer1 = _directionCachePlayer2 * -1;
+            _directionCachePlayer1 = GetLastSegmentDirection(_isPlayerOneTurn);
         }
         else
         {
-            _directionCachePlayer2 = _directionCachePlayer1 * -1;
+            _directionCachePlayer2 = GetLastSegmentDirection(_isPlayerOneTurn);
         }
 
         _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
@@ -228,4 +229,35 @@ public class OfflineMultiplayerSnake : BaseSnake
 
         _eating = false;
     }
+
+    private Vector2 GetLastSegmentDirection(bool isPlayerOneTurn)
+    {
+        var points = _body.Points;
+        Vector2 lastSegmentDirection;
+
+        if (!isPlayerOneTurn)
+        {
+            lastSegmentDirection = points[points.Length - 1] - points[points.Length - 2];
+        }
+        else
+        {
+            lastSegmentDirection = points[0] - points[1];
+        }
+
+        lastSegmentDirection = lastSegmentDirection.Normalized();
+
+        if (Mathf.Abs(lastSegmentDirection.x) > Mathf.Abs(lastSegmentDirection.y))
+        {
+            lastSegmentDirection = new Vector2(Mathf.Sign(lastSegmentDirection.x), 0);
+        }
+        else
+        {
+            lastSegmentDirection = new Vector2(0, Mathf.Sign(lastSegmentDirection.y));
+        }
+
+        GD.Print(lastSegmentDirection);
+        return lastSegmentDirection;
+    }
+
+
 }

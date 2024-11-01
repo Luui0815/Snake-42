@@ -16,11 +16,11 @@ public abstract class BaseSnake : Node2D
     protected BaseSnake _otherSnake;
 
     protected int _gridSize = 32;
-    public float moveDelay;
+    public float MoveDelay;
     protected bool _eating = false;
     protected bool _growing = false;
     protected bool _isPlayerOne;
-    protected bool _Merker = false;
+    protected bool _merker = false;
 
     protected bool _isServer;
     protected bool _isSnake1;
@@ -67,13 +67,13 @@ public abstract class BaseSnake : Node2D
     public virtual void MoveSnake()
     {
         _direction = _directionCache;
-        _tween.InterpolateMethod(this, "MoveTween", 0, 1, moveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
+        _tween.InterpolateMethod(this, "MoveTween", 0, 1, MoveDelay, Tween.TransitionType.Linear, Tween.EaseType.InOut);
         _tween.Start();
     }
 
     protected virtual void MoveTween(float argv)
     {
-        if (_Merker == false)
+        if (_merker == false)
         {
             int i = 0;
             foreach (Vector2 pos in _body.Points)
@@ -116,7 +116,7 @@ public abstract class BaseSnake : Node2D
             // wenn argv = 1 dann ist eine Schleife durch
             if (argv == 1)
             {
-                _Merker = true;
+                _merker = true;
                 _points = _body.Points;
                 CheckFruitCollision();
 
@@ -135,7 +135,7 @@ public abstract class BaseSnake : Node2D
         }
 
         if (argv != 1)
-            _Merker = false;
+            _merker = false;
     }
 
 
@@ -155,24 +155,25 @@ public abstract class BaseSnake : Node2D
         }
     }
 
-
     protected void IncreaseSpeed()
     {
-        moveDelay *= 0.95f;
-        GD.Print(moveDelay.ToString());
+        MoveDelay *= 0.95f;
+        GD.Print(MoveDelay.ToString());
     }
 
     protected virtual bool IsGameOver()
     {
+        //Hinderniskollision
         foreach (var obstacle in _controller.Obstacles)
         {
-            if (_body.Points[0] == obstacle.RectGlobalPosition)
+            if (_body.Points[0] == obstacle)
             {
                 _controller.LoseMessage = ($"Game Over fuer {Name}.\nHat ein Hindernis getroffen!");
                 return true;
             }
         }
 
+        //Kollision mit Gegner
         if (_otherSnake != null && IsInstanceValid(_otherSnake))
         {
             if (_otherSnake.Points.Contains(_body.Points[0]))
@@ -191,6 +192,7 @@ public abstract class BaseSnake : Node2D
             }
         }
 
+        //Selbstkollision
         if (_points.Length >= 3)
         {
             for (int i = 1; i < _points.Length; i++)
