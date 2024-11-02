@@ -203,18 +203,15 @@ public class NetworkManager : Node
 
     public override void _Process(float delta)
     {
-        // nur sinvoll auf Nachrichten zu warten wenn der _multiplayer initialisiert wird, bzw. wenn eine richtige Vwebindung steht
         if(_multiplayerIsActive == true)
         {
             // Auf Nachrichten hören und diese interpretieren!
             _multiplayer.Poll();
-            // nach neuen RTC nachrichten ausschau halten und diese dann KAtegoreien einorden
             if(_multiplayer.GetAvailablePacketCount() > 0)
             {
                 _RtcMsg data = _RtcMsg.ConvertTo_RtcMsg(_multiplayer.GetPacket().GetStringFromUTF8());
                 if(data != null)
                 {
-                    // gültige Nachricht kam an => gucken was sie bedeutet
                     switch(data.MsgState)
                     {
                         case _RtcMsgState.RPC:
@@ -222,7 +219,6 @@ public class NetworkManager : Node
                             string[] msg = data.Data.Split("|"); //0 = NodePath, 1 = Method, wenn mehr = Args
                             if (msg.Length >= 3)
                             {           
-                                // egal ob relaible oder nicht, wird eh nicht versendet, da schon angekommener rpc vom gegenüber
                                 rpc(msg[0], msg[1], true, true, true, JsonConvert.DeserializeObject<object[]>(msg[2]));
                             }
                             else
@@ -280,29 +276,21 @@ public class NetworkManager : Node
     private List<_RtcMsg> RPCPuffer = new List<_RtcMsg>();
      private List<Exception> RPCFehler= new List<Exception>();
 
-    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool relaible = true, params object[] Args)
+    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool reliable = true, params object[] Args)
     {
-        // remoterpc wird benutzt wenn man den rpc vom anderen empfangen hat
-        // der der ihn auslöst setzt in standartmäßig auf false
-
         if(dolocal == true)
         {
-            // lokal den Rpc vollführen
+            // lokal den Rpc auführen
             try
             {
                 GetNode(NodePath).Call(Method,Args);
             }
             catch(Exception e)
             {
-                // RPCFehler.Add(e);
-                // Juckt? throw new Exception("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
+                GD.Print("Der Pfad: " + NodePath + " oder die Methode: " + Method + " existiert nicht!",e);
             }
         }
 
-        // dann Nachricht an den anderen senden, dieser soll ihn auch machen!
-        // wenn remote, hat der andere ihn schon ausgeführt!
-        // nur rpc an anderen senden wenn es eine echte Verbindung gibt, d.h. Init() aufgerufen wurde
-        // wenn nicht mache den rpc nur lokal
         if(remoterpc == false && _multiplayerIsActive == true)
         {
             var settings = new JsonSerializerSettings
@@ -315,7 +303,6 @@ public class NetworkManager : Node
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.UnreliableOrdered;
             
             _RtcMsg msg = new _RtcMsg(_RtcMsgState.RPC,NodePath + "|" + Method + "|" + JsonConvert.SerializeObject(Args,settings));
-            // RPCPuffer.Add(msg);
             SendRawMessage(_RtcMsg.ConvertToJson(msg).ToUTF8());
         } 
     }
