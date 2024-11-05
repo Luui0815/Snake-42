@@ -53,28 +53,23 @@ public class OnlineSnake : BaseSnake
                 else
                     diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
 
-                float distanceeffortpercycle;
-                if(_AveragePingTime != 0f)
-                    distanceeffortpercycle = (diff * delta) / ((float)(_AveragePingTime / 1000f)); 
-                else
-                    distanceeffortpercycle = 0.5f;
-
-                if(diff != 0f)
+                if(_AveragePingTime != 0f && diff != 0f)
                 {
-                    latencyFactor = Mathf.Abs(distanceeffortpercycle / diff); 
+                    latencyFactor = delta / (float)(_AveragePingTime / 1000f);
+
                     if(latencyFactor < 0f)
                         latencyFactor = 0f;
                     if(latencyFactor > 1f)
                         latencyFactor = 1f;
-                }
+                } 
                 else
-                    latencyFactor = 0;
+                    latencyFactor = 0.167f;
                 
                 MakeAverageLatenyFactor();
 
                 _CalculateNewLatenyFactor = false;
                 
-                // die jetzigen TargetPoints speichern da sie asynchron aktualisiertwe dren können, das führt zu rucklern!
+                // Die aktuellen TargetPoints speichern, da sie asynchron aktualisiert werden können, was zu Rucklern führt.
                 _SavedTargetPoints.Clear();
                 for(int i = 0; i < _TargetPoints.Count(); i++)
                     _SavedTargetPoints.Add(new Vector2(_TargetPoints[i]));
@@ -93,7 +88,7 @@ public class OnlineSnake : BaseSnake
             _face.Position = _body.Points[0];
             _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
 
-            if(Name == "Snake1")
+                        if(Name == "Snake1")
             {
                 GlobalVariables.Instance.PingTimeSnake1 = (float)_AveragePingTime;
                 GlobalVariables.Instance.Snake1diff = diff;

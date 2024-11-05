@@ -276,7 +276,7 @@ public class NetworkManager : Node
     private List<_RtcMsg> RPCPuffer = new List<_RtcMsg>();
      private List<Exception> RPCFehler= new List<Exception>();
 
-    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool reliable = true, params object[] Args)
+    public void rpc(string NodePath, string Method, bool remoterpc = false, bool dolocal = true, bool relaible = true, params object[] Args)
     {
         if(dolocal == true)
         {

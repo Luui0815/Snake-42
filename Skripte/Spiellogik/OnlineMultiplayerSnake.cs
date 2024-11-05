@@ -50,35 +50,30 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             float diff = 0f;
 
-            if(_CalculateNewLatenyFactor)
+                        if(_CalculateNewLatenyFactor)
             {
                 if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
                     diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
                 else
                     diff = _TargetPoints[0].y - _body.GetPointPosition(0).y;
 
-                float distanceeffortpercycle;
-                if(_AveragePingTime != 0f)
-                    distanceeffortpercycle = (diff * delta) / ((float)(_AveragePingTime / 1000f)); 
-                else
-                    distanceeffortpercycle = 0.5f;
-
-                if(diff != 0f)
+                if(_AveragePingTime != 0f && diff != 0f)
                 {
-                    latencyFactor = Mathf.Abs(distanceeffortpercycle / diff); 
+                    latencyFactor = delta / (float)(_AveragePingTime / 1000f);
+
                     if(latencyFactor < 0f)
                         latencyFactor = 0f;
                     if(latencyFactor > 1f)
                         latencyFactor = 1f;
-                }
+                } 
                 else
-                    latencyFactor = 0;
+                    latencyFactor = 0.167f;
                 
                 MakeAverageLatenyFactor();
 
                 _CalculateNewLatenyFactor = false;
                 
-                // die jetzigen TargetPoints speichern da sie asynchron aktualisiertwe dren können, das führt zu rucklern!
+                // Die aktuellen TargetPoints speichern, da sie asynchron aktualisiert werden können, was zu Rucklern führt.
                 _SavedTargetPoints.Clear();
                 for(int i = 0; i < _TargetPoints.Count(); i++)
                     _SavedTargetPoints.Add(new Vector2(_TargetPoints[i]));

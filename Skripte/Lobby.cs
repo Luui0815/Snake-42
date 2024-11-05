@@ -124,6 +124,8 @@ public class Lobby : Control
             bool roomfound = false;
             RTCConnectionEstablished = true;
             GlobalVariables.Instance.WebRTC = WebRTCMultiplayer;
+            GlobalVariables.Instance.OnlineGame = true;
+            NetworkManager.NetMan.Init(WebRTCMultiplayer);
             // Raum suchen in dem sich der Spieler noch befindet!
             foreach(Raum room in _roomList)
             {
