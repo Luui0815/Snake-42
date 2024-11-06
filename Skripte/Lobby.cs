@@ -38,6 +38,7 @@ public class Lobby : Control
     private bool RTCConnectionEstablished;
     public Server Server {get { return _server;}}
     public Client Client {get { return _client;}}
+    private HTTPRequest _httpRequest;
 
     public override void _Ready()
     {
@@ -55,8 +56,16 @@ public class Lobby : Control
         if(_server != null && _client != null)
         {
             GetNode<CheckButton>("ServerOffenLassen").Visible = true;
-            // IP Adresse des Servers bestimmen
-            GetNode<TextEdit>("SpielStarten").Text = _server.GetPeer
+            // IP Adresse des Servers bestimmen_httpRequest = new HTTPRequest();
+            GetNode<TextEdit>("ServerAdress").Show();
+            _httpRequest = new HTTPRequest();
+            AddChild(_httpRequest);
+            _httpRequest.Connect("request_completed", this, nameof(OnRequestCompleted));
+        
+            // Anfrage an einen IP-Ermittlungsdienst stellen
+            var url = "https://checkip.amazonaws.com"; // Gibt die öffentliche IP im JSON-Format zurück
+            _httpRequest.Request(url);
+            
         }
         //Version 2: Anwender hat nur Server gestartet und kann Lobby passiv beobachten
         else if(_server != null && _client == null)
@@ -85,6 +94,19 @@ public class Lobby : Control
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         InitRTCConnection();
+    }
+
+    private void OnRequestCompleted(int result, int responseCode, string[] headers, byte[] body)
+    {
+        if (responseCode == 200)
+        {
+            string publicIP = System.Text.Encoding.UTF8.GetString(body).Trim();
+            GetNode<CheckButton>("ServerAdress").Text = "Öffentliche IP-Adresse: " + publicIP;
+        }
+        else
+        {
+            GetNode<CheckButton>("ServerAdress").Text = "Fehler beim Abrufen der öffentlichen IP-Adresse. Statuscode: " + responseCode;
+        }
     }
 
     public void InitRTCConnection()
