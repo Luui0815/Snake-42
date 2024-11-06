@@ -9,24 +9,55 @@ public class ClientFormPopup : Popup
     private LineEdit _ipInput;
     private LineEdit _portInput;
     private LineEdit _playerNameInput;
+    private bool _StartServerToo = false;
 
     public override void _Ready()
     {
         _ipInput = GetNode<LineEdit>("IpInput");
         _portInput = GetNode<LineEdit>("PortInput");
         _playerNameInput = GetNode<LineEdit>("PlayerNameInput");
+        if(_StartServerToo)
+        {
+            GetNode<Label>("IpLabel").QueueFree();
+            GetNode<LineEdit>("IpInput").QueueFree();
+            
+            Vector2 newPos = GetNode<Label>("PortLabel").RectPosition;
+            GetNode<Label>("PortLabel").SetPosition(new Vector2(newPos.x, newPos.y + 24));
+            newPos = _portInput.RectPosition;
+            _portInput.SetPosition(new Vector2(newPos.x, newPos.y + 24));
+
+            newPos = GetNode<Label>("Spielername").RectPosition;
+            GetNode<Label>("Spielername").SetPosition(new Vector2(newPos.x, newPos.y + 24));
+            newPos = _playerNameInput.RectPosition;
+            _playerNameInput.SetPosition(new Vector2(newPos.x, newPos.y + 24));
+
+            _ipInput = null;
+        }
+    }
+
+    public void ConfigForServerAndClient()
+    {
+        // Wenn Server gestartet wird darf nicht eine IP Adresse ausgewählt werden
+        _StartServerToo = true;
     }
 
     private void _on_ConfirmButton_pressed()
     {
-        string ip = _ipInput.Text;
-        string port = _portInput.Text;
-        string playerName = _playerNameInput.Text;  
-        if (ValidatePort(port) && ValidateIp(ip))
+        if(_StartServerToo)
         {
-            //EmitSignal(nameof(Confirmed), ip, int.Parse(port));
-            EmitSignal("Confirmed", ip, port, playerName);
-            QueueFree();
+            if(ValidatePort(_portInput.Text))
+            {
+                EmitSignal("Confirmed", "127.0.0.1", _portInput.Text, _playerNameInput.Text);
+                QueueFree();
+            }
+        }
+        else
+        {
+            if (ValidatePort(_portInput.Text) && ValidateIp(_ipInput.Text))
+            {
+                EmitSignal("Confirmed", _ipInput.Text, _portInput.Text, _playerNameInput.Text);
+                QueueFree();
+            }
         }
     }
 

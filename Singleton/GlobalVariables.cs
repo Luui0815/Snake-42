@@ -52,6 +52,8 @@ public partial class GlobalVariables : Node
     {
         Instance = this;
     }
+
+    public string ClientNameWhichHostsServer; 
     
     public void BackToMainMenuOrLobby()
     {
@@ -61,7 +63,7 @@ public partial class GlobalVariables : Node
         {
             GetTree().CurrentScene.QueueFree();
             Lobby.InitRTCConnection();
-            Lobby.Server.AddForeignClient(Lobby.Client.id, Lobby.Client.Name); // weil der Server den eigenen Lobbyclient vergisst sobald er eine RTC Verbindung hat
+            Lobby.Server.AddForeignClient(Lobby.Client.id, Lobby.Client.PlayerName); // weil der Server den eigenen Lobbyclient vergisst sobald er eine RTC Verbindung hat
             Lobby._on_RumeAkt_pressed();
             Lobby.Show();
         }

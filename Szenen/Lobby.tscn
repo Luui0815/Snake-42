@@ -253,10 +253,10 @@ format = 1
 tile_data = PoolIntArray( 196615, 0, 0, 196617, 0, 0, 196634, 3, 0, 262155, 2, 0, 262158, 3, 0, 262161, 2, 0, 262166, 0, 0, 327704, 1, 0, 327706, 2, 0, 327712, 2, 0, 393225, 1, 0, 393229, 0, 0, 393233, 3, 0, 393234, 2, 0, 458782, 0, 0, 524301, 3, 0, 524312, 1, 0, 589831, 2, 0, 589844, 2, 0, 655371, 2, 0, 655377, 3, 0, 655386, 3, 0, 720917, 3, 0, 720926, 0, 0, 786450, 0, 0, 786458, 0, 0, 786462, 2, 0, 851978, 1, 0, 917532, 3, 0, 983048, 2, 0, 983061, 0, 0, 1048590, 2, 0, 1048601, 3, 0, 1048605, 2, 0, 1048607, 0, 0, 1114129, 3, 0, 1114135, 2, 0, 1179670, 0, 0, 1179678, 3, 0, 1245197, 0, 0 )
 
 [node name="ChatMSGBox" type="VBoxContainer" parent="."]
-margin_left = 225.0
+margin_left = 235.0
 margin_top = 352.0
-margin_right = 625.0
-margin_bottom = 549.0
+margin_right = 635.0
+margin_bottom = 635.0
 theme = SubResource( 1 )
 
 [node name="ColorRect" type="ColorRect" parent="ChatMSGBox"]
@@ -266,15 +266,15 @@ color = Color( 0.129412, 0.768627, 0.768627, 1 )
 [node name="ChatLog" type="RichTextLabel" parent="ChatMSGBox"]
 margin_top = 4.0
 margin_right = 400.0
-margin_bottom = 169.0
+margin_bottom = 255.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/normal = SubResource( 9 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ChatMSGBox"]
-margin_top = 173.0
+margin_top = 259.0
 margin_right = 400.0
-margin_bottom = 197.0
+margin_bottom = 283.0
 
 [node name="PlayerNameLabel" type="Label" parent="ChatMSGBox/HBoxContainer"]
 margin_top = 5.0
@@ -312,9 +312,9 @@ disabled = true
 text = "Spiel starten"
 
 [node name="RäumeAkt" type="Button" parent="."]
-margin_left = 774.0
+margin_left = 649.0
 margin_top = 113.0
-margin_right = 926.0
+margin_right = 1045.0
 margin_bottom = 157.0
 text = "Räume aktualisieren"
 
@@ -326,10 +326,10 @@ margin_bottom = 452.0
 
 [node name="ServerOffenLassen" type="CheckButton" parent="."]
 visible = false
-margin_left = 7.0
-margin_top = 69.0
-margin_right = 208.0
-margin_bottom = 109.0
+margin_left = 322.0
+margin_top = 100.0
+margin_right = 523.0
+margin_bottom = 140.0
 pressed = true
 text = "Server offen lassen"
 
@@ -345,10 +345,10 @@ margin_right = 296.0
 margin_bottom = 79.0
 
 [node name="PrintRTC" type="Button" parent="."]
-margin_left = 279.0
-margin_top = 581.0
-margin_right = 410.0
-margin_bottom = 634.0
+margin_left = 33.0
+margin_top = 583.0
+margin_right = 164.0
+margin_bottom = 636.0
 text = "RTC Anzeigen"
 
 [node name="RTCVerbindungen" type="Label" parent="."]
@@ -359,11 +359,19 @@ margin_bottom = 718.0
 autowrap = true
 
 [node name="SwitchToLevelSelection" type="Button" parent="."]
-margin_left = 449.0
-margin_top = 581.0
-margin_right = 582.0
-margin_bottom = 635.0
+margin_left = 32.0
+margin_top = 517.0
+margin_right = 165.0
+margin_bottom = 571.0
 text = "Weiter"
+
+[node name="ServerAdress" type="TextEdit" parent="."]
+visible = false
+margin_left = 300.0
+margin_top = 231.0
+margin_right = 542.0
+margin_bottom = 266.0
+readonly = true
 
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]

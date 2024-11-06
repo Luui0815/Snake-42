@@ -53,7 +53,11 @@ public class Lobby : Control
         // verschiedene Szenarien fordern eine unterschiedliche Gestaltung der Lobby
         //Version 1: Anwender hat Client und Server gestartet
         if(_server != null && _client != null)
+        {
             GetNode<CheckButton>("ServerOffenLassen").Visible = true;
+            // IP Adresse des Servers bestimmen
+            GetNode<TextEdit>("SpielStarten").Text = _server.GetPeer
+        }
         //Version 2: Anwender hat nur Server gestartet und kann Lobby passiv beobachten
         else if(_server != null && _client == null)
         {
@@ -101,7 +105,6 @@ public class Lobby : Control
         RTCConnectionEstablished = false;
     }
 
-    // ToDo: Folgende Methode geht nicht richtig, denk ich
     private void BackToVerbindungseinstellung()
     {
         if(_server != null)
@@ -110,8 +113,6 @@ public class Lobby : Control
             _client.StopConnection();
         Hide();
         QueueFree();
-        while(_server != null && _client!=null)
-        {}
         GetTree().ChangeScene("res://Szenen/Verbindungseinstellungen.tscn");
     }
 
@@ -137,7 +138,7 @@ public class Lobby : Control
                 }   
             }
             if(roomfound == false)
-                throw new Exception("Der Spieler will ein Spiel starten befindet sich aber in keinem Raum! Das ist unmöglich!");
+                GD.PrintErr("Der Spieler will ein Spiel starten befindet sich aber in keinem Raum! Das ist unmöglich!");
             SwitchToLevelSelectionMenu();
         }
     }
@@ -340,6 +341,7 @@ public class Lobby : Control
             // Lobby muss mit Server erhalten werden
             // in Lobby ist auch noch ein Client, der bleibt als einziger erhalten!, mit der Lobby!
             GlobalVariables.Instance.Lobby = this;
+            GetNode<Button>("SpielStarten").Disabled = true;
             Hide();
         }
         else

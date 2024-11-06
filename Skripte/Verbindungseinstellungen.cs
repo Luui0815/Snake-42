@@ -24,7 +24,7 @@ public class Verbindungseinstellungen : Control
     {
         _bootServer=true;
         _bootClient = true;
-        ShowClientPopup();
+        ShowClientPopup(true);
     }
 
     private void _on_Server_starten_pressed()
@@ -53,9 +53,11 @@ public class Verbindungseinstellungen : Control
         popupInstance.Connect(nameof(ServerFormPopup.Confirmed), this, "OnPopupConfirmed");
     }
 
-    private void ShowClientPopup()
+    private void ShowClientPopup(bool StartServerToo = false)
     {
-        Popup popupInstance = (Popup)_clientFormPopup.Instance();
+        ClientFormPopup popupInstance = (ClientFormPopup)_clientFormPopup.Instance();
+        if(StartServerToo)
+            popupInstance.ConfigForServerAndClient();
         GetTree().Root.AddChild(popupInstance);
         popupInstance.PopupCentered();
         LineEdit portInput = popupInstance.GetNode<LineEdit>("PortInput");
@@ -78,7 +80,7 @@ public class Verbindungseinstellungen : Control
         if (_bootClient && error == Error.Ok)
         {
             error = _client.ConnectToServer("ws://" + ip + ":" + port);
-            _client.playerName = playerName;
+            _client.PlayerName = playerName;
         }
 
         if (error != Error.Ok)

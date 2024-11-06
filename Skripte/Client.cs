@@ -110,7 +110,7 @@ public class Client : Control
         return Encoding.UTF8.GetString(packet);
     }
 
-    public string playerName
+    public string PlayerName
     {
         get{ return _playerName; }
         set{_playerName=value;}
@@ -157,14 +157,6 @@ public class Client : Control
         }
         catch{}
         GD.Print("Client: Nachricht gesendet: " + Data);
-    }
-
-    public string PlayerName
-    {
-        get
-        {
-            return _playerName;
-        }
     }
 
     public void StopConnection()

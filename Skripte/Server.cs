@@ -55,12 +55,14 @@ public class Server : Control
     private class RoomMatesOnStarting // wird nur benutzt um zu sagen das 2 Spieler eine RTC Verbindung aufgebaut haben und das Spiel starten
     {
         public Raum room;
-        public bool deletable; // wenn der Spieler welches die Anfrage gesendet hat merkt dasa es das objekt schon gibt, haben beide die ANfrage gestellt und es kann gelöscht werden
+        public string PlayerOneName;
+        public string PlayerTwoName; 
 
-        public RoomMatesOnStarting(Raum room)
+        public RoomMatesOnStarting(Raum room, string NameOfPlayerOne, string NameOfPlayerTwo)
         {
             this.room = room;
-            deletable = false;
+            PlayerOneName = NameOfPlayerOne;
+            PlayerTwoName = NameOfPlayerTwo;
         }
     }
 
@@ -117,6 +119,9 @@ public class Server : Control
                     // Prüfen ob noch ein 2. drin ist
                     if(r.PlayerTwoId != 0)
                     {
+                        // Weiterer wilder Fehlertripp:
+                        // Nachdem beied Spieler erfolgreich eine WebRTC Verbindung aufgebaut haben trennen sich beide
+                        // 
                         // Spieler 2 wird zum Spieler 1
                         int index = _RaumList.IndexOf(r);
                         _RaumList[index].Raumname = "Raum von: " + _ConnectedClients.Find(x => x.GetId == r.PlayerTwoId).Name;
@@ -241,6 +246,7 @@ public class Server : Control
         {
             // Nachricht wird von beiden gesendet!, aber nur einmal soll eine Nachricht kommen und auch keine Verbindungsabbruc nachricht
             // prüfen ob sein Kollege nicht schon schneller war und es den Eintrag schon gibt!
+
             int index = -1;
             Raum room = JsonConvert.DeserializeObject<Raum>(Message.data);
             foreach(RoomMatesOnStarting mr in _MatesOnStartingGame)
@@ -252,28 +258,62 @@ public class Server : Control
             }
             if(index != -1)
             {
-                // beide haben den Request gesendet => Raum löschen, Clients löschen, ChatMsg an alle andern senden
-                int LengthBefore = _RaumList.Count();
-                _RaumList.RemoveAt(index);
-                if(LengthBefore == _RaumList.Count())
-                {
-                    throw new Exception("2 Clients haben eine RTC Verbindung aufgebaut und dies bestätigt. Aber der Raum in dem sie noch sind existiert nicht! => Unmöglich");
-                }
-                string p1 = _ConnectedClients.Find(x => x.GetId == room.PlayerOneId).Name;
-                string p2 = _ConnectedClients.Find(x => x.GetId == room.PlayerTwoId).Name;
-                if(!( _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == room.PlayerOneId)) && _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == room.PlayerTwoId))))
-                {
-                    throw new Exception("2 Clients haben eine RTC Verbindung aufgebaut und dies bestätigt. Sie sind aber dem Server nicht bekannt! => Unmöglich");
-                }
+                // Nachricht wird zunächst an alle gesndet auch an die, die sich gleich trennen, wenn sie es nicht schon getan haben
+                string p1 = _MatesOnStartingGame[index].PlayerOneName;
+                string p2 = _MatesOnStartingGame[index].PlayerTwoName;
+
                 msg msg = new msg(Nachricht.chatMSG,0,999, "Die Spieler: " + p1 +" und " + p2 + " haben ein Spiel gestartet!");
                 SendDataToAll(JsonConvert.SerializeObject(msg));
                 EmitSignal(nameof(ServerInfo), msg.state, msg.data);
+
+                _MatesOnStartingGame.RemoveAt(index);
             }
             else
             {
                 // dieser Client ist der 1. der den Request sendet
-                _MatesOnStartingGame.Add(new RoomMatesOnStarting(room));
+                // Index in RaumListe bestimmen
+                int RoomID = -1;
+                foreach(Raum r in _RaumList)
+                {
+                    if(r.PlayerOneId == room.PlayerOneId && r.PlayerTwoId == room.PlayerTwoId)
+                    {
+                        RoomID = _RaumList.IndexOf(r);
+                    }
+                }
+                if(RoomID == -1)
+                {
+                    GD.PrintErr("Server: 2 Clients waren in einem Raum und haben eine RTC Verbindung aufgebaut. Beim Trennvorgang hat sich rausgestellt das sie in keinem echten Serverrau sind. Das ist eigentlich unmöglich");
+                    return;
+                }
+                // Raum löschen
+                _RaumList.RemoveAt(RoomID);
+                // Name rausfinden, dabei kann es passieren das sich der eien schon geternn hat, dann vergib den NAme Spieler + id
+                string p1 = string.Empty;
+                string p2 = string.Empty;
+                var playerOne = _ConnectedClients.Find(x => x.GetId == room.PlayerOneId);
+                var playerTwo = _ConnectedClients.Find(x => x.GetId == room.PlayerTwoId);
+
+                if (playerOne != null)
+                {
+                    p1 = playerOne.Name;
+                }
+                else
+                {
+                    p1 = "Spieler " + room.PlayerOneId;
+                }
+
+                if (playerOne != null)
+                {
+                    p2 = playerTwo.Name;
+                }
+                else
+                {
+                    p2= "Spieler " + room.PlayerTwoId;
+                }
+
+                _MatesOnStartingGame.Add(new RoomMatesOnStarting(room, p1, p2));
             }
+            // _ConnectedClients.Remove(_ConnectedClients.Find(x => x.GetId == Message.publisher)); => trennst sich selber
         }
     }
 
@@ -295,15 +335,28 @@ public class Server : Control
 
     public void SendDataToOne(string Data, int id)
     {
-        _WSPeer.GetPeer(id).PutPacket(Data.ToString().ToUTF8());
+        try
+        {
+            _WSPeer.GetPeer(id).PutPacket(Data.ToString().ToUTF8());
+        }
+        catch
+        {
+            GD.PrintErr("Ein Client befindet sich auf dem Server noch in der Clientliste obwohl er getrennt ist");
+        }
     }
 
     public void SendDataToAll(string Data)
     {
         foreach(ConnectedClients cc in _ConnectedClients)
         {
-
-            _WSPeer.GetPeer(cc.GetId).PutPacket(Data.ToString().ToUTF8());
+            try
+            {
+                _WSPeer.GetPeer(cc.GetId).PutPacket(Data.ToString().ToUTF8());
+            }
+            catch
+            {
+                GD.PrintErr("Ein Client befindet sich auf dem Server noch in der Clientliste obwohl er getrennt ist");
+            }
         }
     }
 
@@ -346,7 +399,7 @@ public class Server : Control
         // Da man bei einem Verbindungsabbruch wieder zur lobby kommt nachdem man die RTC gestartet hat und den Serv weiterlaufen hat
         // Der Server hat aber den eigenen Client bereits gelöscht, daher sendet er keiene Daten mehr an ihn, ich weiß langer Trip
         // daher füg ihn einfach hinzu wenn du eine id hast die du nicht kennst!
-        _ConnectedClients.Add(new ConnectedClients(id, name));
+        // _ConnectedClients.Add(new ConnectedClients(id, name));
         // der Client der nie disconnected ist, sendet nachdem die Lobby wieder in den Vordergrund getreten ist den Namen nach!
         // Wow was für eine Fehlerkette
         // Die Methode wird von der Lobby aus ausgerufen! von GlobalVariables BAcktoMainMenuorLobby()
