@@ -238,7 +238,13 @@ public class NetworkManager : Node
                         {
                             _PingAnswerReceived = true;
                             _CyclesWithoutPing = 0;
-                            PingTime = Convert.ToUInt64((DateTime.Now - JsonConvert.DeserializeObject<DateTime>(data.Data)).TotalMilliseconds);
+                            try
+                            {
+                                // auf anderen Geräten kann es zum absturz führen
+                                PingTime = Convert.ToUInt64((DateTime.Now - JsonConvert.DeserializeObject<DateTime>(data.Data)).TotalMilliseconds);
+                            }
+                            catch
+                            {}
                             break;
                         }
                     }

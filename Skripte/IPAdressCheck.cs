@@ -138,7 +138,7 @@ public class IPAdressCheck : Control
 
     private void RequestPublicIPAdress()
     {
-        var url = "https://portchecker.io/api/me";
+        var url = "https://api.ipify.org";
         _httpRequestPublicIPAdress.Request(url);
     }
     private void ResponsePublicIPAdress(int result, int responseCode, string[] headers, byte[] body)
