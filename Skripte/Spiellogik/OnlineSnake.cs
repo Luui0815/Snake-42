@@ -76,8 +76,6 @@ public class OnlineSnake : BaseSnake
                 _points = _body.Points;
             }
             
-            if(_body.GetPointPosition(0) < _SavedTargetPoints[0])
-                return;
             for(int i = 0; i < _SavedTargetPoints.Count(); i++)
             {
                 Vector2 DiffVec = _SavedTargetPoints[i] - _points[i];
@@ -107,7 +105,7 @@ public class OnlineSnake : BaseSnake
     
     protected void MakeAverageLatenyFactor()
     {
-        if(ListLatencyFactorHistory.Count() > 45)
+        if(ListLatencyFactorHistory.Count() > 100)
             ListLatencyFactorHistory.RemoveAt(0);
         ListLatencyFactorHistory.Add(latencyFactor);
         

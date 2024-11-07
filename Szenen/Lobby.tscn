@@ -326,6 +326,7 @@ margin_right = 1047.0
 margin_bottom = 452.0
 
 [node name="ServerOffenLassen" type="CheckButton" parent="."]
+visible = false
 margin_left = 233.0
 margin_top = 101.0
 margin_right = 434.0

@@ -39,6 +39,7 @@ public class Lobby : Control
     public Server Server {get { return _server;}}
     public Client Client {get { return _client;}}
     private HTTPRequest _httpRequest;
+    private Timer _TimeWithoutServerPing; // wird nur initialiert wenn nur client da ist!
 
     public override void _Ready()
     {
@@ -81,6 +82,16 @@ public class Lobby : Control
                 ipchecker.CheckIPAdress();
             }
         }
+        //Version 3: Anwender ist reiner Client und hat sich auf einen Server verbunden
+        else if(_server == null && _client != null)
+        {
+            _TimeWithoutServerPing = new Timer();
+            _TimeWithoutServerPing.OneShot = true;
+            _TimeWithoutServerPing.WaitTime  = 5f;
+            _TimeWithoutServerPing.Connect("timeout", this, nameof(TooLongTimeWithoutServerPing));
+            AddChild(_TimeWithoutServerPing);
+            _TimeWithoutServerPing.Start();
+        }
 
         if(_client != null)//kann null sein wenn nur server gestartet wurde
         {
@@ -99,6 +110,21 @@ public class Lobby : Control
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         InitRTCConnection();
+    }
+
+    private void TooLongTimeWithoutServerPing()
+    {
+        ErrorMessage("Verbindungsabbruch", "Die Verbindung zum Server wurde unterbrochen.").Connect("popup_hide", _client, nameof(_client.BackToMainMenu));
+    }
+
+    private ConfirmationDialog ErrorMessage(string titel, string description)
+    {
+        ConfirmationDialog ErrorPopup = (ConfirmationDialog)GlobalVariables.Instance.ConfirmationDialog.Instance();
+        ErrorPopup.Init(titel,description);
+        GetTree().Root.AddChild(ErrorPopup);
+        ErrorPopup.PopupCentered();
+        ErrorPopup.Show();
+        return ErrorPopup;
     }
 
     public void InitRTCConnection()
@@ -188,6 +214,11 @@ public class Lobby : Control
             AddChild(ErrorPopup);
             ErrorPopup.PopupCentered();
             ErrorPopup.Show();
+        }
+        else if (state == Nachricht.KeepAlivePing)
+        {
+            if(_client != null && _server == null)
+                _TimeWithoutServerPing.Start();
         }
     }
 

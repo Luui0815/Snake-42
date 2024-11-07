@@ -71,7 +71,7 @@ public class Server : Control
     private List<RoomMatesOnStarting> _MatesOnStartingGame = new List<RoomMatesOnStarting>();
     private List<Raum> _RaumList = new List<Raum>();
     public Error Error {get;set;} = Error.Ok;
-
+    private Timer _KeepAliveTimer;
     public override void _Ready()
     {
         //Signale verbinden
@@ -79,6 +79,13 @@ public class Server : Control
         _WSPeer.Connect("client_disconnected", this, "ClientDisconnected");
         _WSPeer.Connect("client_close_request", this, "ConnectionCloseRequest");
         _WSPeer.Connect("data_received",this,"ReceiveData");
+
+        _KeepAliveTimer = new Timer();
+        _KeepAliveTimer.OneShot = false;
+        _KeepAliveTimer.WaitTime  = 1f;
+        _KeepAliveTimer.Connect("timeout", this, nameof(SendAlivePing));
+        AddChild(_KeepAliveTimer);
+        _KeepAliveTimer.Start();
     }
 
     public void ClientConnected(int id, string proto)
@@ -393,6 +400,12 @@ public class Server : Control
             _WSPeer.Poll();
         }
         catch{}
+    }
+
+    private void SendAlivePing()
+    {
+        msg MSG = new msg(Nachricht.KeepAlivePing,0,999,"");
+        SendDataToAll(JsonConvert.SerializeObject(MSG));
     }
 
 /*

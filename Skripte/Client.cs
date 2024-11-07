@@ -25,6 +25,7 @@ namespace Snake42
         ICECandidate, // für WebRTC ICe Candidate austauschen
         ServerWillClosed, // wenn Server abgeschaltet wird
         StartGame, // wird von beiden RTC Tilnehmer geschickt und allen anderen als ChatMsg Weitergeleite: Spiler1 und Spiler2 haben ein Spiel gestartet
+        KeepAlivePing, // wird jede Sekunde vom Server an alle Clients gesendet, das Disconnected Event wird nur ausgelöst wenn man Lobby schließen drückt und nicht die Anwendung hart beendet
     }
 }
 public class Client : Control
@@ -68,8 +69,12 @@ public class Client : Control
         }
     }
 
-    private void BackToMainMenu()
+    public void BackToMainMenu()
     {
+        // Lobby löschen
+        Lobby l = GetTree().Root.GetNodeOrNull<Lobby>("Lobby");
+        if(l != null)
+            l.QueueFree();
         StopConnection();
         QueueFree();
         GetTree().ChangeScene("res://Szenen/MainMenu.tscn");
@@ -99,7 +104,7 @@ public class Client : Control
             SendData(JsonConvert.SerializeObject(msg2));
         }
 
-        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed || Message.state == Nachricht.checkIn)// hier weitere Bedingungen hinzufügen
+        if(Message.state == Nachricht.chatMSG || Message.state == Nachricht.RoomCreate || Message.state == Nachricht.AnswerRoomData || Message.state == Nachricht.SDPData || Message.state == Nachricht.ICECandidate || Message.state == Nachricht.ServerWillClosed || Message.state == Nachricht.checkIn || Message.state == Nachricht.KeepAlivePing)// hier weitere Bedingungen hinzufügen
         {
             EmitSignal(nameof(MSGReceived), Message.state,Message.data);
         }

@@ -1,11 +1,8 @@
 using Godot;
 using Newtonsoft.Json;
 using System;
-using System.CodeDom;
-using System.Runtime.InteropServices;
 using NAudio.Wave;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 
 // die Klasse wird benutzt um eine Spielrverbindung zu managen
 public class NetworkManager : Node
@@ -171,7 +168,6 @@ public class NetworkManager : Node
     private bool _multiplayerIsActive;
     private bool _PingAnswerReceived;
     private int _CyclesWithoutPing = 0; // wenn mehr als 5 Zyklen kein Ping empfangen wird ist es als Verbindungsabbruch zu werten!
-    private WebRTCPeerConnectionGDNative rtc = new WebRTCPeerConnectionGDNative();
     public int BufferCount
     {
         get
@@ -262,6 +258,8 @@ public class NetworkManager : Node
                         ErrorMessage("Verbindungsabbruch", "Die Peer To Peer Verbindung wurde abgebrochen.").Connect("popup_hide", GlobalVariables.Instance, nameof(GlobalVariables.Instance.BackToMainMenuOrLobby));
                         // eigene Verbindung schließen, da nur 2 Spieler miteinander verbunden sind und es wenig sinn macht den anderen im Raum zu lassen!
                         CloseConnection();
+                        // Es kann sein das, dass Spiel pausiert ist wenn das aufgerufen wird
+                        GetTree().Paused = false;
                     }
                 }
                 // Zeit einen neuen Ping zu senden!

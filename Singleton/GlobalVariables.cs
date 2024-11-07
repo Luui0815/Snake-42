@@ -64,5 +64,6 @@ public partial class GlobalVariables : Node
             Lobby._on_RumeAkt_pressed();
             Lobby.Show();
         }
+        GetTree().Paused = false;
     }
 }
