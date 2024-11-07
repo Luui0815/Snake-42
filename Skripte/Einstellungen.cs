@@ -73,7 +73,7 @@ public class Einstellungen : Control
         // im OnlineMultiplayer gibt es keinen Einzelspieler!
         if(GlobalVariables.Instance.OnlineGame == true)
         {
-            _SelectMode = new OptionSelection(2, new string[] { "Miteinander", "Gegeneiander"});
+            _SelectMode = new OptionSelection(2, new string[] { "Miteinander", "Gegeneiander"}, 0, 10, 10, 10, 10, 50, 125);
         }
         else
         {
