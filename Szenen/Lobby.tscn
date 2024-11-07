@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Skripte/Lobby.cs" type="Script" id=1]
 [ext_resource path="res://Assets/UI Assets/Solaria_Demo_Tiles-transformed.png" type="Texture" id=2]
+[ext_resource path="res://Szenen/IPAdressCheck.tscn" type="PackedScene" id=3]
 
 [sub_resource type="ConvexPolygonShape2D" id=6]
 points = PoolVector2Array( 32, 64, 0, 64, 0, 0, 32, 0 )
@@ -325,11 +326,10 @@ margin_right = 1047.0
 margin_bottom = 452.0
 
 [node name="ServerOffenLassen" type="CheckButton" parent="."]
-visible = false
-margin_left = 322.0
-margin_top = 100.0
-margin_right = 523.0
-margin_bottom = 140.0
+margin_left = 233.0
+margin_top = 101.0
+margin_right = 434.0
+margin_bottom = 141.0
 pressed = true
 text = "Server offen lassen"
 
@@ -339,10 +339,6 @@ margin_top = 589.0
 margin_right = 1047.0
 margin_bottom = 636.0
 text = "Lobby verlassen"
-
-[node name="Label" type="Label" parent="."]
-margin_right = 296.0
-margin_bottom = 79.0
 
 [node name="PrintRTC" type="Button" parent="."]
 margin_left = 33.0
@@ -358,20 +354,12 @@ margin_right = 1234.0
 margin_bottom = 718.0
 autowrap = true
 
-[node name="SwitchToLevelSelection" type="Button" parent="."]
-margin_left = 32.0
-margin_top = 517.0
-margin_right = 165.0
-margin_bottom = 571.0
-text = "Weiter"
-
-[node name="ServerAdress" type="TextEdit" parent="."]
+[node name="IPAdressCheck" parent="." instance=ExtResource( 3 )]
 visible = false
-margin_left = 300.0
-margin_top = 231.0
-margin_right = 542.0
-margin_bottom = 266.0
-readonly = true
+margin_left = 239.0
+margin_top = 170.0
+margin_right = 275.04
+margin_bottom = 180.12
 
 [connection signal="text_entered" from="ChatMSGBox/HBoxContainer/MessageInput" to="." method="_on_MessageInput_text_entered"]
 [connection signal="pressed" from="RaumErstellen" to="." method="_on_RaumErstellen_pressed"]
@@ -379,4 +367,3 @@ readonly = true
 [connection signal="pressed" from="SpielStarten" to="." method="_on_SpielStarten_pressed"]
 [connection signal="pressed" from="RäumeAkt" to="." method="_on_RumeAkt_pressed"]
 [connection signal="pressed" from="PrintRTC" to="." method="_on_PrintRTC_pressed"]
-[connection signal="pressed" from="SwitchToLevelSelection" to="." method="_on_SwitchToLevelSelection_pressed"]

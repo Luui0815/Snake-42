@@ -18,6 +18,7 @@ public class GameOverScreen : Control
         _restartButton.Connect("pressed", this, nameof(_on_RestartLevel_pressed));
         _backButton = GetNode<Button>("Back");
         _backButton.Connect("pressed", this, nameof(_on_Back_pressed));
+        PauseMode = PauseModeEnum.Process;
     }
 
     //ueberprueft, ob Pause oder GameOver und passt Labels an

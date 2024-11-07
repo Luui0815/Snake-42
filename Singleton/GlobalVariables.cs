@@ -25,8 +25,7 @@ public partial class GlobalVariables : Node
 
     public WebRTCMultiplayer WebRTC {get; set; } 
     public RTCRoom Room = new RTCRoom();
-    public static string MyPlayerName;
-
+    public string WebSocketServerPort;
     static public readonly Dictionary IceServers = new Dictionary 
     {
         {"iceServers", 
@@ -52,8 +51,6 @@ public partial class GlobalVariables : Node
     {
         Instance = this;
     }
-
-    public string ClientNameWhichHostsServer; 
     
     public void BackToMainMenuOrLobby()
     {
@@ -63,16 +60,9 @@ public partial class GlobalVariables : Node
         {
             GetTree().CurrentScene.QueueFree();
             Lobby.InitRTCConnection();
-            Lobby.Server.AddForeignClient(Lobby.Client.id, Lobby.Client.PlayerName); // weil der Server den eigenen Lobbyclient vergisst sobald er eine RTC Verbindung hat
+            // Lobby.Server.AddForeignClient(Lobby.Client.id, Lobby.Client.PlayerName); // weil der Server den eigenen Lobbyclient vergisst sobald er eine RTC Verbindung hat
             Lobby._on_RumeAkt_pressed();
             Lobby.Show();
         }
-    }
-    public void ShowPopUp()
-    {
-
-    }
-    public override void _Process(float delta)
-    {
     }
 }

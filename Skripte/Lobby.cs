@@ -57,15 +57,12 @@ public class Lobby : Control
         {
             GetNode<CheckButton>("ServerOffenLassen").Visible = true;
             // IP Adresse des Servers bestimmen_httpRequest = new HTTPRequest();
-            GetNode<TextEdit>("ServerAdress").Show();
-            _httpRequest = new HTTPRequest();
-            AddChild(_httpRequest);
-            _httpRequest.Connect("request_completed", this, nameof(OnRequestCompleted));
-        
-            // Anfrage an einen IP-Ermittlungsdienst stellen
-            var url = "https://checkip.amazonaws.com"; // Gibt die öffentliche IP im JSON-Format zurück
-            _httpRequest.Request(url);
-            
+            IPAdressCheck ipchecker = GetNodeOrNull<IPAdressCheck>("IPAdressCheck");
+            if(ipchecker != null)
+            {
+                ipchecker.Visible = true;
+                ipchecker.CheckIPAdress();
+            }
         }
         //Version 2: Anwender hat nur Server gestartet und kann Lobby passiv beobachten
         else if(_server != null && _client == null)
@@ -75,6 +72,14 @@ public class Lobby : Control
             GetNode<Button>("RaumVerlassen").Visible=false;
             GetNode<Button>("SpielStarten").Visible=false;
             GetNode<Button>("Lobby verlassen").Text = "Server beenden";
+
+            // IP Adresse des Servers bestimmen_httpRequest = new HTTPRequest();
+            IPAdressCheck ipchecker = GetNodeOrNull<IPAdressCheck>("IPAdressCheck");
+            if(ipchecker != null)
+            {
+                ipchecker.Visible = true;
+                ipchecker.CheckIPAdress();
+            }
         }
 
         if(_client != null)//kann null sein wenn nur server gestartet wurde
@@ -94,19 +99,6 @@ public class Lobby : Control
 
         GetNode<Button>("Lobby verlassen").Connect("pressed", this, nameof(BackToVerbindungseinstellung));
         InitRTCConnection();
-    }
-
-    private void OnRequestCompleted(int result, int responseCode, string[] headers, byte[] body)
-    {
-        if (responseCode == 200)
-        {
-            string publicIP = System.Text.Encoding.UTF8.GetString(body).Trim();
-            GetNode<CheckButton>("ServerAdress").Text = "Öffentliche IP-Adresse: " + publicIP;
-        }
-        else
-        {
-            GetNode<CheckButton>("ServerAdress").Text = "Fehler beim Abrufen der öffentlichen IP-Adresse. Statuscode: " + responseCode;
-        }
     }
 
     public void InitRTCConnection()
@@ -381,10 +373,5 @@ public class Lobby : Control
     private void _on_PrintRTC_pressed()
     {
         GetNode<Label>("RTCVerbindungen").Text = WebRTCMultiplayer.GetPeers().ToString();
-    }
-
-    private void _on_SwitchToLevelSelection_pressed()
-    {
-        SwitchToLevelSelectionMenu();
     }
 }

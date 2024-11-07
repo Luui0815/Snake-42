@@ -330,6 +330,7 @@ public class Server : Control
         // nochmal an alle Clients senden das es gleich vorbei ist
         SendDataToAll(JsonConvert.SerializeObject(new msg(Nachricht.ServerWillClosed,0,999,"System: Server wird heruntergefahren!")));
         _WSPeer.Stop();
+        GlobalVariables.Instance.WebSocketServerPort = string.Empty;
         QueueFree();
     }
 
@@ -394,6 +395,7 @@ public class Server : Control
         catch{}
     }
 
+/*
     public void AddForeignClient(int id, string name)
     {
         // Da man bei einem Verbindungsabbruch wieder zur lobby kommt nachdem man die RTC gestartet hat und den Serv weiterlaufen hat
@@ -404,4 +406,5 @@ public class Server : Control
         // Wow was für eine Fehlerkette
         // Die Methode wird von der Lobby aus ausgerufen! von GlobalVariables BAcktoMainMenuorLobby()
     }
+*/
 }

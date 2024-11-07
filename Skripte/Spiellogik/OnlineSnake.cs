@@ -7,7 +7,7 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected UInt64 _updateInterval = 85000; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
+    protected UInt64 _updateInterval = 100000; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected UInt64 _TimeSinceLastUpdate;
     protected UInt64 _ClientTimeAtBodyPointUpdate;
     public UInt64 _ClientTimeDiffBodyUpdate;
@@ -76,6 +76,8 @@ public class OnlineSnake : BaseSnake
                 _points = _body.Points;
             }
             
+            if(_body.GetPointPosition(0) < _SavedTargetPoints[0])
+                return;
             for(int i = 0; i < _SavedTargetPoints.Count(); i++)
             {
                 Vector2 DiffVec = _SavedTargetPoints[i] - _points[i];
@@ -88,16 +90,16 @@ public class OnlineSnake : BaseSnake
             _face.Position = _body.Points[0];
             _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
 
-                        if(Name == "Snake1")
+            if(Name == "Snake1" || Name == "Snake3")
             {
                 GlobalVariables.Instance.PingTimeSnake1 = (float)_AveragePingTime;
-                GlobalVariables.Instance.Snake1diff = diff;
+                GlobalVariables.Instance.Snake1diff = _SavedTargetPoints[0].x- _points[0].x != 0 ? _SavedTargetPoints[0].x- _points[0].x : _SavedTargetPoints[0].y- _points[0].y;
                 GlobalVariables.Instance.Snake1LatencyFactor = latencyFactor;
             }
             if(Name == "Snake2")
             {
                 GlobalVariables.Instance.PingTimeSnake2 = (float)_AveragePingTime;
-                GlobalVariables.Instance.Snake2diff = diff;
+                GlobalVariables.Instance.Snake2diff = _SavedTargetPoints[0].x- _points[0].x != 0 ? _SavedTargetPoints[0].x- _points[0].x : _SavedTargetPoints[0].y- _points[0].y;
                 GlobalVariables.Instance.Snake2LatencyFactor = latencyFactor;
             }
         }

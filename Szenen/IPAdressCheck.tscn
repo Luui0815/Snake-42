@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Skripte/IPAdressCheck.cs" type="Script" id=1]
+
+[node name="IPAdressCheck" type="Control"]
+anchor_right = 0.282
+anchor_bottom = 0.204
+margin_right = 6.03998
+margin_bottom = 10.12
+script = ExtResource( 1 )
+
+[node name="InfoBox" type="TextEdit" parent="."]
+anchor_right = 0.931
+anchor_bottom = 1.0
+margin_right = 20.7
+size_flags_horizontal = 15
+size_flags_vertical = 15
+readonly = true
+context_menu_enabled = false
+shortcut_keys_enabled = false
+virtual_keyboard_enabled = false

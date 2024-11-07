@@ -102,6 +102,7 @@ public class Verbindungseinstellungen : Control
             RemoveChild(_client);
             lobbyInstance.AddChild(_client);
         }
+        GlobalVariables.Instance.WebSocketServerPort = Convert.ToString(port);
         GetTree().Root.AddChild(lobbyInstance);
         QueueFree();
     }
