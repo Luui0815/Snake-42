@@ -198,7 +198,7 @@ public class NetworkManager : Node
         PauseMode = PauseModeEnum.Process;
     }
 
-    public override void _Process(float delta)
+    public override void _PhysicsProcess(float delta)
     {
         if(_multiplayerIsActive == true)
         {
@@ -240,8 +240,7 @@ public class NetworkManager : Node
                             _PingAnswerReceived = true;
                             _CyclesWithoutPing = 0;
 
-                            PingTime = Convert.ToUInt64(data.Data) - _LastKeepPingTimeStamp;
-                            PingTime /= 1000;
+                            PingTime = (Convert.ToUInt64(data.Data) - _LastKeepPingTimeStamp) / 1000 - Convert.ToUInt64(_PingIntervall);
                             _LastKeepPingTimeStamp = Convert.ToUInt64(data.Data);
                             break;
                         }

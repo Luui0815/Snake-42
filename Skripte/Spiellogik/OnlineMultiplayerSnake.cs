@@ -11,7 +11,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
     private Vector2 _directionCachePlayer2;
     private Vector2 _currentDirection;
     private bool _isPlayerOneTurn;
-    protected new UInt64 _updateInterval = 85000; // evtl. Anpassen falls Pufferüberlauf
+    protected new UInt64 _updateInterval = 100000; // evtl. Anpassen falls Pufferüberlauf
     protected int _NewTailIndex;
 
     public override void _Ready()
@@ -30,7 +30,10 @@ public class OnlineMultiplayerSnake : OnlineSnake
         _currentDirection = _directionCachePlayer1;
 
         for(int i = 0; i < _body.GetPointCount(); i++)
+        {
             _TargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
+            _SavedTargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
+        }
     }
 
     // _Process hat nur 30 fps und syncht nicht die Bewegungen! => Bewegungsprozess des Clients muss in _PhysicsProcess, das läuft auf 60 fps, je nach Einstellungen
