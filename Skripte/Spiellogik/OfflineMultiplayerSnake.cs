@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public class OfflineMultiplayerSnake : BaseSnake
@@ -11,6 +12,7 @@ public class OfflineMultiplayerSnake : BaseSnake
     private Vector2 _directionCachePlayer2;
     private Vector2 _currentDirection;
     private bool _isPlayerOneTurn;
+    private int _NewTailIndex;
 
     public override void _Ready()
     {
@@ -69,37 +71,51 @@ public class OfflineMultiplayerSnake : BaseSnake
     {
         if (!_merker)
         {
-            //_currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+            Vector2 newPos = Vector2.Zero;
 
-            int headIndex = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
-            int direction = _isPlayerOneTurn ? 1 : -1;
-
-            for (int i = _isPlayerOneTurn ? 0 : _body.Points.Count() - 1;
-                 _isPlayerOneTurn ? i < _body.Points.Count() : i >= 0;
-                 i += direction)
+            if(_isPlayerOneTurn)
             {
-                Vector2 newPos;
-
-                if (i == headIndex)
+                for (int i = 0; i < _body.GetPointCount(); i++)
                 {
-                    newPos = _points[i] + _currentDirection * _gridSize * argv;
-                }
-                else
-                {
-                    int prevIndex = i - direction;
-                    Vector2 diff = (_points[prevIndex] - _points[i]) / _gridSize;
-                    newPos = _points[i] + diff * _gridSize * argv;
-                }
+                    if (i == 0)
+                    {
+                        newPos = _points[i] + _currentDirection * _gridSize * argv;
+                    }
+                    else if(i == _NewTailIndex && _growing)
+                    {
+                        // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
+                        newPos = _points[i];
+                    }
+                    else 
+                    {
+                        Vector2 diff = (_points[i - 1] - _points[i]) / _gridSize;
+                        newPos = _points[i] + diff * _gridSize * argv;
+                    }
 
-                _body.SetPointPosition(i, newPos);
+                    _body.SetPointPosition(i, newPos);
+                }
             }
-
-            if (_eating)
+            else
             {
-                _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
-                _growing = true;
-                _points = _body.Points;
-                _eating = false;
+                for (int i = _body.GetPointCount() - 1; i >= 0; i--)
+                {
+                    if (i == _body.GetPointCount() - 1)
+                    {
+                        newPos = _points[i] + _currentDirection * _gridSize * argv;
+                    }
+                    else if(i == _NewTailIndex && _growing)
+                    {
+                        // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
+                        newPos = _points[i];
+                    }
+                    else 
+                    {
+                        Vector2 diff = (_points[i + 1] - _points[i]) / _gridSize;
+                        newPos = _points[i] + diff * _gridSize * argv;
+                    }
+
+                    _body.SetPointPosition(i, newPos);
+                }
             }
 
             if (argv == 1)
@@ -139,17 +155,21 @@ public class OfflineMultiplayerSnake : BaseSnake
         if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == _fruit.Position)
         {
             _audioPlayer.Play();
-            _tween.StopAll();
-            _eating = true;
-            _fruit.SetNewPosition(_fruit.RandomizePosition());
-            //IncreaseSpeed();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
-            MoveSnake();
+            
+            SwapControl();
+
+            AddNewSnakePoint();
+
+            _points = _body.Points; // Punkte auf das neue Array aktualisieren
+            _growing = true; // Setze Wachstum auf aktiv
+
+            _fruit.SetNewPosition(_fruit.RandomizePosition());
         }
     }
 
-    protected void RotateAndMoveFace()
+    private void RotateAndMoveFace()
     {
         _face1.Position = _body.Points[0];
         _face2.Position = _body.Points[_body.Points.Count() - 1];
@@ -218,63 +238,40 @@ public class OfflineMultiplayerSnake : BaseSnake
         return false;
     }
 
-    private Vector2[] SetPoints(Vector2[] points)
-    {
-        Vector2[] newPoints = new Vector2[points.Length];
-        for (int i = 0; i < points.Length; i++)
-        {
-            newPoints[i] = points[i];
-        }
-        return newPoints;
-    }
-
     private void SwapControl()
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
 
-        if (_isPlayerOneTurn)
+        // jetzt _current direction so setzten das die Schlange nicht gleich in den eigenen Körper läuft
+        Vector2 direction;
+        if(_isPlayerOneTurn)
         {
-            _directionCachePlayer1 = GetLastSegmentDirection(_isPlayerOneTurn);
+            direction = _body.Points[0] - _body.Points[1];
         }
         else
         {
-            _directionCachePlayer2 = GetLastSegmentDirection(_isPlayerOneTurn);
+            direction = _body.Points[_body.Points.Length - 1] - _body.Points[_body.Points.Length - 2];
         }
-
-        _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
-        _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
-
-        _eating = false;
+        _currentDirection = direction.Normalized();
+        if(_isPlayerOneTurn)
+            _directionCachePlayer1 = _currentDirection;
+        else
+            _directionCachePlayer2 = _currentDirection; 
     }
 
-    private Vector2 GetLastSegmentDirection(bool isPlayerOneTurn)
+    private void AddNewSnakePoint()
     {
-        var points = _body.Points;
-        Vector2 lastSegmentDirection;
-
-        if (!isPlayerOneTurn)
+        List<Vector2> newPoints = _body.Points.ToList();;
+        if(!_isPlayerOneTurn)
         {
-            lastSegmentDirection = points[points.Length - 1] - points[points.Length - 2];
+            newPoints.Insert(0, newPoints[0]);
+            _NewTailIndex = 0;
         }
         else
         {
-            lastSegmentDirection = points[0] - points[1];
+            _NewTailIndex = _body.Points.Length;
+            newPoints.Insert(_body.Points.Length - 1, newPoints[_body.Points.Length - 1]);
         }
-
-        lastSegmentDirection = lastSegmentDirection.Normalized();
-
-        if (Mathf.Abs(lastSegmentDirection.x) > Mathf.Abs(lastSegmentDirection.y))
-        {
-            lastSegmentDirection = new Vector2(Mathf.Sign(lastSegmentDirection.x), 0);
-        }
-        else
-        {
-            lastSegmentDirection = new Vector2(0, Mathf.Sign(lastSegmentDirection.y));
-        }
-
-        GD.Print(lastSegmentDirection);
-        return lastSegmentDirection;
+        _body.Points = newPoints.ToArray();
     }
-
-
 }

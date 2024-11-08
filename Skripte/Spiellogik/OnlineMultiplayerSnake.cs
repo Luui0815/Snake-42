@@ -293,7 +293,6 @@ public class OnlineMultiplayerSnake : OnlineSnake
     {
         if (_body.Points[_isPlayerOneTurn ? 0 : _body.Points.Count() - 1] == _fruit.Position)
         {
-            Vector2[] tempPoints = _body.Points;
             _audioPlayer.Play();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
@@ -414,37 +413,5 @@ public class OnlineMultiplayerSnake : OnlineSnake
             _directionCachePlayer1 = _currentDirection;
         else
             _directionCachePlayer2 = _currentDirection; 
-
-        // _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
-        // _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
-    }
-
-    private Vector2 GetLastSegmentDirection(bool isPlayerOneTurn)
-    {
-        var points = _body.Points;
-        Vector2 lastSegmentDirection;
-
-        if (!isPlayerOneTurn)
-        {
-            lastSegmentDirection = points[points.Length - 1] - points[points.Length - 2];
-        }
-        else
-        {
-            lastSegmentDirection = points[0] - points[1];
-        }
-
-        lastSegmentDirection = lastSegmentDirection.Normalized();
-
-        if (Mathf.Abs(lastSegmentDirection.x) > Mathf.Abs(lastSegmentDirection.y))
-        {
-            lastSegmentDirection = new Vector2(Mathf.Sign(lastSegmentDirection.x), 0);
-        }
-        else
-        {
-            lastSegmentDirection = new Vector2(0, Mathf.Sign(lastSegmentDirection.y));
-        }
-
-        GD.Print(lastSegmentDirection);
-        return lastSegmentDirection;
     }
 }
