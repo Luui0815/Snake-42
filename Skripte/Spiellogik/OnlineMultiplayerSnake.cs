@@ -93,7 +93,9 @@ public class OnlineMultiplayerSnake : OnlineSnake
                 _body.SetPointPosition(i, newPos);
             }
         }
-        
+        GlobalVariables.Instance.PingTimeSnake1 = (float)_AveragePingTime;
+        GlobalVariables.Instance.Snake1diff = _SavedTargetPoints[0].x- _points[0].x != 0 ? _SavedTargetPoints[0].x- _points[0].x : _SavedTargetPoints[0].y- _points[0].y;
+        GlobalVariables.Instance.Snake1LatencyFactor = latencyFactor;
         RotateAndMoveFace();
     }
     // protected override void MakeAverageLatenyFactor() => kann man so lassen
@@ -397,15 +399,6 @@ public class OnlineMultiplayerSnake : OnlineSnake
     {
         _isPlayerOneTurn = !_isPlayerOneTurn;
 
-        if (_isPlayerOneTurn)
-        {
-            _directionCachePlayer1 = GetLastSegmentDirection(_isPlayerOneTurn);
-        }
-        else
-        {
-            _directionCachePlayer2 = GetLastSegmentDirection(_isPlayerOneTurn);
-        }
-
         // jetzt _current direction so setzten das die Schlange nicht gleich in den eigenen Körper läuft
         Vector2 direction;
         if(_isPlayerOneTurn)
@@ -416,8 +409,11 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             direction = _body.Points[_body.Points.Length - 1] - _body.Points[_body.Points.Length - 2];
         }
-        direction = direction.Normalized();
-        _currentDirection *= -1; 
+        _currentDirection = direction.Normalized();
+        if(_isPlayerOneTurn)
+            _directionCachePlayer1 = _currentDirection;
+        else
+            _directionCachePlayer2 = _currentDirection; 
 
         // _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
         // _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));

@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using NAudio.Wave;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 // die Klasse wird benutzt um eine Spielrverbindung zu managen
 public class NetworkManager : Node
@@ -240,7 +241,8 @@ public class NetworkManager : Node
                             _PingAnswerReceived = true;
                             _CyclesWithoutPing = 0;
 
-                            PingTime = (Convert.ToUInt64(data.Data) - _LastKeepPingTimeStamp) / 1000 - Convert.ToUInt64(_PingIntervall);
+                            PingTime = (Convert.ToUInt64(data.Data) - _LastKeepPingTimeStamp) / 1000 - Convert.ToUInt64(_PingIntervall * 1000);
+                            Mathf.Clamp(PingTime, 0, 10000);
                             _LastKeepPingTimeStamp = Convert.ToUInt64(data.Data);
                             break;
                         }

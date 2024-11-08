@@ -98,7 +98,7 @@ public class OnlineSnake : BaseSnake
             _face.Position = _body.Points[0];
             _face.RotationDegrees = -Mathf.Rad2Deg(_direction.AngleTo(Vector2.Right));
 
-            if(Name == "Snake1" || Name == "Snake3")
+            if(Name == "Snake1")
             {
                 GlobalVariables.Instance.PingTimeSnake1 = (float)_AveragePingTime;
                 GlobalVariables.Instance.Snake1diff = _SavedTargetPoints[0].x- _points[0].x != 0 ? _SavedTargetPoints[0].x- _points[0].x : _SavedTargetPoints[0].y- _points[0].y;
