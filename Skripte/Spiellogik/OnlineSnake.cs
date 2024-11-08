@@ -23,8 +23,12 @@ public class OnlineSnake : BaseSnake
     {
         base._Ready();
         // _tween.Connect("tween_all_completed", this, nameof(_on_Tween_tween_all_completed));
+        _SavedTargetPoints.Clear();
         for(int i = 0; i < _body.GetPointCount(); i++)
+        {
             _TargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
+            _SavedTargetPoints.Add(new Vector2(_body.GetPointPosition(i)));
+        }
     }
 
     // _Process hat nur 30 fps und syncht nicht die Bewegungen! => Bewegungsprozess des Clients muss in _PhysicsProcess, das läuft auf 60 fps, je nach Einstellungen
@@ -38,6 +42,12 @@ public class OnlineSnake : BaseSnake
                 TimeToSynchBodyPoints();
             }
         }
+
+        // SegmentPositionen zur Visualisierung in GlobalVar schreiben
+        if(_isSnake1)
+            GlobalVariables.Instance.Snake1Body = _body.Points;
+        else
+            GlobalVariables.Instance.Snake2Body = _body.Points;
     }
     // Läuft auf 60 fps:
     public override void _PhysicsProcess(float delta)
@@ -140,6 +150,7 @@ public class OnlineSnake : BaseSnake
                 _points[i] += new Vector2(0, 2 * _gridSize);
                 _body.SetPointPosition(i, _points[i]);
                 _TargetPoints[i] = new Vector2(_body.GetPointPosition(i));
+                _SavedTargetPoints[i] = new Vector2(_body.GetPointPosition(i));
                 // for(int j = 0; j < _body.GetPointCount(); j++)
                 //    _TargetPoints[j] = new Vector2(_body.GetPointPosition(j));
             }
@@ -232,7 +243,7 @@ public class OnlineSnake : BaseSnake
             _merker = false;
     }
 
-    protected void SetAktDirection()
+    protected virtual void SetAktDirection()
     {
         // bracuht auch der Client, dadurch schickt er in der input Methode nur gültige Richtungsangaben an den Server und dieser muss weniger machen
         _direction = new Vector2(_directionCache);

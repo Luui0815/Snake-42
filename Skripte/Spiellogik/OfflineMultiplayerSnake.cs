@@ -102,12 +102,6 @@ public class OfflineMultiplayerSnake : BaseSnake
                 _eating = false;
             }
 
-            _face1.Position = _body.Points[0];
-            _face2.Position = _body.Points[_body.Points.Count() - 1];
-
-            _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
-            _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
-
             if (argv == 1)
             {
                 _tween.StopAll();
@@ -127,7 +121,6 @@ public class OfflineMultiplayerSnake : BaseSnake
                 {
                     SwapControl();
                 }
-
                 MoveSnake();
             }
         }
@@ -136,6 +129,8 @@ public class OfflineMultiplayerSnake : BaseSnake
         {
             _merker = false;
         }
+
+        RotateAndMoveFace();
     }
 
 
@@ -151,6 +146,28 @@ public class OfflineMultiplayerSnake : BaseSnake
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
             MoveSnake();
+        }
+    }
+
+    protected void RotateAndMoveFace()
+    {
+        _face1.Position = _body.Points[0];
+        _face2.Position = _body.Points[_body.Points.Count() - 1];
+
+        Vector2 lookDirection;
+        if (_isPlayerOneTurn)
+        {
+            // genau in die entgegengesetzte Richtung des an ihm befindlichen Körperteil setzten
+            lookDirection = ((_points[_points.Count() - 1] - _points[_points.Count() - 2]) / _gridSize) * -1;
+            _face1.RotationDegrees = -Mathf.Rad2Deg(_currentDirection.AngleTo(Vector2.Right));
+            _face2.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Left));
+        }
+        else
+        {
+            // -1 mehr da durch CheckFruit Collision der letzte Punkte dupliziert wurde. d.h. 2 mal gleiche Punktkoordinaten!
+            lookDirection = ((_points[1] - _points[0]) / _gridSize) * -1;
+            _face2.RotationDegrees = -Mathf.Rad2Deg(_currentDirection.AngleTo(Vector2.Left));
+            _face1.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Right));
         }
     }
 

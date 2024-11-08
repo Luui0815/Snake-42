@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public class OnlineMultiplayerSnake : OnlineSnake
@@ -43,6 +44,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
                 TimeToSynchBodyPoints();
             }
         }
+        GlobalVariables.Instance.Snake1Body = _body.Points;
     }
     public override void _PhysicsProcess(float delta)
     {
@@ -50,7 +52,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             float diff = 0f;
 
-                        if(_CalculateNewLatenyFactor)
+            if(_CalculateNewLatenyFactor)
             {
                 if(_TargetPoints[0].x - _body.GetPointPosition(0).x != 0f)
                     diff = _TargetPoints[0].x - _body.GetPointPosition(0).x;
@@ -106,6 +108,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
             _points[i] += new Vector2(0, 2 * _gridSize);
             _body.SetPointPosition(i, _points[i]);
             _TargetPoints[i] = new Vector2(_body.GetPointPosition(i));
+            _SavedTargetPoints[i] = new Vector2(_body.GetPointPosition(i));
             // for(int j = 0; j < _body.GetPointCount(); j++)
             //    _TargetPoints[j] = new Vector2(_body.GetPointPosition(j));
         }
@@ -135,14 +138,14 @@ public class OnlineMultiplayerSnake : OnlineSnake
         // Grundlegen kann man nur die Richtung ändern wenn man dran ist
         // dann ist noch zu beachten das die Schlange keine 180° Drehung machen kann
         Vector2 direction = new Vector2(X, Y);
-        if(AktCache1 && _isPlayerOneTurn)
+        if(AktCache1)
         {
-            if((_currentDirection * -1) != direction)
+            if((_directionCachePlayer1 * -1) != direction)
                 _directionCachePlayer1 = direction;
         }
-        if(!AktCache1 && !_isPlayerOneTurn)
+        if(!AktCache1)
         {
-            if((_currentDirection * -1) != direction)
+            if((_directionCachePlayer2 * -1) != direction)
                 _directionCachePlayer2 = direction;
         }
     }
@@ -167,7 +170,7 @@ public class OnlineMultiplayerSnake : OnlineSnake
     {
         if (!_merker)
         {
-            _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
+            // _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
             Vector2 newPos = Vector2.Zero;
 
             if(_isPlayerOneTurn)
@@ -237,21 +240,33 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             // genau in die entgegengesetzte Richtung des an ihm befindlichen Körperteil setzten
             lookDirection = ((_points[_points.Count() - 1] - _points[_points.Count() - 2]) / _gridSize) * -1;
-            _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
+            _face1.RotationDegrees = -Mathf.Rad2Deg(_currentDirection.AngleTo(Vector2.Right));
             _face2.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Left));
         }
         else
         {
             // -1 mehr da durch CheckFruit Collision der letzte Punkte dupliziert wurde. d.h. 2 mal gleiche Punktkoordinaten!
             lookDirection = ((_points[1] - _points[0]) / _gridSize) * -1;
-            _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));
+            _face2.RotationDegrees = -Mathf.Rad2Deg(_currentDirection.AngleTo(Vector2.Left));
             _face1.RotationDegrees = -Mathf.Rad2Deg(lookDirection.AngleTo(Vector2.Right));
         }
     }
 
-    // protected override void SetAktDirection() => kann so bleiben
+    protected override void SetAktDirection()
+    {
+        // auch prüfen das die Vektoren nicht 180° entgegengesetzt sind
+        if(_isPlayerOneTurn)
+        {
+            if(_currentDirection != (_directionCachePlayer1 * -1))
+                _currentDirection = _directionCachePlayer1;
+        }
+        else
+        {
+            if(_currentDirection != (_directionCachePlayer2 * -1))
+                _currentDirection = _directionCachePlayer2;
+        }
+    }
 
-    // _OnTween_tween_all_completed() => kann so bleiben
     
     protected override void _on_Tween_tween_all_completed()
     {
@@ -277,26 +292,13 @@ public class OnlineMultiplayerSnake : OnlineSnake
             _audioPlayer.Play();
             _controller.UpdateScore();
             GD.Print($"{Name} hat Frucht gefressen!");
-            _NewTailIndex = _body.Points.Count() / 2;
-
-            _body.Points = new Vector2[tempPoints.Count() + 1];
-            int writeindex = 0;
-            int readindex = 0;
-            do
-            {
-                _body.SetPointPosition(writeindex, new Vector2(tempPoints[readindex]));
-                
-                if(writeindex != _NewTailIndex - 1)
-                    readindex++;
-
-                writeindex++;
-            }while(readindex < tempPoints.Count());
-
-            // _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
-            _growing = true;
-            //IncreseSpeed();
-            _points = _body.Points;
+            
             SwapControl();
+
+            AddNewSnakePoint();
+
+            _points = _body.Points; // Punkte auf das neue Array aktualisieren
+            _growing = true; // Setze Wachstum auf aktiv
 
             _fruit.SetNewPosition(_fruit.RandomizePosition());
             Vector2 newPos = _fruit.RandomizePosition();
@@ -312,10 +314,28 @@ public class OnlineMultiplayerSnake : OnlineSnake
         //IncreaseSpeed();
         _controller.UpdateScore();
         GD.Print($"{Name} hat Frucht gefressen!");
-        _body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
-        // _body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
-        // _TargetPoints.Add(_body.GetPointPosition(_body.Points.Count() - 1)); // hoffen das es funzt
         SwapControl();
+        // _points = _body.Points;
+        //_body.AddPoint(_body.GetPointPosition(_body.Points.Count() / 2));
+        //_body.AddPoint(_body.GetPointPosition(!_isPlayerOneTurn ? _body.Points.Count() - 1 : 0));
+        //_TargetPoints.Add(_body.GetPointPosition(_body.Points.Count() - 1)); // hoffen das es funzt
+        AddNewSnakePoint();
+    }
+
+    protected void AddNewSnakePoint()
+    {
+        List<Vector2> newPoints = _body.Points.ToList();;
+        if(!_isPlayerOneTurn)
+        {
+            newPoints.Insert(0, newPoints[0]);
+            _NewTailIndex = 0;
+        }
+        else
+        {
+            _NewTailIndex = _body.Points.Length;
+            newPoints.Insert(_body.Points.Length - 1, newPoints[_body.Points.Length - 1]);
+        }
+        _body.Points = newPoints.ToArray();
     }
 
     protected override void CheckIfGameOver()
@@ -361,7 +381,6 @@ public class OnlineMultiplayerSnake : OnlineSnake
                 }
             }
         }
-        
 
         if(LoseMsg != "")
         {
@@ -383,6 +402,19 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             _directionCachePlayer2 = GetLastSegmentDirection(_isPlayerOneTurn);
         }
+
+        // jetzt _current direction so setzten das die Schlange nicht gleich in den eigenen Körper läuft
+        Vector2 direction;
+        if(_isPlayerOneTurn)
+        {
+            direction = _body.Points[0] - _body.Points[1];
+        }
+        else
+        {
+            direction = _body.Points[_body.Points.Length - 1] - _body.Points[_body.Points.Length - 2];
+        }
+        direction = direction.Normalized();
+        _currentDirection *= -1; 
 
         // _face1.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer1.AngleTo(Vector2.Right));
         // _face2.RotationDegrees = -Mathf.Rad2Deg(_directionCachePlayer2.AngleTo(Vector2.Left));

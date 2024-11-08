@@ -179,6 +179,7 @@ public class NetworkManager : Node
         }
     }
     public UInt64 PingTime;
+    private UInt64 _LastKeepPingTimeStamp;
     public void Init(WebRTCMultiplayer multiplayer, float KeepAlivePingInterval = 1.0f)
     {
         _multiplayer = multiplayer;
@@ -238,13 +239,10 @@ public class NetworkManager : Node
                         {
                             _PingAnswerReceived = true;
                             _CyclesWithoutPing = 0;
-                            try
-                            {
-                                // auf anderen Geräten kann es zum absturz führen
-                                PingTime = Convert.ToUInt64((DateTime.Now - JsonConvert.DeserializeObject<DateTime>(data.Data)).TotalMilliseconds);
-                            }
-                            catch
-                            {}
+
+                            PingTime = Convert.ToUInt64(data.Data) - _LastKeepPingTimeStamp;
+                            PingTime /= 1000;
+                            _LastKeepPingTimeStamp = Convert.ToUInt64(data.Data);
                             break;
                         }
                     }
@@ -270,7 +268,7 @@ public class NetworkManager : Node
                 }
                 // Zeit einen neuen Ping zu senden!
                 _multiplayer.TransferMode = WebRTCMultiplayer.TransferModeEnum.Reliable;
-                SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, JsonConvert.SerializeObject(DateTime.Now))).ToUTF8());
+                SendRawMessage(JsonConvert.SerializeObject(new _RtcMsg(_RtcMsgState.KeepAlivePing, Convert.ToString(Time.GetTicksUsec()))).ToUTF8());
                 _PingAnswerReceived = false;
                 _LastPingTime = 0.0f;
             }

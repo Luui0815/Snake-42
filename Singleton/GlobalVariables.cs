@@ -46,6 +46,8 @@ public partial class GlobalVariables : Node
     public float PingTimeSnake2;
     public float Snake2diff;
     public float Snake2LatencyFactor;
+    public Vector2[] Snake1Body = new Vector2[0];
+    public Vector2[] Snake2Body = new Vector2[0];
 
     public override void _Ready()
     {

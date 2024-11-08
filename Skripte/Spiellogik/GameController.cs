@@ -81,28 +81,28 @@ public class GameController : Node2D
                 {
                     // einfach
                     _snake1.MoveDelay = _snake2.MoveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
-                    _multiplayerSnake.MoveDelay = 0.4f;
+                    _multiplayerSnake.MoveDelay = 1.0f;
                     break;
                 }
             case 1:
                 {
                     // mittel
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.2f;
-                    _multiplayerSnake.MoveDelay = 0.35f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.85f;
+                    _multiplayerSnake.MoveDelay = 0.85f;
                     break;
                 }
             case 2:
                 {
                     // schwer
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.15f;
-                    _multiplayerSnake.MoveDelay = 0.3f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.7f;
+                    _multiplayerSnake.MoveDelay = 0.7f;
                     break;
                 }
             case 3:
                 {
                     // profi
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.09f;
-                    _multiplayerSnake.MoveDelay = 0.2f;
+                    _snake1.MoveDelay = _snake2.MoveDelay = 0.55f;
+                    _multiplayerSnake.MoveDelay = 0.55f;
                     break;
                 }
         }
@@ -231,6 +231,25 @@ public class GameController : Node2D
 		_ping.Text = "Ping" + NetworkManager.NetMan.PingTime;
 		_info.Text = "Snake1: RealPing: " + GlobalVariables.Instance.PingTimeSnake1 + " DiffDistance: " + GlobalVariables.Instance.Snake1diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake1LatencyFactor +
 		                          "\n  Snake2: RealPing: " + GlobalVariables.Instance.PingTimeSnake2 + " DiffDistance: " + GlobalVariables.Instance.Snake2diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake2LatencyFactor;
+
+        TextEdit body1info = GetNode<TextEdit>("Snake1BodyInfo");
+        body1info.Text = "Positionen Schlange 1\n";
+
+        TextEdit body2info = GetNode<TextEdit>("Snake2BodyInfo");
+        body2info.Text = "Positionen Schlange 2\n";
+
+        
+        for(int i = 0; i < (GlobalVariables.Instance.Snake1Body.Length > GlobalVariables.Instance.Snake2Body.Length ?  GlobalVariables.Instance.Snake1Body.Length : GlobalVariables.Instance.Snake2Body.Length); i++)
+        {
+            if(i < GlobalVariables.Instance.Snake1Body.Length)
+            {
+                body1info.Text += i + ": " + (int)GlobalVariables.Instance.Snake1Body[i].x + ", " + (int)GlobalVariables.Instance.Snake1Body[i].y + "\n";
+            }
+            if(i < GlobalVariables.Instance.Snake2Body.Length)
+            {
+                body2info.Text += i + ": " + (int)GlobalVariables.Instance.Snake2Body[i].x + ", " + (int)GlobalVariables.Instance.Snake2Body[i].y + "\n";
+            }
+        }                       
     }
 
     private void CreateGameField()
