@@ -1,7 +1,2 @@
-Gucken wie WebExport + Android
-
-Client bekommt manchmal nicht mit das Server weg ist bei Websockets => KeepAllive System einbauen!
-Das ConformationDialog Fenster wird nie gelöscht sondern immer neu erzeugt! => irgendwann besteht das Spiel aus Confirmation Popups!
-GameChat geht nicht die Signale werden von den Empfängermethoden nicht aufgerufen! => Wenn kein Mikrofon dann Spielabsturz!
-Mehspieler schlange wächst evtl. nicht
+Das ConformationDialog Fenster wird nie gelöscht sondern immer neu erzeugt! => irgendwann besteht das Spiel aus Confirmation Popups! => Bleibt streng geheim
 

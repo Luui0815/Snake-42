@@ -184,7 +184,7 @@ public class Einstellungen : Control
             }
             // Wenn Online Game muss man Verbindung schließen!
             // Wenn man ne Lobby hat dann die Lobby öffnen!
-            ErrorMessage("Bestätigung", "Wenn du auf Ok drückst wird die Verbindung zum anderen Spieler unterbrochen!\nWillst du es nicht klicke auf das Kreuz!").Connect("confirmed", this, nameof(ConfirmConnectionClose));
+            ErrorMessage("Bestätigung", "Wenn Sie auf Ok drücken wird die Verbindung zum anderen Spieler unterbrochen!\nIst dies nicht Ihre Absicht drücken Sie auf das Kreuz").Connect("confirmed", this, nameof(ConfirmConnectionClose));
         }
         else
         {
