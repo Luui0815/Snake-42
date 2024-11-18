@@ -1,0 +1,8 @@
+Bei der Portfreigabe ist das Protokoll TCP zu wählen!
+Die Anwendung zeigt an ob Sie eine öffentliche oder private IP-Adresse haben.
+
+Im Ordner KompilierteVersionen/Windoes finden Sie das ausführbare Programm.
+Im Ordner Godot_v3.5.3-stable_mono_win64 finden Sie die ausführbare Entwicklungsumgebung mit welcher das Spiel erstellt wurde.
+Im Ordern Assets sind alle verwendeten Bilder zu finden.
+In den Ordern Singelton und Skripte kann man alle Skripte der Anwendung einsehen.
+In Szenen sieht man die verwendeten Szenen.
