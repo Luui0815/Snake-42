@@ -324,7 +324,12 @@ public class NetworkManager : Node
 
     private void SendRawMessage(byte[] message)
     {
-        _multiplayer.PutPacket(message);
+        try
+        {
+            _multiplayer.PutPacket(message);
+            // Godot ist hier bissel verbuggt => Nachricht kommt an es wird aber eine fehlerhafte Fehlermeldung erzeugt!
+        }
+        catch{}
     }
 
     private ConfirmationDialog ErrorMessage(string titel, string description)

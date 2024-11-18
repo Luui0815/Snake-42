@@ -270,8 +270,14 @@ public class Server : Control
                 string p2 = _MatesOnStartingGame[index].PlayerTwoName;
 
                 msg msg = new msg(Nachricht.chatMSG,0,999, "Die Spieler: " + p1 +" und " + p2 + " haben ein Spiel gestartet!");
+                // Info senden!
                 SendDataToAll(JsonConvert.SerializeObject(msg));
                 EmitSignal(nameof(ServerInfo), msg.state, msg.data);
+
+                // jetzt neue Räume an alle senden
+                // an Clients und Server erhalten das!
+                SendRaumListToAllClients();
+
 
                 _MatesOnStartingGame.RemoveAt(index);
             }

@@ -40,7 +40,6 @@ size = 9
 font_data = ExtResource( 2 )
 
 [node name="ClientFormPopup" type="Popup"]
-visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -474.0

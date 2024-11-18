@@ -20,7 +20,7 @@ public partial class GlobalVariables : Node
                                     // und die Signale werden verknüpft!
 
     // Für Verbindungen
-    public Lobby Lobby { get; set; }
+    public Lobby Lobby { get; set; } = null;
     public PackedScene ConfirmationDialog { get; set; }
 
     public WebRTCMultiplayer WebRTC {get; set; } 

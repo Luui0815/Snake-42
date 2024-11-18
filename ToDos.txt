@@ -1,2 +1,12 @@
 Das ConformationDialog Fenster wird nie gelöscht sondern immer neu erzeugt! => irgendwann besteht das Spiel aus Confirmation Popups! => Bleibt streng geheim
 
+Name weg = gemacht = geprüft
+nur Server, Client aktulisiert die Räume nicht = Gemacht  = geprüft
+Test1 zu Spieler 1 umbennen = Gemacht  = geprüft
+Server darf nicht auf Raum beitreten gehen = gemacht  = geprüft
+TEsteingaben entfernen = gemacht  = geprüft
+es können 3 in einen Raum joinen! = gemacht  = geprüft
+
+
+Ping angaben und so evtl. verbergen?
+

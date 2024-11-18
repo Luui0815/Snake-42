@@ -47,7 +47,6 @@ public class Lobby : Control
         _PlayerNameLabel= GetNode<Label>("ChatMSGBox/HBoxContainer/PlayerNameLabel");
         _MSGInput = GetNode<LineEdit>("ChatMSGBox/HBoxContainer/MessageInput");
         _RaumListe = GetNode<ItemList>("RaumListe");
-        _RaumListe.Connect("item_activated", this, "JoinRoom");
 
         //Client und (Server) werden vor dem Aufruf als Nodes der Szenen hinzugefügt, daher geht folgendes
         _client = GetNodeOrNull<Client>("Client");
@@ -64,6 +63,7 @@ public class Lobby : Control
                 ipchecker.Visible = true;
                 ipchecker.CheckIPAdress();
             }
+            _RaumListe.Connect("item_activated", this, "JoinRoom");
         }
         //Version 2: Anwender hat nur Server gestartet und kann Lobby passiv beobachten
         else if(_server != null && _client == null)
@@ -85,6 +85,7 @@ public class Lobby : Control
         //Version 3: Anwender ist reiner Client und hat sich auf einen Server verbunden
         else if(_server == null && _client != null)
         {
+            _RaumListe.Connect("item_activated", this, "JoinRoom");
             _TimeWithoutServerPing = new Timer();
             _TimeWithoutServerPing.OneShot = true;
             _TimeWithoutServerPing.WaitTime  = 5f;
@@ -308,8 +309,8 @@ public class Lobby : Control
 
     private void JoinRoom(int index)
     {
-        //Prüfen ob der Client nicht selbst schon in nem Raum ist
-        if(GetNode<Button>("RaumVerlassen").Disabled == true)
+        //Prüfen ob der Client nicht selbst schon in nem Raum ist und ob der Raum nicht schon voll ist
+        if(GetNode<Button>("RaumVerlassen").Disabled == true && _roomList[index].PlayerTwoId == 0)
         {
             //msg MSG = new msg(Nachricht.RoomJoin,_client.id,0,"");
             _client.SendData(JsonConvert.SerializeObject(new msg(Nachricht.RoomJoin,_client.id,0,Convert.ToString(_roomList[index].PlayerOneId))));
@@ -391,6 +392,7 @@ public class Lobby : Control
         }
         else
         {
+            GlobalVariables.Instance.Lobby = null;
             if(_server != null)
                 _server.StopServer();
             if(_client != null)

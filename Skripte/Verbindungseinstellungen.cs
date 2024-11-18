@@ -65,7 +65,7 @@ public class Verbindungseinstellungen : Control
         LineEdit playername = popupInstance.GetNode<LineEdit>("PlayerNameInput");
         portInput.Text = "8915";
         ipInput.Text = "127.0.0.1";
-        playername.Text = "Test1";
+        playername.Text = "Spieler 1";
 
 
         popupInstance.Connect(nameof(ClientFormPopup.Confirmed), this, "OnPopupConfirmed" );

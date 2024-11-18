@@ -22,6 +22,8 @@ public class GameController : Node2D
     public string LoseMessage { get; set; }
     public int[,] GameField { get { return _gameField; } }
 	public List<Vector2> Obstacles{ get{ return _obstacles; } }
+    private TextEdit body1info;
+    private TextEdit body2info;
 
 	public override void _Ready()
 	{
@@ -37,6 +39,9 @@ public class GameController : Node2D
 		InitializeFruit();
 		InitializeAudioPlayer();
 		InitializePingDisplay();
+        // zum debug:
+        body1info = GetNodeOrNull<TextEdit>("Snake1BodyInfo");
+        body2info = GetNodeOrNull<TextEdit>("Snake2BodyInfo");
         _gameOverScreen = (PackedScene)ResourceLoader.Load("res://Szenen/Levels/GameOverScreen.tscn");
     }
 
@@ -232,24 +237,29 @@ public class GameController : Node2D
 		_info.Text = "Snake1: RealPing: " + GlobalVariables.Instance.PingTimeSnake1 + " DiffDistance: " + GlobalVariables.Instance.Snake1diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake1LatencyFactor +
 		                          "\n  Snake2: RealPing: " + GlobalVariables.Instance.PingTimeSnake2 + " DiffDistance: " + GlobalVariables.Instance.Snake2diff + " LatenzFaktor: " + GlobalVariables.Instance.Snake2LatencyFactor;
 
-        TextEdit body1info = GetNode<TextEdit>("Snake1BodyInfo");
-        body1info.Text = "Positionen Schlange 1\n";
-
-        TextEdit body2info = GetNode<TextEdit>("Snake2BodyInfo");
-        body2info.Text = "Positionen Schlange 2\n";
-
-        
-        for(int i = 0; i < (GlobalVariables.Instance.Snake1Body.Length > GlobalVariables.Instance.Snake2Body.Length ?  GlobalVariables.Instance.Snake1Body.Length : GlobalVariables.Instance.Snake2Body.Length); i++)
+        // die infos sind nur in Level 1, daher so kompliziert!
+        if(body1info != null && body2info != null)
         {
-            if(i < GlobalVariables.Instance.Snake1Body.Length)
+            if(body1info.Visible && body2info.Visible)
             {
-                body1info.Text += i + ": " + (int)GlobalVariables.Instance.Snake1Body[i].x + ", " + (int)GlobalVariables.Instance.Snake1Body[i].y + "\n";
+                body1info.Text = "Positionen Schlange 1\n";
+                body2info.Text = "Positionen Schlange 2\n";
+
+                for(int i = 0; i < (GlobalVariables.Instance.Snake1Body.Length > GlobalVariables.Instance.Snake2Body.Length ?  GlobalVariables.Instance.Snake1Body.Length : GlobalVariables.Instance.Snake2Body.Length); i++)
+                {
+                    if(i < GlobalVariables.Instance.Snake1Body.Length)
+                    {
+                        body1info.Text += i + ": " + (int)GlobalVariables.Instance.Snake1Body[i].x + ", " + (int)GlobalVariables.Instance.Snake1Body[i].y + "\n";
+                    }
+                    if(i < GlobalVariables.Instance.Snake2Body.Length)
+                    {
+                        body2info.Text += i + ": " + (int)GlobalVariables.Instance.Snake2Body[i].x + ", " + (int)GlobalVariables.Instance.Snake2Body[i].y + "\n";
+                    }
+                }  
             }
-            if(i < GlobalVariables.Instance.Snake2Body.Length)
-            {
-                body2info.Text += i + ": " + (int)GlobalVariables.Instance.Snake2Body[i].x + ", " + (int)GlobalVariables.Instance.Snake2Body[i].y + "\n";
-            }
-        }                       
+            
+        }
+                         
     }
 
     private void CreateGameField()
