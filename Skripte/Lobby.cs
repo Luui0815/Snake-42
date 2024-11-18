@@ -338,7 +338,7 @@ public class Lobby : Control
     private void _on_SpielStarten_pressed()
     {
         WebRTCMultiplayer.Initialize(1,false); // Verbindung wird mit id = 1 gestartet, da nur 2 spieler und nur 1 Verbindung benötigt wird!
-        WebRTCMultiplayer.AddPeer(WebRTCPeer,1);
+        // WebRTCMultiplayer.AddPeer(WebRTCPeer,1); => hier würden auf dem der hier rein kommt 2 Verbindungen aufgebaut werden!
 
         if(WebRTCPeer.CreateOffer() != Error.Ok)
         {
@@ -399,7 +399,7 @@ public class Lobby : Control
                 _client.StopConnection();
             QueueFree();
         }
-        
+        // GetTree().ChangeScene("res://Szenen/RTCTest.tscn");
         GetTree().ChangeScene("res://Szenen/Einstellungen.tscn");
     }
 
