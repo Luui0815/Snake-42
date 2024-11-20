@@ -1,4 +1,5 @@
 using Godot;
+using NAudio.MediaFoundation;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,17 +8,18 @@ using System.Linq;
 
 public class OnlineSnake : BaseSnake
 {
-    protected UInt64 _updateInterval = 100000; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
+    protected UInt64 _updateInterval = 50000; // evtl. Anpassung falls Puffer überläuft, das man die Zeit erhöht!
     protected UInt64 _TimeSinceLastUpdate;
     protected UInt64 _ClientTimeAtBodyPointUpdate;
     public UInt64 _ClientTimeDiffBodyUpdate;
     protected List<Vector2> _TargetPoints = new List<Vector2>();
-    protected float latencyFactor{get; set;}
+    protected float latencyFactor{get; set;} = 0;
     protected bool _CalculateNewLatenyFactor;
     protected List<Vector2> _SavedTargetPoints = new List<Vector2>(); // wird benötigt da TargetPoints unabhängig von dem Animationszyklus geändert werden kann
     protected List<UInt64> _ListMeassuredPingTimes = new List<UInt64>();
     protected double _AveragePingTime;
     protected List<float> ListLatencyFactorHistory = new List<float>();
+    protected int _StartUpTime = 0;
 
     public override void _Ready()
     {
@@ -36,7 +38,11 @@ public class OnlineSnake : BaseSnake
     {
         if(_isServer)
         {
-            if(Time.GetTicksUsec() - _TimeSinceLastUpdate > _updateInterval)
+            // Ping Schwankungen simulieren
+            // Random _random = new Random(); 
+            // UInt64 zufallsSchwankungen = Convert.ToUInt64(_random.Next(0, 100000));
+
+            if(Time.GetTicksUsec() - _TimeSinceLastUpdate > _updateInterval /*+ zufallsSchwankungen*/)
             {
                 _TimeSinceLastUpdate = Time.GetTicksUsec();
                 TimeToSynchBodyPoints();
@@ -115,12 +121,26 @@ public class OnlineSnake : BaseSnake
     
     protected void MakeAverageLatenyFactor()
     {
-        if(ListLatencyFactorHistory.Count() > 100)
+        float alpha = 0.3f; // Glättungsfaktor: Niedriger = glattere Werte, langsamerer Anpassung
+        if(ListLatencyFactorHistory.Count == 0)
+        {
+            if(latencyFactor == 0)
+                latencyFactor = 0.3f;
+            
+            ListLatencyFactorHistory.Add(latencyFactor);
+        }
+           
+        else
+        {
+            float smoothedFactor = alpha * latencyFactor + (1 - alpha) * ListLatencyFactorHistory.Last();
+            ListLatencyFactorHistory.Add(smoothedFactor);
+            latencyFactor = smoothedFactor;
+        }
+
+        if (ListLatencyFactorHistory.Count > 100)
             ListLatencyFactorHistory.RemoveAt(0);
-        ListLatencyFactorHistory.Add(latencyFactor);
-        
-        latencyFactor = ListLatencyFactorHistory.Average();
     }
+
 
     protected void CalculatePingTimeStatistic()
     {
@@ -203,30 +223,34 @@ public class OnlineSnake : BaseSnake
     {
         if (_merker == false)
         {
-            for (int i = 0; i < _body.GetPointCount(); i++)
+            // in der StartupTime wird erstmal die Schlange nicht bewegt, Client soll sich auf die Zeiten vom Server einstellen können!
+            if(_StartUpTime >= 3)
             {
-                Vector2 newPos, diff = Vector2.Zero;
-                if (i == 0)
-                    newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
-                else
+                for (int i = 0; i < _body.GetPointCount(); i++)
                 {
-                    if (!(_growing == true && i == _body.Points.Count() - 1))
-                    {
-                        diff = Vector2.Zero;
-                        if (_points[i - 1].x - _points[i].x != 0)
-                            diff.x = (_points[i - 1].x - _points[i].x) / _gridSize;
-                        if (_points[i - 1].y - _points[i].y != 0)
-                            diff.y = (_points[i - 1].y - _points[i].y) / _gridSize;
-
-                        newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
-                    }
+                    Vector2 newPos, diff = Vector2.Zero;
+                    if (i == 0)
+                        newPos = _points[i] + _direction * new Vector2(_gridSize * argv, _gridSize * argv);
                     else
                     {
-                        // letztes Koerperteil darf nicht bewegt werden!
-                        newPos = _body.GetPointPosition(i);
+                        if (!(_growing == true && i == _body.Points.Count() - 1))
+                        {
+                            diff = Vector2.Zero;
+                            if (_points[i - 1].x - _points[i].x != 0)
+                                diff.x = (_points[i - 1].x - _points[i].x) / _gridSize;
+                            if (_points[i - 1].y - _points[i].y != 0)
+                                diff.y = (_points[i - 1].y - _points[i].y) / _gridSize;
+
+                            newPos = _points[i] + diff * new Vector2(_gridSize * argv, _gridSize * argv);
+                        }
+                        else
+                        {
+                            // letztes Koerperteil darf nicht bewegt werden!
+                            newPos = _body.GetPointPosition(i);
+                        }
                     }
+                    _body.SetPointPosition(i, newPos);
                 }
-                _body.SetPointPosition(i, newPos);
             }
 
             _face.Position = _body.Points[0];
@@ -235,6 +259,9 @@ public class OnlineSnake : BaseSnake
             // wenn argv = 1 dann ist eine Schleife durch
             if (argv == 1)
             {
+                if(_StartUpTime <= 3)
+                    _StartUpTime++;
+                
                 _merker = true;
                 _on_Tween_tween_all_completed();
             }

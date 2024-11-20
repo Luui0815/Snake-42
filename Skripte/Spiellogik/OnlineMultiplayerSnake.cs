@@ -177,56 +177,61 @@ public class OnlineMultiplayerSnake : OnlineSnake
         {
             // _currentDirection = _isPlayerOneTurn ? _directionCachePlayer1 : _directionCachePlayer2;
             Vector2 newPos = Vector2.Zero;
-
-            if(_isPlayerOneTurn)
+            if(_StartUpTime >= 3)
             {
-                for (int i = 0; i < _body.GetPointCount(); i++)
+                if(_isPlayerOneTurn)
                 {
-                    if (i == 0)
+                    for (int i = 0; i < _body.GetPointCount(); i++)
                     {
-                        newPos = _points[i] + _currentDirection * _gridSize * argv;
-                    }
-                    else if(i == _NewTailIndex && _growing)
-                    {
-                        // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
-                        newPos = _points[i];
-                    }
-                    else 
-                    {
-                        Vector2 diff = (_points[i - 1] - _points[i]) / _gridSize;
-                        newPos = _points[i] + diff * _gridSize * argv;
-                    }
+                        if (i == 0)
+                        {
+                            newPos = _points[i] + _currentDirection * _gridSize * argv;
+                        }
+                        else if(i == _NewTailIndex && _growing)
+                        {
+                            // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
+                            newPos = _points[i];
+                        }
+                        else 
+                        {
+                            Vector2 diff = (_points[i - 1] - _points[i]) / _gridSize;
+                            newPos = _points[i] + diff * _gridSize * argv;
+                        }
 
-                    _body.SetPointPosition(i, newPos);
+                        _body.SetPointPosition(i, newPos);
+                    }
+                }
+                else
+                {
+                    for (int i = _body.GetPointCount() - 1; i >= 0; i--)
+                    {
+                        if (i == _body.GetPointCount() - 1)
+                        {
+                            newPos = _points[i] + _currentDirection * _gridSize * argv;
+                        }
+                        else if(i == _NewTailIndex && _growing)
+                        {
+                            // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
+                            newPos = _points[i];
+                        }
+                        else 
+                        {
+                            Vector2 diff = (_points[i + 1] - _points[i]) / _gridSize;
+                            newPos = _points[i] + diff * _gridSize * argv;
+                        }
+
+                        _body.SetPointPosition(i, newPos);
+                    }
                 }
             }
-            else
-            {
-                for (int i = _body.GetPointCount() - 1; i >= 0; i--)
-                {
-                    if (i == _body.GetPointCount() - 1)
-                    {
-                        newPos = _points[i] + _currentDirection * _gridSize * argv;
-                    }
-                    else if(i == _NewTailIndex && _growing)
-                    {
-                        // wenn das Vieh wächst darf das mittlere Element nicht bewegt werden!
-                        newPos = _points[i];
-                    }
-                    else 
-                    {
-                        Vector2 diff = (_points[i + 1] - _points[i]) / _gridSize;
-                        newPos = _points[i] + diff * _gridSize * argv;
-                    }
 
-                    _body.SetPointPosition(i, newPos);
-                }
-            }
-            
             RotateAndMoveFace();
             
             if (argv == 1)
             {
+                if(_StartUpTime <= 3)
+                    _StartUpTime++;
+
                 _merker = true;
                 _on_Tween_tween_all_completed();
             }
