@@ -27,18 +27,104 @@ public partial class GlobalVariables : Node
     public RTCRoom Room = new RTCRoom();
     public string WebSocketServerPort;
     static public readonly Dictionary IceServers = new Dictionary 
-    {
-        {"iceServers", 
-            new Godot.Collections.Array 
+{
+    {"iceServers", 
+        new Godot.Collections.Array 
+        {
+            // Google STUN-Server
+            new Dictionary 
             {
-                new Godot.Collections.Dictionary 
-                {
-                    {"urls", "stun:stun.l.google.com:19302"}
-                }
-            }
+                {"urls", "stun:stun.l.google.com:19302"}
+            },
+
+            // Mozilla STUN-Server
+            new Dictionary 
+            {
+                {"urls", "stun:stun.services.mozilla.com"}
+            },
+
+            // Coturn TURN-Server (öffentlich verfügbar)
+            new Godot.Collections.Dictionary 
+            {
+                {"urls", "turn:turnServer1.org:3478"},
+                {"username", "user"},
+                {"credential", "password"}
+            },
+            new Dictionary 
+            {
+                {"urls", "turn:turnServer2.org:3478"},
+                {"username", "user"},
+                {"credential", "password"}
+            },
+
+            // openProject Turn Server
+            new Dictionary
+            {
+                {"urls", "turn:openrelay.metered.ca:80"},
+                {"username", "openrelayproject"},
+                {"credentials", "openrelayproject"}
+            },
+
+            // Free TURN-Server von `turnserver.org` (für Testzwecke)
+            new Dictionary 
+            {
+                {"urls", "turn:turnserver.org:3478"},
+                {"username", "test"},
+                {"credential", "test"}
+            },
+
+            // Stun-Server von `stun.l.google.com`
+            new Dictionary 
+            {
+                {"urls", "stun:stun.l.google.com:19302"}
+            },
+
+            // `stun:stun4.l.google.com` (weiterer Google STUN-Server)
+            new Dictionary 
+            {
+                {"urls", "stun:stun4.l.google.com:19302"}
+            },
+
+            // `stun:stun.sipgate.net` (STUN-Server von Sipgate)
+            new Dictionary 
+            {
+                {"urls", "stun:stun.sipgate.net"}
+            },
+
+            // STUN-Server von `stun.ideasip.com`
+            new Dictionary 
+            {
+                {"urls", "stun:stun.ideasip.com"}
+            },
+
+            // TURN-Server von `turn.anyfirewall.com` (Testserver, öffentlich zugänglich)
+            new Dictionary 
+            {
+                {"urls", "turn:turn.anyfirewall.com:443"},
+                {"username", "test"},
+                {"credential", "test"}
+            },
+            // Weitere STUN-Server
+            new Dictionary 
+            {
+                {"urls", "stun:stun1.l.google.com:19302"}
+            },
+            new Dictionary 
+            {
+                {"urls", "stun:stun2.l.google.com:19302"}
+            },
+            new Dictionary 
+            {
+                {"urls", "stun:stun3.l.google.com:19302"}
+            },
+            new Dictionary 
+            {
+                {"urls", "stun:stun4.l.google.com:19302"}
+            },
         }
-        // Weiter Stun Server hinzufügen!
-    };
+    }
+};
+
 
     public float PingTimeSnake1;
     public float Snake1diff;
