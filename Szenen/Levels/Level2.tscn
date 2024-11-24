@@ -287,6 +287,7 @@ stream = ExtResource( 7 )
 volume_db = -10.0
 
 [node name="PingLabel" type="ColorRect" parent="."]
+visible = false
 margin_left = 320.0
 margin_top = 8.0
 margin_right = 768.0
