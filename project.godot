@@ -14,11 +14,12 @@ config/name="Snake 42"
 run/main_scene="res://Szenen/MainMenu.tscn"
 boot_splash/image="res://Assets/Ladebildschirm.png"
 boot_splash/bg_color=Color( 0, 0, 0, 0 )
+config/icon=""
 config/windows_native_icon="res://Assets/GameIcon.ico"
 
 [audio]
 
-volume=0.0
+volume=38.0
 
 [autoload]
 

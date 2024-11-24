@@ -67,6 +67,12 @@ public class Fruit : Node2D
 
     public bool IsPositionOccupied(Vector2 position)
     {
+        Rect2 fruitBounds = new Rect2(position - new Vector2(_cellSize / 2, _cellSize / 2), new Vector2(_cellSize, _cellSize));
+
+        if (IsPositionInSnakeBounds(fruitBounds, _snake1)) return true;
+        if (_snake2 != null && IsPositionInSnakeBounds(fruitBounds, _snake2)) return true;
+        if (_snake3 != null && IsPositionInSnakeBounds(fruitBounds, _snake3)) return true;
+
         int x = (int)(position.x / _cellSize);
         int y = (int)(position.y / _cellSize);
 
@@ -80,21 +86,21 @@ public class Fruit : Node2D
             return true;
         }
 
-        if (_snake1.Points.Contains(position))
-        {
-            return true;
-        }
-
-        if (_snake2 != null && _snake2.Points.Contains(position))
-        {
-            return true;
-        }        
-
-        if (_snake3 != null && _snake3.Points.Contains(position))
-        {
-            return true;
-        }
-
         return false;
     }
+
+    private bool IsPositionInSnakeBounds(Rect2 bounds, BaseSnake snake)
+    {
+        foreach (Vector2 segment in snake.Points)
+        {
+            Rect2 segmentBounds = new Rect2(segment - new Vector2(_cellSize / 2, _cellSize / 2), new Vector2(_cellSize, _cellSize));
+
+            if (bounds.Intersects(segmentBounds))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

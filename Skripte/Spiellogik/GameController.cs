@@ -85,29 +85,61 @@ public class GameController : Node2D
             case 0:
                 {
                     // einfach
-                    _snake1.MoveDelay = _snake2.MoveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
-                    _multiplayerSnake.MoveDelay = 1.0f;
+                    if (GlobalVariables.Instance.OnlineGame)
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 1.0f; // auf 0.3 stellen, zum nicht mehr debuggen
+                        _multiplayerSnake.MoveDelay = 1.0f;
+                    }
+                    else
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.45f; // auf 0.3 stellen, zum nicht mehr debuggen
+                        _multiplayerSnake.MoveDelay = 0.45f;
+                    }
                     break;
                 }
             case 1:
                 {
                     // mittel
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.85f;
-                    _multiplayerSnake.MoveDelay = 0.85f;
+                    if (GlobalVariables.Instance.OnlineGame)
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.85f; 
+                        _multiplayerSnake.MoveDelay = 0.85f;
+                    }
+                    else
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.4f; 
+                        _multiplayerSnake.MoveDelay = 0.4f;
+                    }
                     break;
                 }
             case 2:
                 {
                     // schwer
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.7f;
-                    _multiplayerSnake.MoveDelay = 0.7f;
+                    if (GlobalVariables.Instance.OnlineGame)
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.7f; 
+                        _multiplayerSnake.MoveDelay = 0.7f;
+                    }
+                    else
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.25f; 
+                        _multiplayerSnake.MoveDelay = 0.25f;
+                    }
                     break;
                 }
             case 3:
                 {
                     // profi
-                    _snake1.MoveDelay = _snake2.MoveDelay = 0.55f;
-                    _multiplayerSnake.MoveDelay = 0.55f;
+                    if (GlobalVariables.Instance.OnlineGame)
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.55f;
+                        _multiplayerSnake.MoveDelay = 0.55f;
+                    }
+                    else
+                    {
+                        _snake1.MoveDelay = _snake2.MoveDelay = 0.15f;
+                        _multiplayerSnake.MoveDelay = 0.15f;
+                    }
                     break;
                 }
         }

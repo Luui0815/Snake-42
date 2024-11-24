@@ -64,3 +64,25 @@ C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.WinForms.dll
 C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.WinMM.dll
 C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\System.Security.AccessControl.dll
 C:\Users\LUG\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\System.Security.Principal.Windows.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Snake 42.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Snake 42.pdb
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Microsoft.Win32.Registry.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.Asio.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.Core.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.Midi.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.Wasapi.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.WinForms.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\NAudio.WinMM.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\Newtonsoft.Json.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\System.Security.AccessControl.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\bin\Debug\System.Security.Principal.Windows.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.AssemblyReference.cache
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.AssemblyInfoInputs.cache
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.AssemblyInfo.cs
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.CoreCompileInputs.cache
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.sourcelink.json
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.csproj.Up2Date
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.dll
+C:\Users\mauro\Documents\GitHub\Snake-42\.mono\temp\obj\Debug\Snake 42.pdb
